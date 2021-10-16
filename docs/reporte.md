@@ -1,7 +1,7 @@
 <h1> Game of Servers </h1>
 
 Somos
-* Claudia Puentes Hernández ([@ClauP99](https://github.com/ClauP99)) :mermaid:,
+* Claudia Puentes Hernández ([@ClauP99](https://github.com/ClauP99)) :bee:,
 * Omar Alejandro Hernández Ramírez ([@OmarHernandez99](https://github.com/OmarHernandez99)) :tiger:, y
 * Andy Ledesma García ([@MakeMake23](https://github.com/MakeMake23)) :wolf:
 
