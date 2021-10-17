@@ -14,9 +14,11 @@ El usuario de nuestro proyecto podrá programar cada uno de los servidores para 
 Un servidor también puede emitir pedidos a otro servidor :scream:, convirtiéndose el primero en un cliente del segundo. En este sentido, se pudieran aplicar algoritmos de IA :astonished: para enrutar el pedido de forma óptima entre servidores.
 
 En un sistema como este se pueden simular:
-* ataques DoS y DDoS,
-* pérdidas de capital en servicios online por demora en las respuestas,
-* pérdidas de usuarios por demora en las respuestas,
+* Ataques DoS y DDoS,
+* Pérdidas de capital en servicios online por demora en las respuestas,
+* Pérdidas de usuarios por demora en las respuestas,
+* Distintas estrategias de ruteo y de distribución de carga
+* El accionar cada uno de servers, como agentes autónomos
+* La viabilidad del sistema en conjunto en cuanto a  la tolerancia a fallas, alta disponibilidad.
 
-entre otras cosas.
-
+Incluyendo IA allá donde puede ser más útil :grin:.
