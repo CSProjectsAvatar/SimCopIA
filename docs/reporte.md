@@ -2,8 +2,9 @@
 
 Somos
 * Claudia Puentes Hernández ([@ClauP99](https://github.com/ClauP99)) :bee:,
-* Omar Alejandro Hernández Ramírez ([@OmarHernandez99](https://github.com/OmarHernandez99)) :tiger:, y
-* Andy Ledesma García ([@MakeMake23](https://github.com/MakeMake23)) :wolf:
+* Omar Alejandro Hernández Ramírez ([@OmarHernandez99](https://github.com/OmarHernandez99)) :tiger:,
+* Andy Ledesma García ([@MakeMake23](https://github.com/MakeMake23)) :wolf: y
+* Mauricio Mahmud Sánchez ([@maux96](https://github.com/maux96)) :fox_face:
 
 y proponemos que el proyecto conjunto de Simulación, Compilación e IA sea sobre servidores y se llame ***Game of Servers***.
 
