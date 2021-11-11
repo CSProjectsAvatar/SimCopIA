@@ -13,6 +13,12 @@ namespace Tests {
             services.BuildServiceProvider();
 
         public IConfiguration Configuration;
+        protected ILoggerFactory LoggerFact;
+
+        [TestCleanup]
+        public void BaseCleanUp() {
+            LoggerFact.Dispose();
+        }
 
         [TestInitialize]
         public void PrimaryInitializer() {
@@ -25,6 +31,14 @@ namespace Tests {
 
             services.AddTransient(c => Configuration);
             services.AddLogging();
+
+            LoggerFact = LoggerFactory.Create(builder => {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("Core", LogLevel.Debug)
+                    .AddConsole();
+            });
         } // init
 
     } // class

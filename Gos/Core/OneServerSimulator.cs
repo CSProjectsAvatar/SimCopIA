@@ -12,7 +12,7 @@ namespace Core {
         private Dictionary<uint, double> _depTimes; // llave: cliente, valor: tiempo de partida
         private double _tArriv; // tiempo d arribo siguiente (t_A)
         private double _tDep; // tiempo d partida siguiente (t_D)
-        private uint _arrivs; // número de arrivos (N_A)
+        private uint _arrivs; // número de arribos (N_A)
         private uint _departs; // número de partidas (N_D)
         private uint _n; // número de clientes
         private double _maxTime; // tiempo en q el sistema debe cerrar (no arriba + nadie)
@@ -58,12 +58,12 @@ namespace Core {
         /// El evento de arribo.
         /// </summary>
         private void Arrival() {
-            _log?.LogDebug("Ejecutando Arrivo.");
+            _log?.LogDebug("Ejecutando Arribo.");
             
             _time = _tArriv;
             _arrivs++;
             _n++;
-            _tArriv = _time + GenArrivalOffset(); // generando el próximo arrivo
+            _tArriv = _time + GenArrivalOffset(); // generando el próximo arribo
 
             if (_n == 1) {
                 _tDep = _time + GenDepartureOffset(); // generando la próxima partida
@@ -72,7 +72,7 @@ namespace Core {
         }
 
         /// <summary>
-        /// Genera lo q se le suma al tiempo actual para generar un nuevo tiempo de arrivo.
+        /// Genera lo q se le suma al tiempo actual para generar un nuevo tiempo de arribo.
         /// </summary>
         /// <returns></returns>
         private double GenArrivalOffset() {
@@ -115,7 +115,7 @@ namespace Core {
         /// Evento de arribo fuera de tiempo.
         /// </summary>
         private void TimeOutArrival() {
-            _log?.LogDebug("Ejecutando Arrivo fuera de tiempo.");
+            _log?.LogDebug("Ejecutando Arribo fuera de tiempo.");
 
             _tArriv = uint.MaxValue;
         }
@@ -160,6 +160,7 @@ namespace Core {
                         yield return _s.Departure; // partida
 
                     } else if (
+                        _s._tArriv != uint.MaxValue && // no ha llegado un evento d este tipo antes (ver https://github.com/CSProjectsAvatar/SimCopIA/issues/4)
                         _s._tArriv <= _s._tDep &&
                         _s._tArriv > _s._maxTime) { // t_A <= t_D  y  t_A > T
 
