@@ -1,17 +1,20 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 
 namespace Core
 {
-
+    [TestClass]
     public class ParallelServerSimulator
     {
         private uint _totalParallelServers;
 
         private double _time; // tiempo global (t)
         private Dictionary<uint, double> _arrTimes; // llave: cliente, valor: tiempo de llegada
-        private Dictionary<uint, double>[] _depTimes; // llave: cliente, valor: tiempo de partida
+        private Dictionary<uint, double>[] _depTimes; // array de diccionarios como servidores , llave: cliente, valor: tiempo de psartida
+        private Dictionary<uint, double> _allDepTimes;
         private double _tArriv; // tiempo d arribo siguiente (t_A)
        
         //Lista ordenada (futuro heap), que se organiza en base al tiempo de salida de los servidores y tiene como valores (servidor_i,cliente_j)
@@ -40,8 +43,9 @@ namespace Core
         }
 
         public IDictionary<uint, double> Arrivals => _arrTimes;
-        public IDictionary<uint, double>[] Departures => _depTimes;
-
+        public IDictionary<uint, double>[] DeparturesPerServer => _depTimes;
+        public IDictionary<uint, double> Deapertures => _allDepTimes;
+    
         public void Run(double closeTime) {
             Initialize(closeTime);
 
@@ -52,11 +56,20 @@ namespace Core
         private void Initialize(double closeTime) {
             _time = _arrivs = _departs = _n = 0u;
             _arrTimes = new();
+
             _depTimes = new Dictionary<uint, double>[this._totalParallelServers];
+            for(int i= 0; i<_depTimes.Length ;i++)
+                _depTimes[i] = new();
+
+            _allDepTimes = new Dictionary<uint, double>();
             _tArriv = GetT0();
             _inQueue = 0;
             _tDepsData = new SortedList<double, (uint,uint)>();
-            _freeServers = new(); 
+            
+            _freeServers = new Queue<uint>();
+            for(uint i=0; i<this._totalParallelServers; i++)
+                _freeServers.Enqueue(i);
+
             _maxTime = closeTime;
         }
          private uint GetT0() {
@@ -66,14 +79,14 @@ namespace Core
         /// El evento de arribo.
         /// </summary>
         private void Arrival() {
-            _log?.LogDebug("EjecutandoArribo");
+            _log?.LogDebug("Ejecutando Arribo");
 
             _time = _tArriv;
             _arrivs ++;
             _n++;
             _tArriv = _time + GenArrivalOffset();
             
-            if ( _freeServers.Count == _totalParallelServers ){
+            if ( _freeServers.Count == 0 ){
                 _inQueue++;
             }
             else{
@@ -106,7 +119,7 @@ namespace Core
         /// El evento de salida.
         /// </summary>
         private void Departure() {
-            _log?.LogDebug("EjecutandoPartida");
+            _log?.LogDebug("Ejecutando Partida");
            
             //tiempo de salida, servidor del que se sale, cliente que sale
             (double time , uint s, uint c) = GetMin(true);
@@ -124,9 +137,12 @@ namespace Core
                                 time + GenDepartureOffset(),
                                 (s,c1)
                             );
+            } else{
+                _freeServers.Enqueue(s);
             }
 
             _depTimes[s][c] = time; 
+            _allDepTimes[c] = time; 
         }
 
         private double GenDepartureOffset() {
@@ -165,6 +181,7 @@ namespace Core
             }
 
             _depTimes[s][c] = time; 
+            _allDepTimes[c] = time; 
 
         }
 
@@ -177,9 +194,11 @@ namespace Core
         ///     (tiempo_de_salida, servidor_del_que_se_sale, cliente_que_sale)
         /// </returns>
         
-        [Obsolete("Cambiar por un heap de minimos el _tDepsData !!",false)]
+       // [Obsolete("Cambiar por un heap de minimos el _tDepsData !!",false)]
         private (double, uint, uint) GetMin(bool remove=false){
             
+            if (this._tDepsData.Count == 0)
+                return (uint.MaxValue,0,0);
             var e = this._tDepsData.GetEnumerator();
             e.MoveNext();
             var current = e.Current;
@@ -206,7 +225,8 @@ namespace Core
                     
                     double minDeapertureTime =_s.GetMin(false).Item1; //el menor tiempo de salida
 
-                    if (_s._tArriv < minDeapertureTime && _s._tArriv  <= _s._maxTime){
+                    
+                    if (_s._tArriv <= minDeapertureTime && _s._tArriv  <= _s._maxTime){
 
                         yield return _s.Arrival;
 
@@ -218,7 +238,7 @@ namespace Core
 
                         yield return _s.TimeOutArrival;
 
-                    } else if (_s._tArriv >= minDeapertureTime && _s._tArriv > _s._maxTime && _s._n > 0 ){
+                    } else if (_s._tArriv > minDeapertureTime && _s._tArriv > _s._maxTime && _s._n > 0 ){
 
                         yield return _s.Close;
 
