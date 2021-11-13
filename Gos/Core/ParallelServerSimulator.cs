@@ -31,6 +31,8 @@ namespace Core
         private readonly Random _rand;
         private readonly ILogger<ParallelServerSimulator> _log;
 
+        public ParallelServerSimulator() : this(50,null)
+        {}
         public ParallelServerSimulator(uint totalParallelServers) : this(totalParallelServers,null){
 
         }
@@ -151,7 +153,7 @@ namespace Core
 
         private void TimeOutArrival(){
             
-            _log.LogDebug("Ejecutando Entrada fuera de tiempo.");
+            _log?.LogDebug("Ejecutando Entrada fuera de tiempo.");
 
             _tArriv = uint.MaxValue;
         }
@@ -160,7 +162,7 @@ namespace Core
         /// Evento de cierre.
         /// </summary>
         private void Close() {
-            _log.LogDebug("Ejecutando Cierre.");
+            _log?.LogDebug("Ejecutando Cierre.");
 
             //tiempo de salida, servidor del que se sale, cliente que sale
             (double time , uint s, uint c) = GetMin(true);
@@ -178,6 +180,8 @@ namespace Core
                                 time + GenDepartureOffset(),
                                 (s,c1)
                             );
+            }else{
+                _freeServers.Enqueue(s);
             }
 
             _depTimes[s][c] = time; 
@@ -255,5 +259,20 @@ namespace Core
                 return GetEnumerator();
             }
         }
+
+
+        [TestMethod]
+        public void ArrivalsEqualsDeparturesTest(){
+            Run(500);
+            Assert.AreEqual(this._arrivs, this._departs);
+        }
+
+        [TestMethod]
+        public void AllServerAreFreeTest(){
+            Run(5000);
+            
+            Assert.AreEqual((uint)this._freeServers.Count, this._totalParallelServers);
+        }
+
     }
 }
