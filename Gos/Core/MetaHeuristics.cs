@@ -15,7 +15,29 @@ namespace Core
         {
             throw new NotImplementedException();
         }
-    }
+
+        private List<int> getParents(List<Individual> individuals, Func<Individual, int> mini)
+        {
+            int count = individuals.Count;
+            int len = count % 2 == 1 ? count / 2 + 1 : count / 2;
+            List<int> pre_mini = new List<int> { };
+
+            foreach (var item in individuals)
+            {
+                pre_mini.Add(mini(item));
+            }
+
+            pre_mini.Sort();
+
+            List<int> best_mini = new List<int> { };
+            for (int i = 0; i < len; i++)
+            {
+                best_mini.Add(pre_mini[i]);
+            }
+
+            return best_mini;
+        }
+        
 
     public class Individual{
         public int numero;
