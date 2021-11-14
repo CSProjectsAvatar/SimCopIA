@@ -55,14 +55,9 @@ namespace Core
             throw new NotImplementedException();
         }
 
-        private List<Individual> getChilds(List<Individual> parents)
-        {
-            generateMutation(ch, _mutationProb);
+        
 
-            throw new NotImplementedException();
-        }
-
-        private List<int> getParents(List<Individual> individuals, Func<Individual, int> mini)
+        private List<Individual> getParents(List<Individual> individuals, Func<Individual, int> mini)
         {
             int count = individuals.Count;
             int len = (int)Math.Ceiling(count * 0.6);
@@ -73,18 +68,19 @@ namespace Core
                 pre_mini.Add(mini(item));
             }
 
-            pre_mini.Sort();
+            var result = individuals.Zip(pre_mini, (o, i) => new { o, i }).OrderBy(x => x.i).Select(x => x.o);
+            List<Individual> best = result.ToList();
 
-            List<int> best_mini = new List<int> { };
+            List<Individual> best_parents = new List<Individual> { };
             for (int i = 0; i < len; i++)
             {
-                best_mini.Add(pre_mini[i]);
+                best_parents.Add(best[i]);
             }
 
-            return best_mini;
+            return best_parents;
         }
 
-        private List<Individual> getChildren(List<int> parents)
+        private List<Individual> getChilds(List<Individual> parents)
         {
             List<Individual> children = new List<Individual> { };
             int childrenCount = 0;
@@ -95,13 +91,13 @@ namespace Core
             {
                 var parent1 = parents[random1.Next(0, parents.Count - 1)];
                 var parent2 = parents[random2.Next(0, parents.Count - 1)];
-                children.Add(generateChildren(parent1, parent2));
+                children.Add(generateChild(parent1, parent2));
                 childrenCount++;
             }
             return children;
         }
 
-        private Individual generateChildren(int parent1, int parent2)
+        private Individual generateChild(Individual parent1, Individual parent2)
         {
             throw new NotImplementedException();
         }
