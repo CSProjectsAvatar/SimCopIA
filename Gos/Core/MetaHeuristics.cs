@@ -1,18 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Core
 {
     public class MetaHeuristics
     {
-        public MetaHeuristics(){
-            MetaH(new List<Individual>(){},
-             (Individual i) => {return i.numero;}, 
-             (Individual i) => {return 0 < i.numero;});
+        Stopwatch crono;
+        private float _mutationProb;
+
+        public MetaHeuristics(float mutationProb)
+        {
+            MetaH(new List<Individual>() { },
+             (Individual i) => { return i.numero; },
+             (Individual i) => { return 0 < i.numero; });
+
+
+            crono = new Stopwatch();
+            _mutationProb = mutationProb;
         }
 
-        private void MetaH(List<Individual> individuals, Func<Individual, int> mini, Func<Individual, bool> validate)
+        private void MetaH(List<Individual> individuals, 
+        Func<Individual, int> mini, 
+        Func<Individual, bool> validate,
+        long timeInMs)
         {
+            var initCount = individuals.Count;
+            crono.Reset();
+
+            while(crono.ElapsedMilliseconds < timeInMs){
+                var parents = getParents(individuals, mini); // Selecciono mejores padres
+                var childs = getChilds(parents); // Realizo entrecruzamiento (Con Mutacion)
+
+                individuals.Clear();
+                individuals.AddRange(parents);
+                individuals.AddRange(childs);
+
+                // Se mueren los menos adaptados
+                while (individuals.Count > initCount)
+                {
+                    for (int i = 0; i < individuals.Count; i++) {
+                        if(!Survives(individuals[i])){
+                            individuals.RemoveAt(i);
+                        }
+                    }
+                    // @audit Si Toda la poblacion es el caso maximo, Loop Infinito
+                }
+                
+            } // Repito
+        }
+
+        private void generateMutation(Individual ch, object mutationProb)
+        {
+            throw new NotImplementedException();
+        }
+
+        private List<Individual> getChilds(List<Individual> parents)
+        {
+            generateMutation(ch, _mutationProb);
+
             throw new NotImplementedException();
         }
 
@@ -60,7 +106,10 @@ namespace Core
             throw new NotImplementedException();
         }
 
-        public class Individual{
-        public int numero;
+    public class Individual{
+        public int Dispatchers { get; set; }
+        public int Doers { get; set; }
+        public int MonthlyMaintennanceCost { get; set; }
+
     }
 }
