@@ -38,7 +38,10 @@ namespace Tests {
                 var t = Task.Run(() => simtor.Run(10));
                 Thread.Sleep(2000);
 
+                Logger.LogMessage($"Estado: {t.Status}\n");
+
                 Assert.IsTrue(t.IsCompleted);
+                Assert.IsTrue(t.Status == TaskStatus.RanToCompletion); // completada satisfactoriamente
             }
         }
     }

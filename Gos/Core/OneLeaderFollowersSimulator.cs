@@ -30,7 +30,7 @@ namespace Core {
 
         public Dictionary<uint, double> Arrivals => _arrTimes;
 
-        public OneLeaderFollowersSimulator() : this(30, null) {
+        public OneLeaderFollowersSimulator() : this(5, null) {
 
         }
 
@@ -132,7 +132,6 @@ namespace Core {
                     _time + GenDepartureOffset(),
                     (serv, client));
             }
-            _arrTimes[_arrivs] = _time;
         }
 
         /// <summary>
@@ -166,6 +165,12 @@ namespace Core {
                     depTime + GenDepartureOffset(),
                     (serv, inClient));
             } else {
+#if DEBUG
+                if (_freeServers.Contains(serv)) {
+                    throw new InvalidOperationException("Servidor ya libre.");
+                }
+#endif
+
                 _freeServers.Enqueue(serv);
             }
 
@@ -199,6 +204,7 @@ namespace Core {
             return GenTimeOffset();
         }
 
+        #region tests
         [TestMethod]
         public void ArrivalsEqualsDepartures() {
             Run(100);
@@ -213,6 +219,30 @@ namespace Core {
             Assert.AreEqual(double.MaxValue, _tLArriv);
             Assert.AreEqual(double.MaxValue, _tFArriv);
         }
+
+        [TestMethod]
+        public void AllServerAreFreeTest() {
+            Run(100);
+
+            Assert.AreEqual(_follows, (uint)_freeServers.Count); // conteo
+            Assert.AreEqual(_follows, (uint)new HashSet<uint>(_freeServers).Count); // unicidad
+            Assert.AreEqual(0, _tDepsData.Count); // info vacía
+        }
+
+        [TestMethod]
+        public void EmptyParallelQueue() {
+            Run(100);
+
+            Assert.AreEqual(0u, _inQueue);
+        }
+
+        [TestMethod]
+        public void EmptySystem() {
+            Run(100);
+
+            Assert.AreEqual(0u, _n);
+        }
+        #endregion
 
         /// <summary>
         /// Enumera los eventos de manera tal q 100pre te da el próximo evento a ejecutar.
@@ -255,6 +285,7 @@ namespace Core {
                     } else if (
                             minDep.Eq(minTime) && // t_D_i <= to los demás tiempos
                             minDep > _s._maxTime && // t_D_i > T
+                            minDep.Neq(double.MaxValue) && // pa q no c llame más d la cuenta (ver https://github.com/CSProjectsAvatar/SimCopIA/issues/5)
                             _s._n > 0) { // n > 0
 
                         yield return () => _s.Departure(true);

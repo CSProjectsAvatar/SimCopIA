@@ -140,6 +140,11 @@ namespace Core
                                 (s,c1)
                             );
             } else{
+#if DEBUG
+                if (_freeServers.Contains(s)) {
+                    throw new InvalidOperationException("Servidor ya libre.");
+                }
+#endif
                 _freeServers.Enqueue(s);
             }
 
@@ -181,6 +186,11 @@ namespace Core
                                 (s,c1)
                             );
             }else{
+#if DEBUG
+                if (_freeServers.Contains(s)) {
+                    throw new InvalidOperationException("Servidor ya libre.");
+                }
+#endif
                 _freeServers.Enqueue(s);
             }
 
