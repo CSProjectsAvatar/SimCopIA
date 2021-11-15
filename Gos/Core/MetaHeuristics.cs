@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core
 {
+    [TestClass]
     public class MetaHeuristics
     {
         Stopwatch crono;
@@ -83,19 +84,17 @@ namespace Core
 
         private List<Individual> getChilds(List<Individual> parents)
         {
-            List<Individual> children = new List<Individual> { };
-            int childrenCount = 0;
+            List<Individual> childrens = new List<Individual> { };
             Random random1 = new Random();
-            Random random2 = new Random();
 
-            while (childrenCount != parents.Count)
+            while (childrens.Count != parents.Count)
             {
                 var parent1 = parents[random1.Next(0, parents.Count - 1)];
-                var parent2 = parents[random2.Next(0, parents.Count - 1)];
-                children.Add(generateChild(parent1, parent2));
-                childrenCount++;
+                var parent2 = parents[random1.Next(0, parents.Count - 1)];
+                
+                childrens.Add(generateChild(parent1, parent2));
             }
-            return children;
+            return childrens;
         }
 
         private Individual generateChild(Individual parent1, Individual parent2)
@@ -127,6 +126,24 @@ namespace Core
 
             Assert.AreEqual(1, parents[0].Dispatchers);
             Assert.AreEqual(2, parents[1].Dispatchers);
+        }
+
+        [TestMethod]
+        public void getChildTest()
+        {
+            var lista = new List<Individual>(){
+                new Individual(2, 5),
+                new Individual(1, 4),
+                new Individual(3, 3),
+                new Individual(5, 8),
+            };
+            var parents = getParents(lista, i => i.Dispatchers);
+            var childs = getChilds(parents);
+
+            Assert.AreEqual(parents.Count, childs.Count);
+
+            // Assert.AreEqual(parents[0].Dispatchers,);
+            // Assert.AreEqual(2, parents[1].Dispatchers);
         }
     }
     public class Individual{
