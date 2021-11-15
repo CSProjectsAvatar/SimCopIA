@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core
 {
@@ -12,8 +14,9 @@ namespace Core
         public MetaHeuristics(float mutationProb)
         {
             MetaH(new List<Individual>() { },
-             (Individual i) => { return i.numero; },
-             (Individual i) => { return 0 < i.numero; });
+             (Individual i) => { return i.Dispatchers; },
+             (Individual i) => { return 0 < i.Doers; },
+             1000);
 
 
             crono = new Stopwatch();
@@ -40,9 +43,9 @@ namespace Core
                 while (individuals.Count > initCount)
                 {
                     for (int i = 0; i < individuals.Count; i++) {
-                        if(!Survives(individuals[i])){
-                            individuals.RemoveAt(i);
-                        }
+                        // if(!Survives(individuals[i])){
+                        //     individuals.RemoveAt(i);
+                        // }
                     }
                     // @audit Si Toda la poblacion es el caso maximo, Loop Infinito
                 }
@@ -53,31 +56,29 @@ namespace Core
         private void generateMutation(Individual ch, object mutationProb)
         {
             throw new NotImplementedException();
-        }
-
-        
+        }      
 
         private List<Individual> getParents(List<Individual> individuals, Func<Individual, int> mini)
         {
             int count = individuals.Count;
             int len = (int)Math.Ceiling(count * 0.6);
-            List<int> pre_mini = new List<int> { };
+            List<int> pre_mini = (from item in individuals
+                                  select mini(item)).ToList();
 
-            foreach (var item in individuals)
-            {
-                pre_mini.Add(mini(item));
-            }
+            var bests = individuals.Zip(pre_mini, (o, i) => new { o, i })
+                                    .OrderBy(x => x.i)
+                                    .Select(x => x.o)
+                                    .Take(len)
+                                    .ToList();
+            // List<Individual> best = result.ToList();
 
-            var result = individuals.Zip(pre_mini, (o, i) => new { o, i }).OrderBy(x => x.i).Select(x => x.o);
-            List<Individual> best = result.ToList();
+            // List<Individual> best_parents = new List<Individual> { };
+            // for (int i = 0; i < len; i++)
+            // {
+            //     best_parents.Add(bests[i]);
+            // }
 
-            List<Individual> best_parents = new List<Individual> { };
-            for (int i = 0; i < len; i++)
-            {
-                best_parents.Add(best[i]);
-            }
-
-            return best_parents;
+            return bests;
         }
 
         private List<Individual> getChilds(List<Individual> parents)
@@ -101,27 +102,46 @@ namespace Core
         {
             Random random = new Random();
             double va = random.NextDouble(); //variable aleatoria con probabilidad uniforme en [0,1]
-            Individual child = new Individual();
-            if (va < 0.5)
-            {
-                child.Dispatchers = parent1.Dispatchers;
-                child.Doers = parent1.Doers;
-                child.MonthlyMaintennanceCost = parent2.MonthlyMaintennanceCost;
+            Individual child;
+            if (va < 0.5) {
+                child = new Individual(parent1.Dispatchers, parent1.Doers);
             }
-            else
-            {
-                child.Dispatchers = parent2.Dispatchers;
-                child.Doers = parent2.Doers;
-                child.MonthlyMaintennanceCost = parent1.MonthlyMaintennanceCost;
+            else {
+                child = new Individual(parent2.Dispatchers, parent2.Doers);
             }
 
             return child;
         }
 
+        [TestMethod]
+        public void getParentsTest()
+        {
+            var lista = new List<Individual>(){
+                new Individual(2, 5),
+                new Individual(1, 4),
+                new Individual(3, 3),
+                new Individual(5, 8),
+            };
+            var parents = getParents(lista, i => i.Dispatchers);
+            Assert.AreEqual(3, parents.Count);
+
+            Assert.AreEqual(1, parents[0].Dispatchers);
+            Assert.AreEqual(2, parents[1].Dispatchers);
+        }
+    }
     public class Individual{
+
         public int Dispatchers { get; set; }
         public int Doers { get; set; }
-        public int MonthlyMaintennanceCost { get; set; }
+        public int MonthlyMaintennanceCost { get; }
 
+
+        public Individual(){ }
+        public Individual(int dispatchers, int doers)
+        {
+            Dispatchers = dispatchers;
+            Doers = doers;
+            MonthlyMaintennanceCost = dispatchers*10 + doers*5;
+        }
     }
 }
