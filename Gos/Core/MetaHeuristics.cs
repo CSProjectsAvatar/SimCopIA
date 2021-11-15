@@ -12,6 +12,7 @@ namespace Core
         Stopwatch crono;
         private float _mutationProb;
 
+        public MetaHeuristics(){ }
         public MetaHeuristics(float mutationProb)
         {
             MetaH(new List<Individual>() { },
