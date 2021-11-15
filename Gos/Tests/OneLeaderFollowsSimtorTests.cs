@@ -23,16 +23,20 @@ namespace Tests {
         [TestMethod]
         public void ArrivalsBeforeDepartures() {
             var simtor = new OneLeaderFollowersSimulator(5, _log);
-            simtor.Run(1000);
+            simtor.Run(100);
 
             var deps = simtor.GetDepartures();
+
+            Logger.LogMessage(string.Join('\n', simtor.Arrivals));
+            Logger.LogMessage("\n");
+            Logger.LogMessage(string.Join('\n', deps));
 
             Assert.IsTrue(simtor.Arrivals.Keys
                 .All(k => simtor.Arrivals[k] < deps[k]));
         }
 
         [DataTestMethod]
-        [DataRow(20u, 5u)]
+        [DataRow(14u, 5u)]
         [DataRow(13u, 10u)]
         [DataRow(5u, 103u)]
         public void FinishedRun(uint times, uint followers) {

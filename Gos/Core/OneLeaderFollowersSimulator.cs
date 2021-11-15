@@ -111,8 +111,8 @@ namespace Core {
         /// <summary>
         /// Evento de arribo a los seguidores.
         /// </summary>
-        private void ArrivalToFollowers() {
-            _log?.LogDebug("Ejecutando arribo a los seguidores");
+        private void ArrivalToFollowers(bool late) {
+            _log?.LogDebug("Ejecutando arribo " + (late ? "fuera de tiempo " : "") + "a los seguidores");
 
             _time = _tFArriv;
             _n1--;
@@ -135,15 +135,6 @@ namespace Core {
         }
 
         /// <summary>
-        /// Arribo fuera de tiempo para los seguidores.
-        /// </summary>
-        private void TimeOutArrivalToFollowers() {
-            _log?.LogDebug("Ejecutando arribo fuera de tiempo a los seguidores");
-
-            _tFArriv = double.MaxValue;
-        }
-
-        /// <summary>
         /// El evento de salida y cierre (son equivalentes).
         /// </summary>
         private void Departure(bool isClose) {
@@ -159,7 +150,7 @@ namespace Core {
             if (_inQueue != 0) {
 
                 _inQueue--;
-                var inClient = _arrivs - _inQueue;  // primer cliente de la cola que entra al servidor s
+                var inClient = _arrivs - _n1 - _inQueue;  // primer cliente de la cola que entra al servidor s
 
                 _tDepsData.Add(
                     depTime + GenDepartureOffset(),
@@ -271,12 +262,12 @@ namespace Core {
                     } else if (
                             _s._tFArriv.Eq(minTime) && // t_A_2 <= to los demás tiempos
                             _s._tFArriv.Leq(_s._maxTime)) { // t_A_2 <= T
-                        yield return _s.ArrivalToFollowers;
+                        yield return () => _s.ArrivalToFollowers(false);
                     } else if (
                             _s._tFArriv.Neq(double.MaxValue) && // no ha llegado un evento d este tipo antes (ver https://github.com/CSProjectsAvatar/SimCopIA/issues/4)
                             _s._tFArriv.Eq(minTime) && // t_A_2 <= to los demás tiempos
                             _s._tFArriv > _s._maxTime) { // t_A_2 > T
-                        yield return _s.TimeOutArrivalToFollowers;
+                        yield return () => _s.ArrivalToFollowers(true);
                     } else if (
                             minDep.Eq(minTime) && // t_D_i <= to los demás tiempos
                             minDep.Leq(_s._maxTime)) { // t_D_i <= T
