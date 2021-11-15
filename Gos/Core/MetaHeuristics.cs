@@ -135,16 +135,18 @@ namespace Core
             var lista = new List<Individual>(){
                 new Individual(2, 5),
                 new Individual(1, 4),
-                new Individual(3, 3),
-                new Individual(5, 8),
             };
             var parents = getParents(lista, i => i.Dispatchers);
             var childs = getChilds(parents);
 
             Assert.AreEqual(parents.Count, childs.Count);
 
-            // Assert.AreEqual(parents[0].Dispatchers,);
-            // Assert.AreEqual(2, parents[1].Dispatchers);
+            Assert.IsTrue(
+                (parents[0].Dispatchers == childs[0].Dispatchers &&
+                parents[1].Doers == childs[0].Doers)
+                || 
+                (parents[1].Dispatchers == childs[0].Dispatchers &&
+                parents[0].Doers == childs[0].Doers) );
         }
     }
     public class Individual{
