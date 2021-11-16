@@ -99,7 +99,23 @@ namespace Core
 
         private Individual generateChild(Individual parent1, Individual parent2)
         {
-            throw new NotImplementedException();
+            Random random = new Random();
+            double va = random.NextDouble(); //variable aleatoria con probabilidad uniforme en [0,1]
+            Individual child = new Individual();
+            if (va < 0.5)
+            {
+                child.Dispatchers = parent1.Dispatchers;
+                child.Doers = parent1.Doers;
+                child.MonthlyMaintennanceCost = parent2.MonthlyMaintennanceCost;
+            }
+            else
+            {
+                child.Dispatchers = parent2.Dispatchers;
+                child.Doers = parent2.Doers;
+                child.MonthlyMaintennanceCost = parent1.MonthlyMaintennanceCost;
+            }
+
+            return child;
         }
 
     public class Individual{

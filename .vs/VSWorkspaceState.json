@@ -2,7 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\Gos",
+    "\\Gos\\Compiler",
     "\\Gos\\Core"
   ],
+  "SelectedNode": "\\Gos\\Compiler\\Program.cs",
   "PreviewInSolutionExplorer": false
 }
