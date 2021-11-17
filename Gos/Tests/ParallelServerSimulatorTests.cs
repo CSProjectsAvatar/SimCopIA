@@ -23,7 +23,7 @@ namespace Tests {
             simtor.Run(100);
 
             Assert.IsTrue(simtor.Arrivals.Keys
-                .All(k => simtor.Arrivals[k] < simtor.Deapertures[k]));
+                .All(k => simtor.Arrivals[k] < simtor.Departures[k]));
         }
 
         [DataTestMethod]

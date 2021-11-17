@@ -27,20 +27,28 @@ namespace Core {
         private readonly IEnumerable<Action> _events; // los eventos ordenados en el tiempo
         private readonly Random _rand;
         private readonly ILogger<OneLeaderFollowersSimulator> _log;
+        private readonly double _lambda;
 
         public Dictionary<uint, double> Arrivals => _arrTimes;
 
-        public OneLeaderFollowersSimulator() : this(5, null) {
+        public OneLeaderFollowersSimulator() : this(5, 1.5, null) {
+
+        }
+
+        public OneLeaderFollowersSimulator(uint followers, ILogger<OneLeaderFollowersSimulator> logger) :
+                this(followers, 1.5, logger) {
 
         }
 
         public OneLeaderFollowersSimulator(
                 uint followers,
+                double lambda,
                 ILogger<OneLeaderFollowersSimulator> logger) {
             _events = new EventGiver(this);
             _rand = new();
             _log = logger;
             _follows = followers;
+            _lambda = lambda;
         }
 
         public Dictionary<uint, double> GetDepartures() {
@@ -122,12 +130,14 @@ namespace Core {
             } else {
                 _tFArriv = double.MaxValue;
             }
+            var client = _arrivs - _n1; // ID del cliente = N_A - n1
 
             if (_freeServers.Count == 0) {
                 _inQueue++;
+
+                _log?.LogDebug($"Cliente {client} hace cola.");
             } else {
                 var serv = _freeServers.Dequeue();
-                var client = _arrivs - _n1; // ID del cliente = N_A - n1
                 _tDepsData.Add(
                     _time + GenDepartureOffset(),
                     (serv, client));
@@ -186,9 +196,8 @@ namespace Core {
         }
 
         private double GenTimeOffset() {
-            var lambda = 1.5;
 
-            return -1 / lambda * Math.Log(_rand.NextDouble()); // distribución exponencial
+            return -1 / _lambda * Math.Log(_rand.NextDouble()); // distribución exponencial
         }
 
         private double GenArrivalToFollowersOffset() {

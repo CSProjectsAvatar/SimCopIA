@@ -46,7 +46,7 @@ namespace Core
 
         public IDictionary<uint, double> Arrivals => _arrTimes;
         public IDictionary<uint, double>[] DeparturesPerServer => _depTimes;
-        public IDictionary<uint, double> Deapertures => _allDepTimes;
+        public IDictionary<uint, double> Departures => _allDepTimes;
     
         public void Run(double closeTime) {
             Initialize(closeTime);

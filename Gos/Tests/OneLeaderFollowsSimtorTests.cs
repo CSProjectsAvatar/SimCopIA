@@ -12,17 +12,19 @@ using System.Threading.Tasks;
 namespace Tests {
     [TestClass]
     public class OneLeaderFollowsSimtorTests : BaseTest {
-        private ILogger<OneLeaderFollowersSimulator> _log;
+        private ILogger<OneLeaderFollowersSimulator> _simLog;
+        private ILogger<OneLeaderFollowsSimtorTests> _log;
 
         [TestInitialize]
         public void Init() {
             //_log = Container.GetRequiredService<ILogger<OneLeaderFollowersSimulator>>();
-            _log = LoggerFact.CreateLogger<OneLeaderFollowersSimulator>();
+            _simLog = LoggerFact.CreateLogger<OneLeaderFollowersSimulator>();
+            _log = LoggerFact.CreateLogger<OneLeaderFollowsSimtorTests>();
         }
 
         [TestMethod]
         public void ArrivalsBeforeDepartures() {
-            var simtor = new OneLeaderFollowersSimulator(5, _log);
+            var simtor = new OneLeaderFollowersSimulator(5, _simLog);
             simtor.Run(100);
 
             var deps = simtor.GetDepartures();
@@ -41,7 +43,7 @@ namespace Tests {
         [DataRow(5u, 103u)]
         public void FinishedRun(uint times, uint followers) {
             for (int i = 0; i < times; i++) {
-                var simtor = new OneLeaderFollowersSimulator(followers, _log);
+                var simtor = new OneLeaderFollowersSimulator(followers, _simLog);
 
                 Logger.LogMessage($"\nCorrida {i + 1}:\n");
 
@@ -53,6 +55,33 @@ namespace Tests {
                 Assert.IsTrue(t.IsCompleted);
                 Assert.IsTrue(t.Status == TaskStatus.RanToCompletion); // completada satisfactoriamente
             }
+        }
+
+        [TestMethod]
+        public void OneFollower() {
+            for (int i = 0; i < 5; i++) {
+                var simtor = new OneLeaderFollowersSimulator(1, _simLog);
+
+                _log.LogInformation($"\nCorrida {i + 1}:\n");
+
+                simtor.Run(10);
+                var deps = simtor.GetDepartures();
+
+                Assert.IsTrue(simtor.Arrivals.All(kv => deps.ContainsKey(kv.Key))); // arribos subconjunto d partidas
+                Assert.IsTrue(deps.All(kv => simtor.Arrivals.ContainsKey(kv.Key))); //  partidas subconjunto d arribos
+            }
+        }
+
+        [TestMethod]
+        public void LambdaVariation() {
+            var simtor = new OneLeaderFollowersSimulator(5, .5, _simLog);
+            simtor.Run(10);
+            var arrivals = simtor.Arrivals.Count;
+
+            simtor = new OneLeaderFollowersSimulator(5, 4, _simLog);
+            simtor.Run(10);
+
+            Assert.IsTrue(arrivals < simtor.Arrivals.Count); // mientras mayor el lambda, más arribos ocurren
         }
     }
 }
