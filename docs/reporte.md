@@ -22,3 +22,68 @@ En un sistema como este se pueden simular:
 * la viabilidad del sistema en conjunto en cuanto a  la tolerancia a fallas, alta disponibilidad.
 
 Incluyendo IA allá donde puede ser más útil :grin:.
+
+## OneLeaderFollowersSimulator
+Simulación de un lider con un conjunto de servidores en paralelo.
+### Variables
+- #### Variables de tiempo
+  - $ t $ - tiempo general.
+  - $ t_{A_1} $ - siguiente tiempo de arribo al lider.
+  - $ t_{A_2} $ - siguiente tiempo de arribo a los seguidores.
+  - $ t_{D_i} $ - siguiente tiempo de salida del i-esimo seguidor .
+- #### Variables contadoras
+  - $ N_A $ - cantidad de arribos 
+  - $ N_D $ - cantidad de partidas 
+  - $ A_1 $ - Diccionario de tiempos de arribo al lider
+  - $ A_{d_i} $ - Lista de diccionarios donde $ A_{d_i}[j]= t_j $ siendo  $ A_{d_i} $ el diccionario correspondiente al i-esimo seguidor y $ t_j $ el tiempo de partida asociado al 'cliente' j-esimo.
+- #### Variables de estado
+  - $ n_1 $ - número de clientes en el lider.
+  - $ n $ - número de clientes en el sistema.
+  - $ F_s $ - servidores libres.
+  - $ q $ - cantidad de 'clientes' esperando en la cola de los seguidores.
+
+### Eventos
+- **Arribo al lider**  $( t_{A_1} == min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... ) \wedge t_{A_1} < T ) $ :
+  
+  - $ t = t_{A_1} $
+  - $ N_A = N_A + 1 $
+  - $ n_1 = n_1 + 1 $
+  - $ n = n + 1 $
+  - $ if~(n_1 == 1)~~~then~~~~(~t_{A_S}=genArrivalTimeOffset())~\wedge ~t_{A_2}=t + t_{A_S})$
+  - $ A_1[N_A] = t$
+- **Arribo a los seguidores**  $( t_{A_2} == min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... ) \wedge t_{A_2} < T )$ :
+  - $ t = t_{A_2} $
+  - $ n_1=n_1-1 $
+  - $ if~(n_1 \ne 0)~~~then~~~~(~t_{A_S}=genArrivalTimeOffset()~\wedge ~t_{A_2}=t + t_{A_S})$
+  - $else~~~~t_{A_2} = \infin $
+  - $ if~(|F_s| == 0)~~~then~~~~( q = q+1)$
+  - $else:$
+    - $ serv = F_s.Dequeue() $ 
+    - $ client = N_A - n_1 $
+    - $ t_{D_{Offset}} = genDeapTimeOffset() $
+    - $ t_{D_{serv,client}} = t + t_{D_{Offset}} $  <!-- incluir info del cliente aca -->
+- **Partida** $(min(t_{D_1},t_{D_2},...)==min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... )) \wedge (min(t_{D_1},t_{D_2},...) \le T$:
+  - $t_{Dmin}= GetMinDep()$
+  - $serv = GetMinServDep()$
+  - $client = GetMinClientDep()$
+  - $ t = t_{t_Dmin}$
+  - $ N_D = N_D +1$
+  - $ n=n-1 $
+  - $if~(q \ne 0)~~~then$ :
+    - $q=q+1$
+    - $client = N_A-q$
+    - $ t_{D_{Offset}} = genDeapTimeOffset() $
+    - $ t_{D_{serv,client}} = t + t_{D_{Offset}} $
+  - $else ~~~~F_s.Add(serv)$
+  - $A_{d_{serv}}[client]= t_{Dmin} $
+- **Arribo fuera de tiempo para el lider** $ (t_{A_1}\ne \infin \wedge t_{A_1} ==  min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... ) \wedge  t_{A_1} >T) $:
+  - $ t_{A_1} = \infin $
+- **Arribo fuera de tiempo para los seguidores**  $ (t_{A_2}\ne \infin \wedge t_{A_2} ==  min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... ) \wedge  t_{A_1} >T) $ :
+  - $ t_{A_2} = \infin $
+- **Cierre** $(min(t_{D_1},t_{D_2},...)==min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... ))~~\wedge~~((min(t_{D_1},t_{D_2},...) > T)~~\wedge$
+
+  $((min(t_{D_1},t_{D_2},...) \ne \infin)~~\wedge~~n>0$ :
+  
+  El evento de cierre es análogo al evento de partida.
+
+  
