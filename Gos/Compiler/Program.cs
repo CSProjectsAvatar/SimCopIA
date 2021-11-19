@@ -1,4 +1,5 @@
 ﻿using System;
+using Core;
 
 namespace Compiler
 {
@@ -7,6 +8,7 @@ namespace Compiler
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+            var m = MetaHeuristics();
         }
     }
 }
