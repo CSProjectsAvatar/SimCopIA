@@ -13,18 +13,18 @@ namespace Core
         Stopwatch crono;
         private float _mutationProb;
 
-        public MetaHeuristics(){ }
-        public MetaHeuristics(float mutationProb)
+        public MetaHeuristics()
         {
-            MetaH(new List<Individual>() { },
-             (Individual i) => { return i.Dispatchers; },
-             (Individual i) => { return 0 < i.Doers; },
-             1000);
 
 
             crono = new Stopwatch();
-            _mutationProb = mutationProb;
+            // _mutationProb = mutationProb;
             _random = new Random(Environment.TickCount);
+           
+            MetaH(new List<Individual>() { },
+             (Individual i) => { return i.Doers; },
+             (Individual i) => { return 0 < i.Doers; },
+             10000000);
         }
 
         private void MetaH(List<Individual> individuals, 
@@ -117,6 +117,9 @@ namespace Core
                 child = new Individual(parent2.Doers);
             }
 
+            if (_random.NextDouble() < _mutationProb)
+                child.Mutate();
+                
             return child;
         }
 
@@ -157,21 +160,41 @@ namespace Core
         }
     }
     public class Individual{
-
+        Random _random;
         public int Dispatchers { get; set; } = 1;
         public int Doers { get; set; }
         public int MonthlyMaintennanceCost { get; }
 
-        public Individual(){ }
+        public Individual() : this(0,0) { }
         public Individual(int dispatchers, int doers)
         {
             Dispatchers = dispatchers;
             Doers = doers;
             MonthlyMaintennanceCost = dispatchers*10 + doers*5;
+            var _random = new Random(Environment.TickCount);
         }
 
         public Individual(int doers) : this(1, doers)
         {
+        }
+
+        public static List<Individual> Sampler(int number){
+            var list = new List<Individual>();
+            for (int i = 0; i < number; i++)
+            {
+                var doers = _random.Next(1, 100);
+                list.Add(new Individual(doers));
+            }
+            return list;
+        }
+        internal void Mutate()
+        {
+            if(_random.NextDouble() < 0.5){
+                Doers -= 1;
+            }
+            else {
+                Doers += 1;
+            }
         }
     }
 }
