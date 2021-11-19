@@ -23,7 +23,7 @@ En un sistema como este se pueden simular:
 
 Incluyendo IA allá donde puede ser más útil :grin:.
 
-## OneLeaderFollowersSimulator
+## Modelo de un Líder y muchos Seguidores
 Simulación de un l&iacute;der con un conjunto de servidores en paralelo.
 ### Variables
 - #### Variables de tiempo
@@ -49,19 +49,19 @@ Simulación de un l&iacute;der con un conjunto de servidores en paralelo.
   - $ N_A = N_A + 1 $
   - $ n_1 = n_1 + 1 $
   - $ n = n + 1 $ 
-  - $ t_{A_1} = t + genArrivalToLidTimeOffset() $
-  - $ if~(n_1 == 1)~~~then~~~~t_{A_S}=genArrivalToFollTimeOffset()~\wedge ~t_{A_2}=t + t_{A_S})$   
+  - $ generar~~t_{A_{L}} \wedge~~t_{A_1} = t + t_{A_{L}} $  <!-- aqui deberia ser  -->
+  - $ if~(n_1 == 1)~~~then~~~~generar~~t_{A_S}~\wedge ~t_{A_2}=t + t_{A_S})$   
   - $ A_1[N_A] = t$
 - **Arribo a los seguidores**  $( t_{A_2} == min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... ) \wedge t_{A_2} < T )$ :
   - $ t = t_{A_2} $
   - $ n_1=n_1-1 $
-  - $ if~(n_1 \ne 0)~~~then~~~~(~t_{A_S}=genArrivalTimeOffset()~\wedge ~t_{A_2}=t + t_{A_S})$
+  - $ if~(n_1 \ne 0)~~~then~~~~(generar~t_{A_S}~\wedge ~t_{A_2}=t + t_{A_S})$
   - $else~~~~t_{A_2} = \infin $
   - $ if~(|F_s| == 0)~~~then~~~~( q = q+1)$
   - $else:$
     - $ serv = F_s.Dequeue() $ 
     - $ client = N_A - n_1 $
-    - $ t_{D_{serv}} =t +  genDeapTimeOffset()$
+    - $ generar~t_{D_S}~~\wedge~~t_{D_{serv}} =t + t_{D_S}$
     - se inserta $client$ en $serv$ 
 
 - **Partida** $(min(t_{D_1},t_{D_2},...)==min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... )) \wedge (min(t_{D_1},t_{D_2},...) \le T$:
@@ -74,8 +74,7 @@ Simulación de un l&iacute;der con un conjunto de servidores en paralelo.
   - $if~(q \ne 0)~~~then$ :
     - $q=q-1$ 
     - $client = N_A-q$
-    - $ t_{D_{Offset}} = genDeapTimeOffset() $
-    - $ t_{D_{serv,client}} = t + t_{D_{Offset}} $
+    - $generar~t_{D_{S}} ~~\wedge~~ t_{D_{serv,client}} = t + t_{D_{S}}  $
   - $else ~~~~F_s.Add(serv)$
   - $A_{d_{serv}}[client]= t_{Dmin} $
 - **Arribo fuera de tiempo para el líder** $ (t_{A_1}\ne \infin \wedge t_{A_1} ==  min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... ) \wedge  t_{A_1} >T) $:
