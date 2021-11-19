@@ -49,8 +49,8 @@ Simulación de un l&iacute;der con un conjunto de servidores en paralelo.
   - $ N_A = N_A + 1 $
   - $ n_1 = n_1 + 1 $
   - $ n = n + 1 $ 
-  - $ generar~~t_{A_{L}} \wedge~~t_{A_1} = t + t_{A_{L}} $  <!-- aqui deberia ser  -->
-  - $ if~(n_1 == 1)~~~then~~~~generar~~t_{A_S}~\wedge ~t_{A_2}=t + t_{A_S})$   
+  - $ generar~~t_{A_{L}} \wedge~~t_{A_1} = t + t_{A_{L}} $ 
+  - $ if~(n_1 == 1)~~~then~~~~generar~~t_{A_S}~\wedge ~t_{A_2}=t + t_{A_S}$   
   - $ A_1[N_A] = t$
 - **Arribo a los seguidores**  $( t_{A_2} == min( t_{A_1},t_{A_2}, t_{D_1},t_{D_2},... ) \wedge t_{A_2} < T )$ :
   - $ t = t_{A_2} $
