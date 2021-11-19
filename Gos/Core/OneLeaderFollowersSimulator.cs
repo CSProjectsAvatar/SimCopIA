@@ -35,11 +35,23 @@ namespace Core {
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="followers">Cantidad de seguidores (doers).</param>
+        /// <param name="logger"></param>
         public OneLeaderFollowersSimulator(uint followers, ILogger<OneLeaderFollowersSimulator> logger) :
                 this(followers, 1.5, logger) {
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="followers">Cantidad de seguidores (doers).</param>
+        /// <param name="lambda">Parámetro lambda de la distribución exponencial para determinar tiempos de 
+        /// ocurrencia de los eventos.</param>
+        /// <param name="logger"></param>
         public OneLeaderFollowersSimulator(
                 uint followers,
                 double lambda,
@@ -57,6 +69,10 @@ namespace Core {
                 .ToDictionary(d => d.Key, d => d.Value);
         }
 
+        /// <summary>
+        /// Tiempo de cierre del sistema (T). Cuando se arribe a este tiempo, no se recibirán más pedidos.
+        /// </summary>
+        /// <param name="closeTime"></param>
         public void Run(double closeTime) {
             Initialize(closeTime);
 
