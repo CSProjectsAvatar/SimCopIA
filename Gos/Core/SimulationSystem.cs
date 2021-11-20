@@ -6,18 +6,19 @@ using System.Threading.Tasks;
 
 namespace Core
 {
-    public class System
+    public class SimulationSystem
     {
-        public double RunSimulation
+        public static double RunSimulation
         (Individual individual,  
-        Func<Dictionary<uint, double>, Dictionary<uint, double>, double> minimize,
+        // Func<Dictionary<uint, double>, Dictionary<uint, double>, double> minimize = AttentionTime,
         double lambda = 0.3)
         {
            var simulation = new OneLeaderFollowersSimulator(individual.Doers, lambda);
-           return minimize(simulation.Arrivals, simulation.GetDepartures());
+        //    return minimize(simulation.Arrivals, simulation.GetDepartures());
+           return AttentionTime(simulation.Arrivals, simulation.GetDepartures());
         }
 
-        public double AttentionTime(Dictionary<uint, double> arrivals, Dictionary<uint, double> departures)
+        public static double AttentionTime(Dictionary<uint, double> arrivals, Dictionary<uint, double> departures)
         {
             double[] sub = new double[arrivals.Count];
             int i = 0;
