@@ -9,6 +9,12 @@ using System.Threading;
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
+
+            // ClassAux.RunMeta();
+
+
+
+
             using var loggerFactory = LoggerFactory.Create(builder => { // configurando niveles de logueo
                 builder
                     .AddFilter("Microsoft", LogLevel.Warning)

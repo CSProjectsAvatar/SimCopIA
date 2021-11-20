@@ -11,29 +11,24 @@ namespace Core
     {
         Random _random;
         Stopwatch crono;
-        private float _mutationProb;
+        private double _mutationProb;
 
         public MetaHeuristics()
         {
-
-
             crono = new Stopwatch();
-            // _mutationProb = mutationProb;
+            _mutationProb = 0.2;
             _random = new Random(Environment.TickCount);
            
-            MetaH(new List<Individual>() { },
-             (Individual i) => { return i.Doers; },
-             (Individual i) => { return 0 < i.Doers; },
-             10000000);
         }
 
-        private void MetaH(List<Individual> individuals, 
+        public void Run(List<Individual> individuals, 
         Func<Individual, int> mini, 
         Func<Individual, bool> validate,
         long timeInMs)
         {
             var initCount = individuals.Count;
             crono.Reset();
+            crono.Start();
 
             while(crono.ElapsedMilliseconds < timeInMs){
                 var parents = getParents(individuals, mini); // Selecciono mejores padres
@@ -46,15 +41,14 @@ namespace Core
                 // Se mueren los menos adaptados
                 while (individuals.Count > initCount)
                 {
-                    for (int i = 0; i < individuals.Count && individuals.Count > initCount; i++) {
+                    for (int i = 0; i < individuals.Count; i++) {
                         if(!Survives(individuals[i])){
                             individuals.RemoveAt(i);
                         }
                     }
-                    // @audit Si Toda la poblacion es el caso maximo, Loop Infinito
                 }
                 
-            } // Repito
+            } // Proxima Generacion
         }
 
         private bool Survives(Individual individual)
@@ -63,12 +57,7 @@ namespace Core
                 return true;
             }
             return false;
-        }
-
-        private void generateMutation(Individual ch, object mutationProb)
-        {
-            throw new NotImplementedException();
-        }      
+        }  
 
         private List<Individual> getParents(List<Individual> individuals, Func<Individual, int> mini)
         {
@@ -160,7 +149,7 @@ namespace Core
         }
     }
     public class Individual{
-        Random _random;
+        static Random _random = new Random(Environment.TickCount);
         public int Dispatchers { get; set; } = 1;
         public int Doers { get; set; }
         public int MonthlyMaintennanceCost { get; }
@@ -171,7 +160,6 @@ namespace Core
             Dispatchers = dispatchers;
             Doers = doers;
             MonthlyMaintennanceCost = dispatchers*10 + doers*5;
-            var _random = new Random(Environment.TickCount);
         }
 
         public Individual(int doers) : this(1, doers)
