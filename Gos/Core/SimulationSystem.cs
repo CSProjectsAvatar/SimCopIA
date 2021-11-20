@@ -8,14 +8,19 @@ namespace Core
 {
     public class SimulationSystem
     {
-        public static double RunSimulation
-        (Individual individual,  
-        // Func<Dictionary<uint, double>, Dictionary<uint, double>, double> minimize = AttentionTime,
-        double lambda = 0.3)
-        {
-           var simulation = new OneLeaderFollowersSimulator(individual.Doers, lambda);
-        //    return minimize(simulation.Arrivals, simulation.GetDepartures());
-           return AttentionTime(simulation.Arrivals, simulation.GetDepartures());
+        public static double RunSimulation(
+                Individual individual,
+                Func<Dictionary<uint, double>, Dictionary<uint, double>, double> minimize = default,
+                double lambda = 0.3,
+                double closeTime = 10) {
+
+            if (minimize == default) {
+                minimize = AttentionTime;
+            }
+            var simulation = new OneLeaderFollowersSimulator(individual.Doers, lambda);
+            simulation.Run(closeTime);
+
+            return minimize(simulation.Arrivals, simulation.GetDepartures());
         }
 
         public static double AttentionTime(Dictionary<uint, double> arrivals, Dictionary<uint, double> departures)

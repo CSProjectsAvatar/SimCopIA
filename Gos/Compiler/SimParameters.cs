@@ -17,5 +17,20 @@
         /// Tiempo de cierre del sistema (T). Cuando se arribe a este tiempo, no se recibirán más pedidos.
         /// </summary>
         public double CloseTime { get; set; }
+
+        /// <summary>
+        /// Costo mensual máximo de mantenimiento del sistema.
+        /// </summary>
+        public int MonthlyMaintenanceCost { get; set; }
+
+        /// <summary>
+        /// Tiempo en milisegundos de corrida de la metaheurística.
+        /// </summary>
+        public long RunTimeMilliseconds { get; set; }
+        
+        /// <summary>
+        /// Número de individuos del algoritmo genético.
+        /// </summary>
+        public int Poblation { get; set; }
     }
 }

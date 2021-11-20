@@ -9,12 +9,6 @@ using System.Threading;
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
-
-            // ClassAux.RunMeta();
-
-
-
-
             using var loggerFactory = LoggerFactory.Create(builder => { // configurando niveles de logueo
                 builder
                     .AddFilter("Microsoft", LogLevel.Warning)
@@ -23,31 +17,31 @@ namespace Compiler {
                     .AddConsole();
             });
             var @params = JsonSerializer.Deserialize<SimParameters>(File.ReadAllText("appsettings.json"));
-
             var log = loggerFactory.CreateLogger<Program>();
+            var metah = new MetaHeuristics();
+            var indivs = Individual.Sampler(@params.Poblation);
 
-            var simtor = new OneLeaderFollowersSimulator(
-                @params.Followers,
-                @params.Lambda,
-                loggerFactory.CreateLogger<OneLeaderFollowersSimulator>());
-
-            log.LogInformation("Comienzo de la simulación...");
             log.LogInformation(
                 $"{@params.Followers} seguidores, " +
-                $"lambda = {@params.Lambda} y " +
-                $"el sistema cierra en el tiempo {@params.CloseTime}.");
+                $"lambda = {@params.Lambda}, " +
+                $"el sistema cierra en el tiempo {@params.CloseTime}, " +
+                "se minimiza el tiempo de atención a los pedidos, " +
+                $"el costo de mantenimiento máximo mensual es {@params.MonthlyMaintenanceCost} y " +
+                $"la metaheurística se ejecutará por {@params.RunTimeMilliseconds} milisegundos, " +
+                $"en una población de {@params.Poblation} individuos.");
+            log.LogInformation("Comienzo de la metaheurística...");
 
-            simtor.Run(@params.CloseTime);
+            metah.Run(indivs,
+                (Individual i) => SimulationSystem.RunSimulation(i, default, @params.Lambda, @params.CloseTime),
+                (Individual i) => 
+                    0 < i.MonthlyMaintennanceCost && 
+                    i.MonthlyMaintennanceCost < @params.MonthlyMaintenanceCost,
+                @params.RunTimeMilliseconds);
 
-            log.LogInformation("Simulación terminada.");
-
+            log.LogInformation("Metaheurística terminada.");
             Thread.Sleep(100); // esperando a q el mensaje d arriba se escriba
-
             Console.WriteLine("\n===========Resultados===========\n");
-            Console.WriteLine("Arribos:");
-            Console.WriteLine(string.Join('\n', simtor.Arrivals));
-            Console.WriteLine("\nPartidas:");
-            Console.WriteLine(string.Join('\n', simtor.GetDepartures()));
+            Console.WriteLine($"El sistema debe poseer {indivs[0].Doers} doers.");
         }
     }
 }

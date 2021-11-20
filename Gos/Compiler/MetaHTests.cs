@@ -29,7 +29,7 @@ namespace Compiler {
             
             meta.Run( list,
                 (Individual i) => SimulationSystem.RunSimulation(i),
-                (Individual i) => { return 0 < i.MonthlyMaintennanceCost ; },
+                (Individual i) => { return 0 < i.MonthlyMaintennanceCost; }, // @todo acotar superiorment el costo
                 1000);
 
             Assert.AreEqual(57, list[0].Doers);
