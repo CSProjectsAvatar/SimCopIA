@@ -8,17 +8,17 @@ namespace Core
 {
     public class System
     {
-        public Tuple<Dictionary<uint,double>,Dictionary<uint,double>> GetDictionaries (Individual individuals)
+        public double RunSimulation
+        (Individual individual,  
+        Func<Dictionary<uint, double>, Dictionary<uint, double>, double> minimize,
+        double lambda = 0.3)
         {
-           var simulation = new OneLeaderFollowersSimulator(individuals.Doers, 0.3, loggerFactory.CreateLogger<OneLeaderFollowersSimulator>());
-           var dictionary = Tuple.Create(simulation.Arrivals, simulation.GetDepartures());
-           return dictionary;
+           var simulation = new OneLeaderFollowersSimulator(individual.Doers, lambda);
+           return minimize(simulation.Arrivals, simulation.GetDepartures());
         }
 
-        public double Min(Tuple<Dictionary<uint, double>, Dictionary<uint, double>> dictionaries)
+        public double AttentionTime(Dictionary<uint, double> arrivals, Dictionary<uint, double> departures)
         {
-            var arrivals = dictionaries.Item1;
-            var departures = dictionaries.Item2;
             double[] sub = new double[arrivals.Count];
             int i = 0;
             var arrivalsValues = arrivals.Values.ToList();
@@ -30,7 +30,6 @@ namespace Core
             }
 
             return  sub.Sum() / sub.Length;
-
         }
     }
 }

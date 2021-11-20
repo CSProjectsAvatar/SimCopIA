@@ -35,6 +35,10 @@ namespace Core {
 
         }
 
+        public OneLeaderFollowersSimulator(uint followers, double lambda) : this(followers, lambda, null) {
+
+        }
+        
         /// <summary>
         /// 
         /// </summary>
