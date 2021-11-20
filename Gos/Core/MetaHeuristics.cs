@@ -22,7 +22,7 @@ namespace Core
         }
 
         public void Run(List<Individual> individuals, 
-        Func<Individual, int> mini, 
+        Func<Individual, double> mini, 
         Func<Individual, bool> validate,
         long timeInMs)
         {
@@ -59,26 +59,18 @@ namespace Core
             return false;
         }  
 
-        private List<Individual> getParents(List<Individual> individuals, Func<Individual, int> mini)
+        private List<Individual> getParents(List<Individual> individuals, Func<Individual, double> mini)
         {
             int count = individuals.Count;
             int len = (int)Math.Ceiling(count * 0.6);
-            List<int> pre_mini = (from item in individuals
-                                  select mini(item)).ToList();
+            List<double> pre_mini = (from item in individuals
+                                        select mini(item)).ToList();
 
             var bests = individuals.Zip(pre_mini, (o, i) => new { o, i })
                                     .OrderBy(x => x.i)
                                     .Select(x => x.o)
                                     .Take(len)
                                     .ToList();
-            // List<Individual> best = result.ToList();
-
-            // List<Individual> best_parents = new List<Individual> { };
-            // for (int i = 0; i < len; i++)
-            // {
-            //     best_parents.Add(bests[i]);
-            // }
-
             return bests;
         }
 
@@ -150,19 +142,19 @@ namespace Core
     }
     public class Individual{
         static Random _random = new Random(Environment.TickCount);
-        public int Dispatchers { get; set; } = 1;
-        public int Doers { get; set; }
+        public uint Dispatchers { get; set; } = 1;
+        public uint Doers { get; set; }
         public int MonthlyMaintennanceCost { get; }
 
         public Individual() : this(0,0) { }
-        public Individual(int dispatchers, int doers)
+        public Individual(uint dispatchers, uint doers)
         {
             Dispatchers = dispatchers;
             Doers = doers;
-            MonthlyMaintennanceCost = dispatchers*10 + doers*5;
+            MonthlyMaintennanceCost = ((int)dispatchers)*10 + (int)doers*5;
         }
 
-        public Individual(int doers) : this(1, doers)
+        public Individual(uint doers) : this(1, doers)
         {
         }
 
@@ -171,7 +163,7 @@ namespace Core
             for (int i = 0; i < number; i++)
             {
                 var doers = _random.Next(1, 100);
-                list.Add(new Individual(doers));
+                list.Add(new Individual((uint)doers));
             }
             return list;
         }
