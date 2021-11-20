@@ -2,7 +2,7 @@
     /// <summary>
     /// Contiene los parámetros necesarios para ejecutar la simulación.
     /// </summary>
-    internal class SimParameters {
+    internal class AppParameters {
         /// <summary>
         /// Cantidad de seguidores (doers).
         /// </summary>

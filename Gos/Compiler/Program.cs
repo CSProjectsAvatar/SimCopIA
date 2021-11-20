@@ -16,7 +16,7 @@ namespace Compiler {
                     .AddFilter("Core", LogLevel.Information)
                     .AddConsole();
             });
-            var @params = JsonSerializer.Deserialize<SimParameters>(File.ReadAllText("appsettings.json"));
+            var @params = JsonSerializer.Deserialize<AppParameters>(File.ReadAllText("appsettings.json"));
             var log = loggerFactory.CreateLogger<Program>();
             var metah = new MetaHeuristics();
             var indivs = Individual.Sampler(@params.Poblation);
