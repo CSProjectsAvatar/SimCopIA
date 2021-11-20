@@ -22,5 +22,17 @@ namespace Compiler {
 
             Assert.AreEqual(57, list[0].Doers);
         }
+        // [TestMethod]
+        public static void RunMetaWithFunc(){
+            var meta = new MetaHeuristics();
+            var list = Individual.Sampler(30);
+            
+            meta.Run( list,
+                (Individual i) => SimulationSystem.RunSimulation(i),
+                (Individual i) => { return 0 < i.MonthlyMaintennanceCost ; },
+                1000);
+
+            Assert.AreEqual(57, list[0].Doers);
+        }
    }
 }
