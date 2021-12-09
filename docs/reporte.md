@@ -6,6 +6,9 @@
   - [Modelo de un Líder y muchos Seguidores](#modelo-de-un-líder-y-muchos-seguidores)
     - [Variables](#variables)
     - [Eventos](#eventos)
+- [2da Entrega](#2da-entrega)
+  - [Gram&aacute;tica](#gramática)
+  - [Reglas Sem&aacute;nticas](#reglas-semánticas)
 
 ## Propuesta
 
@@ -117,3 +120,64 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
   $((min(t_{D_1},t_{D_2},...) \ne \infin)~~\wedge~~n>0$ :
   
   El evento de cierre es análogo al evento de partida.
+
+## 2da Entrega
+### Gram&aacute;tica
+```
+<program> := <stat-list>
+
+<stat-list> := <stat> ";"
+             | <stat> ";" <stat-list>
+
+<stat> := <let-var>
+        | <def-func>
+        | <print-stat>
+
+<let-var> := "let" ID "=" <expr>
+
+<def-func> := "fun" ID "(" <arg-list> ")" "{" <stat-list> "}"
+
+<print-stat> := "print" <expr>
+
+<arg-list> := ID
+            | ID "," <arg-list>
+
+<expr> := <expr> + <term>
+        | <expr> - <term>
+        | <term>
+
+<term> := <term> * <factor>
+        | <term> / <factor>
+        | <factor>
+
+<factor> := <atom>
+          | "(" <expr> ")"
+
+<atom> := NUMBER
+        | ID
+        | <func-call>
+
+<func-call> := ID "(" <expr-list> ")"
+
+<expr-list> := <expr>
+             | <expr> "," <expr-list>
+```
+**El `;` lo pone el *lexer***, no es necesario que el usuario lo haga. Este puede emplear `\` para definir *statements* de m&aacute;s de una l&iacute;nea.
+
+### Reglas Sem&aacute;nticas
+Una variable solo puede ser definida una vez en todo el
+programa.
+- Los nombres de variables y funciones no comparten el mismo
+ámbito (pueden existir una variable y una función llamadas
+igual).
+- No se pueden redefinir las funciones predefinidas.
+- Una función puede tener distintas definiciones siempre que
+tengan distinta cantidad de argumentos.
+- Toda variable y función tiene que haber sido definida antes de
+ser usada en una expresión (salvo las funciones pre-definidas).
+- Todos los argumentos definidos en una misma función tienen
+que ser diferentes entre sí, aunque pueden ser iguales a
+variables definidas globalmente o a argumentos definidos en
+otras funciones.
+- En el cuerpo de una función, los nombres de los argumentos
+ocultan los nombres de variables iguales.
