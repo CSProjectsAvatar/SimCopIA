@@ -8,14 +8,19 @@ namespace DataClassHierarchy
         public string Identifier { get; set; }
         public List<Expression> Args { get; set; }
 
-        public override int Eval()
+        public override (bool Success, object Result) TryEval()
         {
             throw new System.NotImplementedException();
         }
 
         public override bool Validate(Context context)
         {
-            throw new System.NotImplementedException();
+            foreach (var expr in Args)
+            {
+                if (!expr.Validate(context))
+                    return false;
+            }
+            return context.CheckFunc(Identifier, Args.Count);
         }
     }
 }

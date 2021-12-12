@@ -5,14 +5,18 @@ namespace DataClassHierarchy
     {
         public string Value { get; set; }
 
-        public override int Eval()
+        public override (bool, object) TryEval()
         {
-            throw new System.NotImplementedException(); 
+            if(double.TryParse(Value, out double result))
+            {
+                return (true, result);
+            }
+            return (false, null);
         }
 
         public override bool Validate(Context context)
         {
-            throw new System.NotImplementedException();
+            return true;
         }
     }
 }
