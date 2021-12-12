@@ -9,7 +9,7 @@ namespace DataClassHierarchy
         
         public override bool Validate(Context context)
         {
-            return Expr.Validate(context) && context.AddVariable(Identifier); // @audit Duda aki
+            return Expr.Validate(context) && context.DefVariable(Identifier);
         }
     }
 }
