@@ -6,25 +6,34 @@ namespace DataClassHierarchy
     public class Context
     {
         Context parent;
-        Dictionary<string, Variable> _variables;
-        Dictionary<(string, int), DefFun> _functions; // (nombre, aridad) -> DefFun
+        
+        HashSet<string> _variables;
+        HashSet<(string, int)> _functions; // (nombre, aridad) 
         public Context(){
-            _variables = new Dictionary<string, Variable>();
-            _functions = new Dictionary<(string, int), DefFun>();
+            _variables = new HashSet<string>();
+            _functions = new HashSet<(string, int)>();
 
         }
-        public void DefVariable(string name, Variable value){ // @audit Guardamos los values por fin?
-            _variables.Add(name, value);
+        public bool DefVariable(string name){
+            if(_variables.Contains(name)){
+                return false;
+            }
+            _variables.Add(name);
+            return true;
         }
-        public void DefFunc(string name, List<string> args, DefFun value){
-            _functions.Add(name, value); // @audit Hay que decidirse sobre si guardar (name, aridad) o (name, args)
+        public bool DefFunc(string name, int funArity){
+            if(_functions.Contains((name, funArity))){
+                return false;
+            }
+            _functions.Add((name, funArity));
+            return true;
         }
         
         public bool CheckVar(string varName){
-            return _variables.ContainsKey(varName) || (parent != null && parent.CheckVar(varName));
+            return _variables.Contains(varName) || (parent != null && parent.CheckVar(varName));
         }
         public bool CheckFunc(string funcName, int arity){
-            return _functions.ContainsKey((funcName, arity)) 
+            return _functions.Contains((funcName, arity)) 
                 || (parent != null && parent.CheckFunc(funcName, arity));
         } 
         

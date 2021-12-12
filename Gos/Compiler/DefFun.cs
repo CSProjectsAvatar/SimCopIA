@@ -14,13 +14,13 @@ namespace DataClassHierarchy
             var innerContext = context.CreateChildContext();
 
             foreach (var arg in Arguments) {
-                innerContext.DefVariable(arg); // @audit Duda aki, y la var?
+                innerContext.DefVariable(arg);
             }
             if(!Body.Validate(innerContext)) {
                 return false;
             }
 
-            return context.DefFunction(Identifier, Arguments, this); // @audit this?
+            return context.DefFunc(Identifier, Arguments.Count);
         }
     }
 }
