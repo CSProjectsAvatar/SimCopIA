@@ -24,7 +24,6 @@ public class Agent : IExecutable{
     public Environment environment {get;}
     public Agent(Environment e){
         this.environment = e;    
-        this.status = new Available(this);
     }
 
     public void SetPerception(Perception p){

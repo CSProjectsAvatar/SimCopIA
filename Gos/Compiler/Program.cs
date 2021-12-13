@@ -22,7 +22,7 @@ namespace Compiler {
             */
            
             Environment env = new Environment();
-            Agent a1 = new Agent(env);
+            SimpleServer a1 = new SimpleServer(env);
             
             env.AddPackageSender(a1,10);
             
