@@ -6,7 +6,7 @@ using System.Linq;
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
-            using var loggerFactory = LoggerFactory.Create(builder => {
+           /* using var loggerFactory = LoggerFactory.Create(builder => {
                 builder
                     .AddFilter("Microsoft", LogLevel.Warning)
                     .AddFilter("System", LogLevel.Warning)
@@ -19,6 +19,16 @@ namespace Compiler {
             Console.WriteLine(string.Join('\n', simtor.Arrivals));
             Console.WriteLine();
             Console.WriteLine(string.Join('\n', simtor.Departures));
+            */
+           
+            Environment env = new Environment();
+            Agent a1 = new Agent(env);
+            
+            env.AddPackageSender(a1,10);
+            
+            foreach( var a in env.Enumerable()){
+                a();
+            }
         }
     }
 }
