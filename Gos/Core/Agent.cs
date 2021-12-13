@@ -12,7 +12,7 @@ public class PackageSender:IExecutable{
         environment = e;
     }
     public void Execute(){
-        System.Console.WriteLine("Llega paquete al servidor "+ this.agent);//debug
+        System.Console.WriteLine($"{this.environment.currentTime} Llega paquete al servidor {this.agent}");//debug
         agent.SetPerception(Perception.IsDataAvailable);
         agent.Execute();
         agent.SetPerception(Perception.NotData);
@@ -62,7 +62,6 @@ public class Available:Status{
     public override Status Next(Perception p){
         if (p == Perception.IsDataAvailable)
         {
-            System.Console.WriteLine("Se ocupa el servidor "+this.agent);//debug 
             return new Unavailable(this.agent);
         }    
         else return this;
@@ -72,8 +71,8 @@ public class Available:Status{
     }
 }
 public class Unavailable:Status{
-    public double EndTime {get;}
-    public int PackagesOnQueue {get;}
+    public int EndTime {get;}
+    public int PackagesOnQueue {get;private set;}
     public Unavailable(Agent a): base(a){
         this.EndTime = this.environment.currentTime + _genTimeOffset() ;
         this.environment.SubsribeEvent(this.agent, this.EndTime);
@@ -82,13 +81,16 @@ public class Unavailable:Status{
         this.PackagesOnQueue = packagesOnQueue;
     }
 
+    void AddPackageToQueue()=> PackagesOnQueue++; 
     public override Status Next(Perception p ){
-        if (p == Perception.IsDataAvailable && EndTime < this.environment.currentTime){
-            return new Unavailable(this.agent,PackagesOnQueue+1) ;
-        }else if (p == Perception.NotData && PackagesOnQueue>1 && EndTime == this.environment.currentTime){
+        if (p == Perception.IsDataAvailable && this.environment.currentTime < EndTime){
+            AddPackageToQueue();
+            return this;
+        }else if (PackagesOnQueue>0 && EndTime == this.environment.currentTime){
+            System.Console.WriteLine($"{this.environment.currentTime} Sale paquete de {this.agent} y se pone en cola el proximo, quedan en cola {this.PackagesOnQueue -1}");//debug
             return new Unavailable(this.agent,PackagesOnQueue-1);
         }else if (EndTime== this.environment.currentTime) {
-            System.Console.WriteLine("Sale paquete de "+this.agent);//debug
+            System.Console.WriteLine($"{this.environment.currentTime} Sale paquete de {this.agent}");//debug
             return new Available(this.agent);
         }else{
             return this;
@@ -96,10 +98,9 @@ public class Unavailable:Status{
     }
     public override void Action(){
     }
-    private double _genTimeOffset() {
-        var lambda = 1.5;
+    private int _genTimeOffset() {
         var _rand = new Random();
-        return -1 / lambda * Math.Log(_rand.NextDouble()); // distribución exponencial
+        return _rand.Next(5,20); 
     } 
 }
 
@@ -112,7 +113,7 @@ public enum Perception{
 
 public class Environment{
     List<Agent> agents;
-    public double currentTime {get; set;}
+    public int currentTime {get; set;}
     public Environment(){
         currentTime = 0;
         agents = new();
@@ -121,7 +122,7 @@ public class Environment{
     private Utils.Heap<IExecutable> turn; //el proximo evento que le toca ejecutarse...
     public IEnumerable<Action> Enumerable(){
         while (turn.Count != 0){
-            (double time, IExecutable exe ) = this.turn.RemoveMin();
+            (int time, IExecutable exe ) = this.turn.RemoveMin();
             this.currentTime = time;
             yield return exe.Execute;
         }
@@ -129,10 +130,10 @@ public class Environment{
     public void AddAgent(Agent a){
         agents.Add(a);
     }
-    public void SubsribeEvent(IExecutable e, double time){
+    public void SubsribeEvent(IExecutable e, int time){
         turn.Add(time,e);
     }
     
-    public void AddPackageSender(Agent toAgent, double time)
+    public void AddPackageSender(Agent toAgent, int time)
         => turn.Add(time,new PackageSender(toAgent,this));
 } 

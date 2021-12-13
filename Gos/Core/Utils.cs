@@ -5,7 +5,7 @@ namespace Utils
     public class Heap<T> {
         
         
-        private List<(double,T)> _data;
+        private List<(int,T)> _data;
         public int Count => this._data.Count;
         public Heap(){
             this._data = new();
@@ -32,11 +32,11 @@ namespace Utils
                 HeapfyDown(mini);
             }
         }
-        public void Add(double comp,T element){
+        public void Add(int comp,T element){
             _data.Add((comp,element));
             heapfyUp(this.Count-1);
         }
-        public (double,T) RemoveMin(){
+        public (int,T) RemoveMin(){
             if(Count==0) throw new Exception("Heap is Empty!!");
             var sol = _data[0];
             _data[0] = _data[this.Count -1 ];

@@ -23,8 +23,10 @@ namespace Compiler {
            
             Environment env = new Environment();
             SimpleServer a1 = new SimpleServer(env);
-            
+
             env.AddPackageSender(a1,10);
+            env.AddPackageSender(a1,15);
+            env.AddPackageSender(a1,18);
             
             foreach( var a in env.Enumerable()){
                 a();
