@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+
+// Cualquiera que sea capaz de ejecutarse en un momento dado
 public interface IExecutable{
     void Execute();
 }
 
+// Se Crea cada vez que se va a mandar a un agente un paquete
 public class PackageSender:IExecutable{
     public Agent agent {get;}
     public Environment environment {get;}
@@ -12,38 +15,52 @@ public class PackageSender:IExecutable{
         environment = e;
     }
     public void Execute(){
-        System.Console.WriteLine($"{this.environment.currentTime} Llega paquete al servidor {this.agent}");//debug
+        environment.PrintAgent(agent,"LLega paquete.");
         agent.SetPerception(Perception.IsDataAvailable);
         agent.Execute();
         agent.SetPerception(Perception.NotData);
     }
 }
+
+// Un agente con una funcion de execute que llama las funciones de los estados, Next y Action 
+// La percepcion del agente se cambia usando SetPerception (usando por ejemplo un PackageSender)
 public class Agent : IExecutable{
+    public int ID{get;}
     private Perception currentPerception;
     protected Status status {get; set;}
+    public Agent connectedTo {get; private set;}
     public Environment environment {get;}
-    public Agent(Environment e){
+    public Agent(Environment e, int ID){
         this.environment = e;    
+        this.ID = ID;
     }
 
     public void SetPerception(Perception p){
         currentPerception = p;
     }
 
-    public void Execute( ){
+    public void Execute(){
         this.status=status.Next(currentPerception);
         this.status.Action();
     }
+    public void Connect(Agent a){
+        this.connectedTo = a;
+    }
+
 }
 
 #region Ejemplo de agente
+
+//un agente simple, con los estados Available y las variaciones de Unavailable.
 public class SimpleServer : Agent{ 
-    public SimpleServer (Environment env): base(env){
+    public SimpleServer (Environment env, int ID): base(env, ID){
         this.status = new Available(this);
     }
     
 }
 #endregion
+
+// un estado de un agente, tiene una funcion de cambio de estado (Next) y tiene una funcion de interaccion con el ambiente (Action)
 public abstract class Status{
     protected  Agent agent{get;}
     protected Environment environment => agent.environment;  
@@ -76,6 +93,10 @@ public class Unavailable:Status{
     public Unavailable(Agent a): base(a){
         this.EndTime = this.environment.currentTime + _genTimeOffset() ;
         this.environment.SubsribeEvent(this.agent, this.EndTime);
+
+        if (this.agent.connectedTo != null)
+            this.environment.AddPackageSender(this.agent.connectedTo,this.EndTime);
+
     }
     public Unavailable(Agent a,int packagesOnQueue):this(a){
         this.PackagesOnQueue = packagesOnQueue;
@@ -87,10 +108,10 @@ public class Unavailable:Status{
             AddPackageToQueue();
             return this;
         }else if (PackagesOnQueue>0 && EndTime == this.environment.currentTime){
-            System.Console.WriteLine($"{this.environment.currentTime} Sale paquete de {this.agent} y se pone en cola el proximo, quedan en cola {this.PackagesOnQueue -1}");//debug
+            environment.PrintAgent(agent,$"Sale paquete, quedan {PackagesOnQueue-1} en cola.");
             return new Unavailable(this.agent,PackagesOnQueue-1);
         }else if (EndTime== this.environment.currentTime) {
-            System.Console.WriteLine($"{this.environment.currentTime} Sale paquete de {this.agent}");//debug
+            environment.PrintAgent(agent,$"Sale paquete.");
             return new Available(this.agent);
         }else{
             return this;
@@ -114,6 +135,7 @@ public enum Perception{
 public class Environment{
     List<Agent> agents;
     public int currentTime {get; set;}
+
     public Environment(){
         currentTime = 0;
         agents = new();
@@ -130,10 +152,28 @@ public class Environment{
     public void AddAgent(Agent a){
         agents.Add(a);
     }
+    
     public void SubsribeEvent(IExecutable e, int time){
         turn.Add(time,e);
     }
-    
+    public void PrintAgent(Agent a,string toPrint){ // debug...
+        System.Console.WriteLine($"( Time:{this.currentTime},  Agent:{a.ID} ) - {toPrint}"); 
+    } 
     public void AddPackageSender(Agent toAgent, int time)
         => turn.Add(time,new PackageSender(toAgent,this));
+        
+    public AgentCreator Build => new AgentCreator(this);
+    public class AgentCreator{
+        Environment env; 
+        private static int nextInt; 
+        public AgentCreator(Environment env){
+            this.env = env;
+        }
+        public SimpleServer SimpleServer(){
+            var agent = new SimpleServer(env, nextInt++);
+            env.agents.Add(agent);
+            return agent;
+
+        } 
+    }
 } 

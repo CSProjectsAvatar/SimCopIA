@@ -20,13 +20,17 @@ namespace Compiler {
             Console.WriteLine();
             Console.WriteLine(string.Join('\n', simtor.Departures));
             */
-           
-            Environment env = new Environment();
-            SimpleServer a1 = new SimpleServer(env);
+             
 
+
+            //Probando los agentes con servidores simples.
+            Environment env = new Environment();
+            var a1 = env.Build.SimpleServer();
+            var a2 = env.Build.SimpleServer();
+
+            a1.Connect(a2);
             env.AddPackageSender(a1,10);
-            env.AddPackageSender(a1,15);
-            env.AddPackageSender(a1,18);
+            env.AddPackageSender(a1,28);
             
             foreach( var a in env.Enumerable()){
                 a();
