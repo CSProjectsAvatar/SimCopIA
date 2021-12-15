@@ -7,7 +7,10 @@ namespace DataClassHierarchy
 {
     public class DivOp:NumOp
     {
-        public DivOp(Expression left, Expression right, ILogger logger):base(left, right, logger){ }
+        ILogger<DivOp> log;
+        public DivOp(Expression left, Expression right, ILogger<DivOp> logger):base(left, right){
+            this.log = logger;
+        }
 
         public override (bool, double) TryCompute(double left, double right){
             if(right == 0){
@@ -16,9 +19,6 @@ namespace DataClassHierarchy
             }
         
             return (true, left / right);
-        }
-        public override double Eval(double left, double right){ 
-            return left / right; // @audit check for divide by zero, Exception? False?
         }
     }
 }

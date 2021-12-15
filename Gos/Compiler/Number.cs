@@ -1,17 +1,20 @@
 
+using System;
+
 namespace DataClassHierarchy
 {
     public class Number:Expression
     {
         public string Value { get; set; }
 
-        public override (bool, object) TryEval()
+        public double GetVal()
         {
-            if(double.TryParse(Value, out double result))
-            {
-                return (true, result);
+            if(double.TryParse(Value, out double result)) {
+                return result;
             }
-            return (false, null);
+            else {
+                throw new Exception("Invalid number"); // Aki no debemos llegar nunca por nuestro Lexer
+            }
         }
 
         public override bool Validate(Context context)

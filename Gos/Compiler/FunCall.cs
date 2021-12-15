@@ -3,14 +3,16 @@
 using System.Collections.Generic;
 namespace DataClassHierarchy
 {
-    public class FunCall:Expression
+    public class FunCall:Statement
     {
         public string Identifier { get; set; }
         public List<Expression> Args { get; set; }
 
-        public override (bool Success, object Result) TryEval()
+        public FunCall(){ }
+        public FunCall(string identifier, List<Expression> args)
         {
-            throw new System.NotImplementedException();
+            Identifier = identifier;
+            Args = args;    
         }
 
         public override bool Validate(Context context)
