@@ -11,15 +11,41 @@ namespace Compiler {
         /// </summary>
         /// <param name="gramSymbol"></param>
         /// <returns></returns>
-        public static string SymbolTypeToStr(Type gramSymbol) {
+        public static string SymbolTypeToStr(GramSymType gramSymbol) {
             // si es un token, vamos a devolver un string q identifica al tipo d token, mientras q si
             // es un no-terminal, devolvemos el nombre del tipo
-            return gramSymbol.Name == nameof(Token)
-                ? ((Token.TypeEnum)gramSymbol  // obtener el tipo del token en string
-                        .GetMember(nameof(Token.Type))
-                        .GetValue(0))
-                    .ToString()
-                : gramSymbol.Name;
+            return gramSymbol.ToString();
+        }
+
+        public static bool Inherits(this Type t, Type ancestor) {
+            Type @base = t;
+
+            do {
+                if (@base.Name == ancestor.Name) {
+                    return true;
+                }
+                @base = @base.BaseType;
+
+            } while (@base != null);
+
+            return false;
+        }
+
+        /// <summary>
+        /// Devuelve una función que ejecuta <paramref name="action"/> y sólo puede ser llamada una vez.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        internal static Action<T> Once<T>(Action<T> action) {
+            var called = false;
+            return t => {
+                if (called) {
+                    throw new InvalidOperationException("Function can only be called once.");
+                }
+                called = true;
+                action(t);
+            };
         }
     }
 }

@@ -14,8 +14,8 @@ namespace Compiler {
         private readonly Grammar gram;
         private readonly ILogger<Lr1> log;
 
-        public Lr1(Grammar grammar, ILogger<Lr1> logger) {
-            this.dfa = new Lr1Dfa(grammar);
+        public Lr1(Grammar grammar, ILogger<Lr1> logger, ILogger<Lr1Dfa> dfaLogger) {
+            this.dfa = new Lr1Dfa(grammar, dfaLogger);
             this.gram = grammar;
             this.log = logger;
         }

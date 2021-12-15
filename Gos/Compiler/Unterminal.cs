@@ -24,10 +24,10 @@ namespace Compiler {
         /// <param name="unterminal"></param>
         /// <param name="derivants"></param>
         /// <returns></returns>
-        internal static Unterminal FromReduction(Type unterminal, IReadOnlyList<GramSymbol> derivants) {
+        internal static Unterminal FromReduction(UntType unterminal, IReadOnlyList<GramSymbol> derivants) {
             // para asegurarnos d q cada subclase tenga el constructor apropiado, creamos un constructor
             // en esta clase y obligamos a implementar el me'todo SetAst
-            return Activator.CreateInstance(unterminal, derivants.ToArray())
+            return Activator.CreateInstance((Type)unterminal, derivants.ToArray())
                 as Unterminal;
         }
     }

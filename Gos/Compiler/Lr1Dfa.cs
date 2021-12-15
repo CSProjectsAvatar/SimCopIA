@@ -1,28 +1,39 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Compiler {
-    internal class Lr1Dfa {
-        private Dictionary<(uint, Token.TypeEnum), (ActionEnum, uint)> action;  // (estado, token) -> (accio'n, data)
-        private Dictionary<(uint, string), uint> @goto;  // (estado, no-terminal) -> nuevo estado
-        private readonly Grammar grammar;
+    public class Lr1Dfa {
+        internal Dictionary<(uint, Token.TypeEnum), (ActionEnum, uint)> action;  // (estado, token) -> (accio'n, data)
+        internal Dictionary<(uint, string), uint> @goto;  // (estado, no-terminal) -> nuevo estado
+        internal Grammar grammar;
+        private readonly ILogger<Lr1Dfa> log;
         private Dictionary<string, ICollection<Token.TypeEnum>> first;
         private Dictionary<string, bool> derivesEps;
 
-        public Lr1Dfa(Grammar grammar) {
+        public Lr1Dfa() {
+
+        }
+
+        public Lr1Dfa(Grammar grammar, ILogger<Lr1Dfa> logger) {
+            this.grammar = grammar;
+            var initItem = Lr1Item.Initial(grammar.Initial);
+            this.grammar.AddFakeProduction(initItem.Production);  // anyadiendo produccio'n falsa S' -> E
+            this.grammar.Initial = initItem.Production.Unterminal;  // ahora el inicial es S'
+
+            this.log = logger;
             CalcEpsilonDerivations();
             CalcFirsts();
-
             this.action = new();
             this.@goto = new();
-            this.grammar = grammar;
             var toProcess = new Queue<Lr1State>();
             var states = new HashSet<Lr1State>();  // para no analizar 2 veces el mismo estado
 
             // considerando estado inicial
-            Lr1State initState = Closure(Lr1Item.Initial(grammar.Initial));
+            Lr1State initState = Closure(initItem);
+            this.log?.LogDebug("Initial State:" + Environment.NewLine + "{init}", initState.ToString());
             toProcess.Enqueue(initState);  // encolando estado inicial para procesarlo
             states.Add(initState);  // anyadie'ndolo al conjunto de estados
             this.action[(initState.Id, Token.TypeEnum.Eof)] = (ActionEnum.Ok, default);  // ACTION[I0, $] = 'OK'
@@ -34,24 +45,28 @@ namespace Compiler {
 
                 foreach (var group in curState.GroupBy(i => i.NextSymbol)) {  // agrupando por el si'mbolo q viene despue's del punto
                     if (group.Key == default) {  // X -> α., s
-                        SetReduceActions(curState);
+                        SetReduceActions(curState.Id, group);
                         continue;
                     }
                     var @goto = Closure(from i in @group where i.CanMoveDot select i.MoveDot());  // Goto(curState, group.Key) (conf 12, diapo 21)
                     
-                    if (!states.Contains(@goto)) {
-                        ProcessNewState(toProcess, states, ref count, curState, group.Key, @goto);
-                    }
+                    ProcessClosure(toProcess, states, ref count, curState, group.Key, @goto);
                 }
             }
+        }
+
+        internal ICollection<Token.TypeEnum> First(UntType e) {
+            return First(new[] { e });
         }
 
         /// <summary>
         /// Determina cuáles no-terminales derivan en épsilon y almacena los resultados en 
         /// <see cref="derivesEps"/>.
         /// </summary>
-        private void CalcEpsilonDerivations() {
-            this.derivesEps = new();
+        internal void CalcEpsilonDerivations() {
+            this.derivesEps = Enum.GetValues<Token.TypeEnum>()
+                .ToDictionary(t => t.ToString(), _ => false);  // ningu'n token deriva en eps
+            this.derivesEps[nameof(Token.TypeEnum.Epsilon)] = true;  // excepto eps 😉
             bool change;
 
             void SetVal(string unterminal, bool value) {
@@ -62,22 +77,17 @@ namespace Compiler {
                 change = false;
                 foreach (var prod in this.grammar.Productions
                         .Where(p => !this.derivesEps.ContainsKey(p.Unterminal.Name))) {  // producciones de no terminales en los cuales una decisio'n no ha si2 tomada
-                    if (IsToken(Helper.SymbolTypeToStr(prod.Derivation[0]), out var token)
-                            && token == Token.TypeEnum.Epsilon) {  // X -> eps
-                        SetVal(prod.Unterminal.Name, true);
-                    } else {
-                        var derives = prod.Derivation.Aggregate(  // 😎: trata d determinar si deriva en eps d acuer2 a la derivacio'n
-                            (bool?)true,
-                            (accum, unter) => accum switch {
-                                true => this.derivesEps.ContainsKey(unter.Name)
-                                    ? this.derivesEps[unter.Name]
-                                    : null,  // no conozco si el si'mbolo deriva a no en eps
-                                _ => accum  // propago el 1er false o null q m encuentre desp d un true
-                            }
-                        ); // es true si todos los si'mbolos derivan en eps, null si el ma's a la izq q no deriva en eps no c conoce, y false en otro caso
-                        if (derives.HasValue) {
-                            SetVal(prod.Unterminal.Name, derives.Value);
+                    var derives = prod.Derivation.Aggregate(  // 😎: trata d determinar si deriva en eps d acuer2 a la derivacio'n
+                        (bool?)true,
+                        (accum, unter) => accum switch {
+                            true => this.derivesEps.ContainsKey(unter.Name)
+                                ? this.derivesEps[unter.Name]
+                                : null,  // no conozco si el si'mbolo deriva a no en eps
+                            _ => accum  // propago el 1er false o null q m encuentre desp d un true
                         }
+                    ); // es true si todos los si'mbolos derivan en eps, null si el ma's a la izq q no deriva en eps no c conoce, y false en otro caso
+                    if (derives.HasValue) {
+                        SetVal(prod.Unterminal.Name, derives.Value);
                     }
                 }
             } while (change);
@@ -87,8 +97,11 @@ namespace Compiler {
         /// Computa el First de todos los no-terminales y almacena los resultados en 
         /// <see cref="first"/>.
         /// </summary>
-        private void CalcFirsts() {
-            var firsts = new Dictionary<string, HashSet<Token.TypeEnum>>();
+        internal void CalcFirsts() {
+            var firsts = this.grammar.Productions
+                .Select(p => p.Unterminal.Name)
+                .Distinct()
+                .ToDictionary(name => name, _ => new HashSet<Token.TypeEnum>());  // First(X) = {}, pa toa X
             bool change;
 
             void EnsureSubset(HashSet<Token.TypeEnum> subset, HashSet<Token.TypeEnum> superset) {
@@ -123,7 +136,7 @@ namespace Compiler {
         /// <param name="unterminal">El derivante de la forma oracional <paramref name="sentence"/>.</param>
         /// <param name="ensureSubset"></param>
         private void CalcFirst(
-                IReadOnlyList<Type> sentence, 
+                IReadOnlyList<GramSymType> sentence, 
                 Dictionary<string, HashSet<Token.TypeEnum>> firsts, 
                 string unterminal, 
                 Action<HashSet<Token.TypeEnum>, HashSet<Token.TypeEnum>> ensureSubset) {
@@ -144,11 +157,11 @@ namespace Compiler {
             }
         }
 
-        private Lr1State Closure(Lr1Item lr1Item) {
+        internal Lr1State Closure(Lr1Item lr1Item) {
             return Closure(new[] { lr1Item });
         }
 
-        private Lr1State Closure(IEnumerable<Lr1Item> items) {
+        internal Lr1State Closure(IEnumerable<Lr1Item> items) {
             var q = new Queue<Lr1Item>(items);
             var set = new HashSet<Lr1Item>(items);
 
@@ -171,6 +184,7 @@ namespace Compiler {
                                 .Select(p => new Lr1Item(p, terminal, 0))  // X -> .β, b
                                 .Where(i => !set.Contains(i))) {  // no considerar las q ya consideramos
                             q.Enqueue(newItem);
+                            set.Add(newItem);
                         }
                     }
                 }
@@ -183,7 +197,7 @@ namespace Compiler {
         /// </summary>
         /// <param name="delta"></param>
         /// <returns></returns>
-        private bool DerivesEpsilon(IEnumerable<Type> delta) {
+        internal bool DerivesEpsilon(IEnumerable<GramSymType> delta) {
             foreach (var t in delta) {
                 if (!IsToken(t.Name, out _) && !DerivesEpsilon(t.Name)) {
                     return false;
@@ -192,7 +206,7 @@ namespace Compiler {
             return true;
         }
 
-        private ICollection<Token.TypeEnum> First(IEnumerable<Type> symbols) {
+        private ICollection<Token.TypeEnum> First(IEnumerable<GramSymType> symbols) {
             var res = new List<Token.TypeEnum>();
 
             foreach (var s in symbols) {
@@ -214,36 +228,45 @@ namespace Compiler {
         /// </summary>
         /// <param name="unterminal"></param>
         /// <returns></returns>
-        private bool DerivesEpsilon(string unterminal) {
+        internal bool DerivesEpsilon(string unterminal) {
             return this.derivesEps[unterminal];
         }
 
         /// <summary>
-        /// Realiza las operaciones necesarias sobre el nuevo estado <paramref name="newState"/>.
+        /// Procesa <paramref name="closure"/> (la clausura de <paramref name="curState"/>). Marca el
+        /// estado si no se ha visitado antes y almacena la relación que existe entre los dos estados.
         /// </summary>
         /// <param name="toProcess"></param>
         /// <param name="states">Conjunto de estados.</param>
         /// <param name="count">Cantidad de estados encontrados.</param>
         /// <param name="curState">Estado actual.</param>
         /// <param name="transitionSymbol">Símbolo por el cual se llega de 
-        /// <paramref name="curState"/> a <paramref name="newState"/>.</param>
-        /// <param name="newState">Nuevo estado.</param>
-        private void ProcessNewState(
+        /// <paramref name="curState"/> a <paramref name="closure"/>.</param>
+        /// <param name="closure">Nuevo estado.</param>
+        private void ProcessClosure(
                 Queue<Lr1State> toProcess, 
                 HashSet<Lr1State> states, 
                 ref uint count, 
                 Lr1State curState, 
                 string transitionSymbol, 
-                Lr1State newState) {
-            newState.Id = count++;
-
-            if (IsToken(transitionSymbol, out var token)) {  // X -> α.cω, s y Goto(curState, c) = @goto.Id
-                SetAction(curState.Id, token, ActionEnum.Shift, newState.Id);  // ACTION[curState, c] = shift pa @goto.Id
-            } else {  // X → α.Yω, s y Goto(curState, Y) = @goto.Id
-                this.@goto[(curState.Id, transitionSymbol)] = newState.Id;
+                Lr1State closure) {
+            if (states.TryGetValue(closure, out var match)) {  // ya este estado existe
+                closure = match;  // pa q newState tenga el ID bien puesto
+            } else {  // es un nuevo estado
+                closure.Id = count++;
+                this.log?.LogDebug("New state found:" + Environment.NewLine + "{closure}", closure.ToString());
+                states.Add(closure);
+                toProcess.Enqueue(closure);  // procesar luego el estado nuevo
             }
-            states.Add(newState);
-            toProcess.Enqueue(newState);  // procesar luego el estado nuevo
+            this.log?.LogDebug("Transition s{id1} --{symbol}--> s{id2}",
+                curState.Id,
+                transitionSymbol,
+                closure.Id);
+            if (IsToken(transitionSymbol, out var token)) {  // X -> α.cω, s y Goto(curState, c) = @goto.Id
+                SetAction(curState.Id, token, ActionEnum.Shift, closure.Id);  // ACTION[curState, c] = shift pa @goto.Id
+            } else {  // X → α.Yω, s y Goto(curState, Y) = @goto.Id
+                this.@goto[(curState.Id, transitionSymbol)] = closure.Id;
+            }
         }
 
         /// <summary>
@@ -282,9 +305,13 @@ namespace Compiler {
         /// correspondiente.
         /// </summary>
         /// <param name="curState"></param>
-        private void SetReduceActions(Lr1State curState) {
-            foreach (var (lookAh, prodId) in curState.Select(i => (i.Lookahead, i.Production.Id))) {
-                SetAction(curState.Id, lookAh, ActionEnum.Reduce, prodId);  // ACTION[curState, lookAh] = Rk
+        private void SetReduceActions(uint stateId, IEnumerable<Lr1Item> items) {
+            foreach (var (lookAh, prodId) in items.Select(i => (i.Lookahead, i.Production.Id))) {
+                this.log?.LogDebug("ACTION[{curStateId}, {lookAh}] = R{k}",
+                    stateId,
+                    lookAh,
+                    prodId);
+                SetAction(stateId, lookAh, ActionEnum.Reduce, prodId);  // ACTION[curState, lookAh] = Rk
             }
         }
 

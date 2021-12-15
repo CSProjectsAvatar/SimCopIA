@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Compiler {
-    internal struct Lr1Item {
+    public struct Lr1Item {
         private uint dot;
 
         /// <summary>
@@ -53,16 +54,32 @@ namespace Compiler {
         }
 
         /// <summary>
-        /// Devuelve <code>S' -> .S, $</code> donde S es <paramref name="initialUnterminal"/>.
+        /// Devuelve <code>S' -> .S, $</code> donde S es <paramref name="initialUnterminal"/> y S'
+        /// es un nuevo símbolo.
         /// </summary>
         /// <param name="initialUnterminal"></param>
         /// <returns></returns>
-        internal static Lr1Item Initial(Type initialUnterminal) {
+        internal static Lr1Item Initial(UntType initialUnterminal) {
             return new Lr1Item(
-                production: new Production(0, typeof(FakeSymbol), initialUnterminal),  // S' -> S
+                production: new Production(UntType.Fake, initialUnterminal),  // S' -> S
                 lookahead: Token.TypeEnum.Eof,  // $
                 dot: 0u
             );
+        }
+
+        public static implicit operator Lr1Item((Production, int, Token.TypeEnum) data) {
+            return new Lr1Item(data.Item1, data.Item3, (uint)data.Item2);
+        }
+
+        public override string ToString() {
+            var regex = new Regex(@"\w+");
+            var prodStr = this.Production.ToString();
+            var matches = regex.Matches(prodStr);
+            var dotIdx = CanMoveDot
+                ? matches[(int)this.dot + 1].Index
+                : prodStr.Length;
+
+            return $"{prodStr.Insert(dotIdx, ".")}, {this.Lookahead}";
         }
     }
 }

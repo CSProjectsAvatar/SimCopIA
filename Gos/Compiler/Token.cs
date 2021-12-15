@@ -24,9 +24,48 @@ namespace Compiler {
         /// </summary>
         internal static Token Epsilon => new Token(TypeEnum.Epsilon, 1, ++colHelper);
 
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Number => new Token(TypeEnum.Number, 1, ++colHelper);
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Plus => new Token(TypeEnum.Plus, 1, ++colHelper);
+
         public enum TypeEnum {
-            Eof,  // fin de archivo
-            Epsilon  // para uso del parser
+            /// <summary>
+            /// Fin de archivo.
+            /// </summary>
+            Eof,
+
+            /// <summary>
+            /// Para uso del parser.
+            /// </summary>
+            Epsilon,
+            Number,
+            Plus,
+
+            /// <summary>
+            /// *
+            /// </summary>
+            Times,
+
+            /// <summary>
+            /// (
+            /// </summary>
+            LPar,
+
+            /// <summary>
+            /// )
+            /// </summary>
+            RPar,
+
+            /// <summary>
+            /// =
+            /// </summary>
+            Eq
         }
     }
 }
