@@ -4,9 +4,6 @@ using System.Linq;
 
 namespace Compiler {
     public abstract class Unterminal : GramSymbol {
-        public Unterminal(params GramSymbol[] derivation) {
-            Ast = SetAst(derivation);
-        }
 
         /// <summary>
         /// Devuelve el nodo de AST del no-terminal, producto de reducir su producción 
@@ -14,7 +11,7 @@ namespace Compiler {
         /// </summary>
         /// <param name="derivation"></param>
         /// <returns></returns>
-        protected abstract AstNode SetAst(GramSymbol[] derivation);
+        protected abstract AstNode SetAst(IReadOnlyList<GramSymbol> derivation);
 
         public AstNode Ast { get; private set; }
 
@@ -25,10 +22,10 @@ namespace Compiler {
         /// <param name="derivants"></param>
         /// <returns></returns>
         internal static Unterminal FromReduction(UntType unterminal, IReadOnlyList<GramSymbol> derivants) {
-            // para asegurarnos d q cada subclase tenga el constructor apropiado, creamos un constructor
-            // en esta clase y obligamos a implementar el me'todo SetAst
-            return Activator.CreateInstance((Type)unterminal, derivants.ToArray())
-                as Unterminal;
+            var res = Activator.CreateInstance((Type)unterminal) as Unterminal;
+            res.Ast = res.SetAst(derivants);
+
+            return res;
         }
     }
 }

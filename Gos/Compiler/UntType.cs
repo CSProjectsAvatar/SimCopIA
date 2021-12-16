@@ -5,14 +5,13 @@ namespace Compiler {
     /// Representa el tipo de un no-terminal.
     /// </summary>
     public class UntType : GramSymType {
-        internal readonly static UntType Fake = new UntType(typeof(FakeUnterminal));
         private readonly Type unterminal;
         public readonly static UntType E = new UntType(typeof(FakeE));
         public readonly static UntType F = new UntType(typeof(FakeF));
         public readonly static UntType T = new UntType(typeof(FakeT));
         public readonly static UntType X = new UntType(typeof(FakeX));
         public readonly static UntType Y = new UntType(typeof(FakeY));
-        public readonly static UntType S = Fake;
+        public readonly static UntType S = new UntType(typeof(FakeS));
 
         public UntType(Type unterminal) {
             if (!unterminal.Inherits(typeof(Unterminal))) {

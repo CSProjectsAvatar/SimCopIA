@@ -37,6 +37,7 @@ namespace Compiler {
             toProcess.Enqueue(initState);  // encolando estado inicial para procesarlo
             states.Add(initState);  // anyadie'ndolo al conjunto de estados
             this.action[(initState.Id, Token.TypeEnum.Eof)] = (ActionEnum.Ok, default);  // ACTION[I0, $] = 'OK'
+            this.@goto[(initState.Id, this.grammar.Initial.ToString())] = initState.Id;  // pa q cuan2 reduzk S -> E caiga en el estado inicial
 
             var count = 1u;  // contador de estados
 

@@ -61,7 +61,7 @@ namespace Compiler {
         /// <returns></returns>
         internal static Lr1Item Initial(UntType initialUnterminal) {
             return new Lr1Item(
-                production: new Production(UntType.Fake, initialUnterminal),  // S' -> S
+                production: new Production(UntType.S, initialUnterminal),  // S' -> S
                 lookahead: Token.TypeEnum.Eof,  // $
                 dot: 0u
             );

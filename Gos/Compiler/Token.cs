@@ -34,6 +34,11 @@ namespace Compiler {
         /// </summary>
         internal static Token Plus => new Token(TypeEnum.Plus, 1, ++colHelper);
 
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Eq => new Token(TypeEnum.Eq, 1, ++colHelper);
+
         public enum TypeEnum {
             /// <summary>
             /// Fin de archivo.
@@ -66,6 +71,10 @@ namespace Compiler {
             /// =
             /// </summary>
             Eq
+        }
+
+        public override string ToString() {
+            return Type.ToString();
         }
     }
 }

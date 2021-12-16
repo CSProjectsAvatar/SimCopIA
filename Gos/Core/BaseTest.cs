@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
-namespace Tests {
+namespace Core {
     [TestClass]
     public abstract class BaseTest {
         public ServiceCollection services;

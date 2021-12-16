@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Compiler {
-    public class Grammar {
+    public class Grammar : IDisposable {
         public Grammar(IEnumerable<Production> productions, UntType initial) {
             this.productions = productions.ToList();
             Initial = initial;
@@ -32,5 +32,9 @@ namespace Compiler {
             Helper.Once((Production p) => this.productions.Add(p));
         
         private List<Production> productions;
+
+        public void Dispose() {
+            Production.ResetId();
+        }
     }
 }

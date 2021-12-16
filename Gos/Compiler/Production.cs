@@ -31,5 +31,9 @@ namespace Compiler {
         public override int GetHashCode() {
             return HashCode.Combine(this.Unterminal, this.Derivation);
         }
+
+        internal static void ResetId() {
+            id = 0;
+        }
     }
 }
