@@ -34,7 +34,7 @@ namespace Tests {
             Assert.IsTrue(Math.Abs(5 - (double)result) <= 0.001);
         }
 
-       [TestMethod]
+        [TestMethod]
         public void EvaluatingLetVar() {
             var letA = new LetVar(){ 
                 Identifier = "a",
