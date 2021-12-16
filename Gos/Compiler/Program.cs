@@ -24,17 +24,22 @@ namespace Compiler {
 
 
             //Probando los agentes con servidores simples.
-            Environment env = new Environment();
+            var env = new AgentesDiscretos.Environment();
             var a1 = env.Build.SimpleServer();
-            var a2 = env.Build.SimpleServer();
 
-            a1.Connect(a2);
-            env.AddPackageSender(a1,10);
-            env.AddPackageSender(a1,28);
+            env.AddRequest("0","1",10);
+            env.AddRequest("0","1",28);
             
             foreach( var a in env.Enumerable()){
                 a();
             }
+
+            foreach(var r in env.solutionResponses) 
+                System.Console.WriteLine($"time:{r.responseTime} body:{r.body}");
+
+
+
+
         }
     }
 }
