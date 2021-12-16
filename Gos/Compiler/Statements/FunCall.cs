@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 namespace DataClassHierarchy
 {
-    public class FunCall:Statement
+    public class FunCall:Expression, IStatement
     {
         public string Identifier { get; set; }
         public List<Expression> Args { get; set; }

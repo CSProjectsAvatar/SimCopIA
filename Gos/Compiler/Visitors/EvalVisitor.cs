@@ -14,6 +14,8 @@ namespace DataClassHierarchy
         private Stack<Context> stackC;
         private readonly ILogger<EvalVisitor> _logger;
         private ILogger log;
+        private (bool Found, object Value) _returnFlag;
+
         public Context Context { get => stackC.Peek(); set => stackC.Push(value); }
 
         public EvalVisitor(Context global, ILogger logger)
@@ -22,24 +24,62 @@ namespace DataClassHierarchy
             Context = global;
             this.log = logger;
         }
+        
         public (bool, object) Visiting(AstNode node) {
-            // throw new Exception("Se llego por el visitor a la raiz, falta implementacion de Visiting"); 
+            throw new Exception("Se llego por el visitor a la raiz, falta implementacion de Visiting"); // @audit esto es para probar, comentar dsp 
             // Se llego por el visitor a la raiz, no hay implementacion de Visiting en la clase hijo
             return (true, null);
         }  
-        public (bool, object) Visiting(NumOp node) {
+        
+        // public (bool, object) Visiting(NumOp node) {
+        //     var (lSuccess, lResult) = Visit(node.Left);
+        //     if(!lSuccess){
+        //         log.LogError("Left operand could not be Evalued");
+        //         return (false, null);
+        //     }
+
+        //     var (rSuccess, rResult) = Visit(node.Right);
+        //     if(!rSuccess){
+        //         log.LogError("Right operand could not be Evalued");
+        //         return (false, null);
+        //     }
+        //     var tResults = (lResult, rResult);
+
+        //     switch (tResults)
+        //     {
+        //         case (double lNum, double rNum):
+        //             var (succ, result) = node.TryCompute(lNum, rNum);
+        //             if(!succ){
+        //                 log.LogError("Could not compute {lNum} {this} {rNum}", lNum, this, rNum);
+        //                 return (false, null);
+        //             }
+        //             return (true, result);
+                
+        //         default:
+        //             log.LogError("Could not compute {lResult} {this} {rResult}", lResult, this, rResult);
+        //             return (false, null);
+        //     }
+        // }
+    
+        public object CheckBinar(BinaryExpr node) {
             var (lSuccess, lResult) = Visit(node.Left);
             if(!lSuccess){
                 log.LogError("Left operand could not be Evalued");
-                return (false, null);
+                return null;
             }
 
             var (rSuccess, rResult) = Visit(node.Right);
             if(!rSuccess){
                 log.LogError("Right operand could not be Evalued");
+                return null;
+            }
+            return (lResult, rResult);
+        }
+        public (bool, object) Visiting(BinaryExpr node) {  
+            var tResults = CheckBinar(node);
+            if(tResults is null){
                 return (false, null);
             }
-            var tResults = (lResult, rResult);
 
             switch (tResults)
             {
@@ -52,11 +92,12 @@ namespace DataClassHierarchy
                     return (true, result);
                 
                 default:
-                    log.LogError("Could not compute {lResult} {this} {rResult}", lResult, this, rResult);
+                    log.LogError("Could not compute {node}", node);
                     return (false, null);
             }
         }
         
+
         public (bool, object) Visiting(FunCall node){
             var exprValues = new List<object>();
             foreach(var expr in node.Args){
@@ -72,20 +113,24 @@ namespace DataClassHierarchy
             var defFun = Context.GetFunc(node.Identifier, node.Args.Count);
             var arguments = defFun.Arguments.Zip(exprValues, (arg, value) => (arg, value));
 
-            var childCtx = new Context();
+            var childCtx = Context.CreateChildContext();
             foreach(var (arg, value) in arguments){
                 childCtx.DefVariable(arg, value);
             } // pasando los argumentos con valores al nuevo contexto
 
-            Context = childCtx;
-            var (f_success, f_result) = Visit(defFun.Body); // evaluando la funcion
-            stackC.Pop();
+            Context = childCtx; // cambiando el contexto
+            
+            var (f_success, _) = Visit(defFun.Body); // evaluando la funcion
+            var returnedValue = _returnFlag.Value;
+            _returnFlag = (false, null); // bajando la bandera de return
+            
+            stackC.Pop(); // destruyendo el ultimo contexto
 
             if(!f_success){
                 log.LogError("Could not Evaluate {defFun}", defFun);
                 return (false, null);
             }
-            return (true, f_result);
+            return (true, returnedValue);
         }
         
         public (bool, object) Visiting(LetVar node){
@@ -96,6 +141,11 @@ namespace DataClassHierarchy
             }
             Context.SetVar(node.Identifier, result);
             return (true, result);  
+        }
+        
+        public (bool, object) Visiting(DefFun node){
+            Context.SetFunc(node.Identifier, node.Arguments.Count, node);
+            return (true, null);  
         }
     
         public (bool, object) Visiting(Variable node){
@@ -121,14 +171,59 @@ namespace DataClassHierarchy
         }
 
         public (bool, object) Visiting(Program node){
-            foreach (var st in node.Statements){
+            return Visit(node.Statements);
+
+            // foreach (var st in node.Statements){
+            //     var (success, result) = Visit(st);
+            //     if(!success){
+            //         log.LogError("Could not Evaluate {st}", st);
+            //         return (false, null);
+            //     }
+            // }
+            // return (true, null);    
+        }
+        
+        public (bool, object) Visiting(IfStmt node){
+            var (success, result) = Visit(node.Condition);
+            if(!success || result is not bool){ // Error
+                log.LogError("Could not Evaluate {st}", node.Condition);
+                return (false, null);
+            }
+            if(result is bool r && r == true){
+                Visit(node.Then);
+            }
+
+            return (true, null); 
+        }
+        
+
+        /// <summary>
+        /// Evalua una lista de statements y devuelve el resultado de la ultima
+        /// </summary>
+        public (bool, object) Visiting(IList<IStatement> statements){
+            object lastR = null;
+
+            foreach (var st in statements){
                 var (success, result) = Visit(st);
                 if(!success){
                     log.LogError("Could not Evaluate {st}", st);
                     return (false, null);
                 }
+                lastR = result;
+
+                if(_returnFlag.Found) 
+                    break;
             }
-            return (true, null);    
+            return (true, null);
+        }
+        public (bool, object) Visiting(Return node){
+            var (success, result) = Visit(node.Expr);
+            if(!success){
+                log.LogError("Could not Evaluate {node.Expr}", node.Expr);
+                return (false, null);
+            }
+            _returnFlag = (true, result);
+            return (true, result);    
         }
         
     }

@@ -10,7 +10,7 @@ namespace DataClassHierarchy
         public NumOp(){}
         public NumOp(Expression left, Expression right):base(left, right){ }
 
-        public abstract (bool, double) TryCompute(double left, double right);
+        // public abstract (bool, double) TryCompute(double left, double right);
     }
 }
     

@@ -11,14 +11,15 @@ namespace DataClassHierarchy
         public DivOp(Expression left, Expression right, ILogger<DivOp> logger):base(left, right){
             this.log = logger;
         }
-
-        public override (bool, double) TryCompute(double left, double right){
-            if(right == 0){
-                log.LogError("Can't divide by 0");
-                return (false, 0);
+        public override (bool, object) TryCompute(object left, object right){
+            if(left is double l && right is double r){
+                if(r == 0){
+                    log.LogError("Can't divide by 0");
+                    return (false, null);
+                }
+                return (true, l / r);
             }
-        
-            return (true, left / right);
+            return (false, null);
         }
     }
 }

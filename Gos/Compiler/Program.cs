@@ -3,9 +3,7 @@ namespace DataClassHierarchy
 {
     public class Program:AstNode
     {
-        public List<Statement>  Statements { get; set; }
-
-        
+        public List<IStatement>  Statements { get; set; }        
         public override bool Validate(Context context)
         {
             foreach (var st in Statements)

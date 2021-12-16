@@ -1,7 +1,7 @@
 
 namespace DataClassHierarchy
 {
-    public class LetVar:Statement
+    public class LetVar:AstNode, IStatement
     {
         public string Identifier { get; set; }
         public Expression Expr { get; set; }
