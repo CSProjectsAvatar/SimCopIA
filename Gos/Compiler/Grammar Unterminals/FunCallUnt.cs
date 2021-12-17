@@ -3,20 +3,18 @@ using System.Linq;
 using DataClassHierarchy;
 
 namespace Compiler {
-    internal class DefFunUnt : Unterminal
+    internal class FunCallUnt : Unterminal
     {
 
         // <func-call> := ID "(" <expr-list> ")"
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
             string id = (derivation[0] as Token).Lexem;
-            var arg = (derivation[2] as expr).Args;
-            var statements = (derivation[6] as StatListUnt).Statements;
+            var args = (derivation[2] as ExprListUnt).Exprs;
 
-            return new DefFun(){
+            return new FunCall(){
                 Identifier = id,
-                Arguments = arg.ToList(),
-                Body = statements
+                Args = args.ToList()
             };
         }
     }

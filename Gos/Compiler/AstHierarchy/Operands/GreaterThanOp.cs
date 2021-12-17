@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace DataClassHierarchy
 {
-    public class MoreThanOp:BinaryExpr
+    public class GreaterThanOp:BinaryExpr
     {
-        public MoreThanOp(){}
-        public MoreThanOp(Expression left, Expression right):base(left, right){ }
+        public GreaterThanOp(){}
+        public GreaterThanOp(Expression left, Expression right):base(left, right){ }
 
         public override (bool, object) TryCompute(object left, object right){
             if(left is double l && right is double r){

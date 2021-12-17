@@ -10,14 +10,12 @@ namespace Compiler {
         //<block-stat> := <if> | <def-func>
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
-            switch(derivation[0]){
-                case IfUnt ifUnt:
-                    return ifUnt.Ast;
-                case DefFuncUnt defFuncUnt:
-                    return defFuncUnt.Ast;
-                default:
-                    throw new System.Exception("BlockStUnt: unexpected symbol");
-            }
+            return derivation[0] switch{
+                IfUnt ifUnt => ifUnt.Ast,
+                DefFuncUnt defFuncUnt => defFuncUnt.Ast,
+                _ => throw new System.Exception("BlockStUnt.SetAst: grammar symbol no esperado")
+            };
+        
         }
     }
 }

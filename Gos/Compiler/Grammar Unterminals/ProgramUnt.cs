@@ -4,6 +4,7 @@ using DataClassHierarchy;
 namespace Compiler {
     internal class ProgramUnt : Unterminal
     {
+        //<program> := <stat-list>
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
             List<IStatement> list = new List<IStatement>();
