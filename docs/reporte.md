@@ -142,8 +142,12 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 <arg-list> := ID
             | ID "," <arg-list>
 
-<expr> := <expr> + <term>
-        | <expr> - <term>
+<expr> := <math> "<" <math>
+		| <math> ">" <math>
+		| <math>
+
+<math> := <math> + <term>
+        | <math> - <term>
         | <term>
 
 <term> := <term> * <factor>
@@ -151,7 +155,7 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
         | <factor>
 
 <factor> := <atom>
-          | "(" <expr> ")"
+          | "(" <math> ")"
 
 <atom> := NUMBER
         | ID
@@ -161,6 +165,10 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 
 <expr-list> := <expr>
              | <expr> "," <expr-list>
+             
+<if> := "if" <expr> "{" <stat-list> "}"
+
+<return> := "return" <expr>
 ```
 **El `;` lo pone el *lexer***, no es necesario que el usuario lo haga. Este puede emplear `\` para definir *statements* de m&aacute;s de una l&iacute;nea.
 
