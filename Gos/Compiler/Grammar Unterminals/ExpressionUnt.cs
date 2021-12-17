@@ -19,13 +19,10 @@ namespace Compiler {
             var rightAst = (derivation[2] as MathUnt).Ast;
 
             return derivation[1] switch{
-                Token { Type: TokenType.LessThan }  => new LessThanOp(leftAst, rightAst),
-                
+                Token { Type: TokenType.LessThan }  => new LessThanOp(leftAst, rightAst),   
                 Token { Type: TokenType.GreaterThan }  => new GreaterThanOp(leftAst, rightAst),
-               
                 _ => throw new InvalidOperationException() // @audit aki creo q no debemos llegar nunca
             };
-
         }
     }
 }
