@@ -72,7 +72,57 @@ namespace Compiler {
             /// <summary>
             /// =
             /// </summary>
-            Eq
+            Eq,
+
+            EndOfLine,
+
+            /// <summary>
+            /// Definición de variable.
+            /// </summary>
+            Let,
+
+            /// <summary>
+            /// Definición de función.
+            /// </summary>
+            Fun,
+
+            /// <summary>
+            /// {
+            /// </summary>
+            LBrace,
+
+            /// <summary>
+            /// }
+            /// </summary>
+            RBrace,
+
+            Print,
+            Comma,
+
+            /// <summary>
+            /// <
+            /// </summary>
+            LessThan,
+
+            /// <summary>
+            /// >
+            /// </summary>
+            GreaterThan,
+
+            Minus,
+
+            /// <summary>
+            /// /
+            /// </summary>
+            Div,
+
+            /// <summary>
+            /// Identificador.
+            /// </summary>
+            Id,
+
+            If,
+            Return
         }
 
         public override string ToString() {

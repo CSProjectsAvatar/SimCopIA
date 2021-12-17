@@ -5,6 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace DataClassHierarchy
 {
+    /// <summary>
+    /// Nodo de AST para la resta.
+    /// </summary>
     public class SubOp:NumOp
     {
         public SubOp(){}
