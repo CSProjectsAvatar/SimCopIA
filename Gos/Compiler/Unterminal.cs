@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DataClassHierarchy;
 
 namespace Compiler {
     public abstract class Unterminal : GramSymbol {

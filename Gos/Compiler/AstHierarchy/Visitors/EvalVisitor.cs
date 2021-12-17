@@ -170,17 +170,8 @@ namespace DataClassHierarchy
             return (true, null); // @audit No tenemos soportado null creo, puede dar bateo
         }
 
-        public (bool, object) Visiting(Program node){
+        public (bool, object) Visiting(ProgramNode node){
             return Visit(node.Statements);
-
-            // foreach (var st in node.Statements){
-            //     var (success, result) = Visit(st);
-            //     if(!success){
-            //         log.LogError("Could not Evaluate {st}", st);
-            //         return (false, null);
-            //     }
-            // }
-            // return (true, null);    
         }
         
         public (bool, object) Visiting(IfStmt node){

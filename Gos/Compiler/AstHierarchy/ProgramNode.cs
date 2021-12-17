@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 namespace DataClassHierarchy
 {
-    public class Program:AstNode
+    public class ProgramNode:AstNode
     {
         public List<IStatement>  Statements { get; set; }        
         public override bool Validate(Context context)

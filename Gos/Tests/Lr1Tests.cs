@@ -29,13 +29,13 @@ namespace Tests {
                     F > n),
                 this.log,
                 this.dfaLog);
-            var n1 = new Token(Token.TypeEnum.Number, 1, 1);
-            var plus = new Token(Token.TypeEnum.Plus, 1, 2);
-            var n2 = new Token(Token.TypeEnum.Number, 1, 3);
-            var times = new Token(Token.TypeEnum.Times, 1, 4);
-            var n3 = new Token(Token.TypeEnum.Number, 1, 5);
-            var eof = new Token(Token.TypeEnum.Eof, 1, 6);
-            var _eq = new Token(Token.TypeEnum.Eq, 1, 7);
+            var n1 = new Token(Token.TypeEnum.Number, 1, 1, "1");
+            var plus = new Token(Token.TypeEnum.Plus, 1, 2, "+");
+            var n2 = new Token(Token.TypeEnum.Number, 1, 3, "2");
+            var times = new Token(Token.TypeEnum.Times, 1, 4, "*");
+            var n3 = new Token(Token.TypeEnum.Number, 1, 5, "3");
+            var eof = new Token(Token.TypeEnum.Eof, 1, 6, "$");
+            var _eq = new Token(Token.TypeEnum.Eq, 1, 7, "=");
 
             Assert.IsTrue(parser.TryParse(
                 new[] {
