@@ -61,7 +61,7 @@ namespace Tests {
                 Expr = new Variable(){ Identifier = "a"}
              };
             
-            var prog = new Program(){
+            var prog = new ProgramNode(){
                 Statements = new List<IStatement>(){
                     letA,
                     letB
@@ -105,7 +105,7 @@ namespace Tests {
                 Identifier = "b",
                 Expr = funCallDoubleA
              };
-            var prog = new Program(){
+            var prog = new ProgramNode(){
                 Statements = new List<IStatement>(){
                     defDouble, // f x -> 2x
                     letA,      // a = 10
@@ -161,7 +161,7 @@ namespace Tests {
                 Identifier = "b",
                 Expr = funCalldefDoubleMinusOne
              };
-            var prog = new Program(){
+            var prog = new ProgramNode(){
                 Statements = new List<IStatement>(){
                     defDoubleMinusOne, // f x -> { y = 1; return 2x - y }
                     letA,      // a = 10
@@ -229,7 +229,7 @@ namespace Tests {
                 Identifier = "b",
                 Expr = funCallFact
             };
-            var prog = new Program(){
+            var prog = new ProgramNode(){
                 Statements = new List<IStatement>(){
                     defFactorial, // f x -> x * f (x-1)
                     letA,      // a = 5
@@ -306,7 +306,7 @@ namespace Tests {
                 Identifier = "b",
                 Expr = funCallFib
             };
-            var prog = new Program(){
+            var prog = new ProgramNode(){
                 Statements = new List<IStatement>(){
                     defFib, // f x -> if x < 2 then 1 else f(x-1) + f(x-2)
                     letA,      // a = 6

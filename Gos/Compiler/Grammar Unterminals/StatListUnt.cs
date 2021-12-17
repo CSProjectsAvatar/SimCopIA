@@ -19,7 +19,7 @@ namespace Compiler.Grammar_Unterminals {
             Statements = new[] { 
                 (derivation[0] is StatementUnt stat
                     ? stat.Ast
-                    : ((BlokStUnt)derivation[0]).Ast)
+                    : ((BlockStUnt)derivation[0]).Ast)
                 as IStatement
             };
             if (derivation.Count == 3 || derivation.Count == 2 && derivation[1] is StatListUnt) {

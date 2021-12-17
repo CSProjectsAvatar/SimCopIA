@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Compiler.Grammar_Unterminals;
 using DataClassHierarchy;
 
 namespace Compiler {
@@ -11,16 +12,16 @@ namespace Compiler {
 		//         | <math>
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
-            var leftAst = (derivation[0] as MathUnt).Ast;
+            var leftAst = (derivation[0] as MathUnt).Ast as Expression;
 
             if(derivation.Count == 1)
                 return leftAst;
 
-            var rightAst = (derivation[2] as MathUnt).Ast;
+            var rightAst = (derivation[2] as MathUnt).Ast as Expression;
 
             return derivation[1] switch{
-                Token { Type: TokenType.LessThan }  => new LessThanOp(leftAst, rightAst),   
-                Token { Type: TokenType.GreaterThan }  => new GreaterThanOp(leftAst, rightAst),
+                Token { Type: Token.TypeEnum.LessThan }  => new LessThanOp(leftAst, rightAst),   
+                Token { Type: Token.TypeEnum.GreaterThan }  => new GreaterThanOp(leftAst, rightAst),
                 _ => throw new InvalidOperationException() // aki creo q no debemos llegar nunca
             };
         }

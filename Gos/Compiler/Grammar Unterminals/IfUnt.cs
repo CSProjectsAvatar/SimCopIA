@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Compiler.Grammar_Unterminals;
 using DataClassHierarchy;
 
 namespace Compiler {
@@ -10,7 +11,7 @@ namespace Compiler {
         {
             return new IfStmt(){
                 Condition = (derivation[1] as ExpressionUnt).Ast as Expression,
-                Then = (derivation[3] as StatListUnt).Ast
+                Then = (derivation[3] as StatListUnt).Statements.ToList()
             };
         }
     }

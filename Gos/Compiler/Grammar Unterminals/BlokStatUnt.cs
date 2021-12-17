@@ -12,7 +12,7 @@ namespace Compiler {
         {
             return derivation[0] switch{
                 IfUnt ifUnt => ifUnt.Ast,
-                DefFuncUnt defFuncUnt => defFuncUnt.Ast,
+                DefFunUnt defFuncUnt => defFuncUnt.Ast,
                 _ => throw new System.Exception("BlockStUnt.SetAst: grammar symbol no esperado")
             };
         
