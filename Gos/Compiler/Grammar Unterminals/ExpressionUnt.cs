@@ -21,7 +21,7 @@ namespace Compiler {
             return derivation[1] switch{
                 Token { Type: TokenType.LessThan }  => new LessThanOp(leftAst, rightAst),   
                 Token { Type: TokenType.GreaterThan }  => new GreaterThanOp(leftAst, rightAst),
-                _ => throw new InvalidOperationException() // @audit aki creo q no debemos llegar nunca
+                _ => throw new InvalidOperationException() // aki creo q no debemos llegar nunca
             };
         }
     }
