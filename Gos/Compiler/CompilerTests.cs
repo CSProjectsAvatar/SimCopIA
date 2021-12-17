@@ -1,4 +1,5 @@
 ﻿using Compiler;
+using Compiler.Grammar_Unterminals;
 using Core;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,29 @@ namespace Compiler {
         protected static readonly UntType F = UntType.F;
         protected static readonly UntType X = UntType.X;
         protected static readonly UntType Y = UntType.Y;
+
+        // los verdaderos si'mbolos
+        #region no terminales
+        protected static readonly UntType Prog = UntType.Prog;
+        protected static readonly UntType StatList = new UntType(typeof(StatListUnt));
+        protected static readonly UntType BlockStat = new UntType(typeof(BlockStUnt));
+        protected static readonly UntType Stat = new UntType(typeof(StatementUnt));
+        protected static readonly UntType LetVar = new UntType(typeof(LetVarUnt));
+        protected static readonly UntType DefFunc = new UntType(typeof(DefFunUnt));
+        protected static readonly UntType Print = new UntType(typeof(PrintUnt));
+        protected static readonly UntType ArgList = new UntType(typeof(ArgListUnt));
+        protected static readonly UntType Expr = new UntType(typeof(ExpressionUnt));
+        protected static readonly UntType Math = new UntType(typeof(MathUnt));
+        protected static readonly UntType Term = new UntType(typeof(TermUnt));
+        protected static readonly UntType Factor = new UntType(typeof(FactorUnt));
+        protected static readonly UntType Atom = new UntType(typeof(AtomUnt));
+        protected static readonly UntType FuncCall = new UntType(typeof(FunCallUnt));
+        protected static readonly UntType ExprList = new UntType(typeof(ExprListUnt));
+        protected static readonly UntType If = new UntType(typeof(IfUnt));
+        protected static readonly UntType Return = new UntType(typeof(ReturnUnt));
+        #endregion
+
+        #region terminales
         protected static readonly TokenType n = TokenType.Number;
         protected static readonly TokenType plus = TokenType.Plus;
         protected static readonly TokenType e = TokenType.Epsilon;
@@ -21,5 +45,74 @@ namespace Compiler {
         protected static readonly TokenType rpar = Token.TypeEnum.RPar;
         protected static readonly TokenType eq = Token.TypeEnum.Eq;
         protected static readonly TokenType dollar = Token.TypeEnum.Eof;
+        protected static readonly TokenType id = Token.TypeEnum.Id;
+        protected static readonly TokenType comma = Token.TypeEnum.Comma;
+        protected static readonly TokenType lbrace = Token.TypeEnum.LBrace;
+        protected static readonly TokenType rbrace = Token.TypeEnum.RBrace;
+        protected static readonly TokenType print = Token.TypeEnum.Print;
+        protected static readonly TokenType lt = Token.TypeEnum.LessThan;
+        protected static readonly TokenType gt = Token.TypeEnum.GreaterThan;
+        protected static readonly TokenType semicolon = Token.TypeEnum.EndOfLine;
+        protected static readonly TokenType let = Token.TypeEnum.Let;
+        protected static readonly TokenType fun = Token.TypeEnum.Fun;
+        protected static readonly TokenType @if = Token.TypeEnum.If;
+        protected static readonly TokenType @return = Token.TypeEnum.Return;
+
+        #endregion
+
+        protected static Grammar Grammar = new Grammar(
+            Prog,
+
+            Prog > StatList,
+
+            StatList > (Stat, semicolon),
+            StatList > (Stat, semicolon, StatList),
+            StatList > BlockStat,
+            StatList > (BlockStat, StatList),
+
+            BlockStat > If,
+            BlockStat > DefFunc,
+
+            Stat > LetVar,
+            Stat > Print,
+            Stat > Return,
+
+            LetVar > (let, id, eq, Expr),
+
+            DefFunc > (fun, id, lpar, ArgList, rpar, lbrace, StatList, rbrace),
+
+            Print > (print, Expr),
+
+            ArgList > id,
+            ArgList > (id, comma, ArgList),
+
+            ExprList > (Math, lt, Math),
+            ExprList > (Math, gt, Math),
+            ExprList > Math,
+
+            Math > Math + Term,
+            Math > Math - Term,  // @todo sobreescribir el - (clase GramSymType)
+            Math > Term,
+
+            Term > Term * Factor,
+            Term > Term / Factor,  // @todo lo mismo con el /
+            Term > Factor,
+
+            Factor > Atom,
+            Factor > (lpar, Math, rpar),
+
+            Atom > n,
+            Atom > id,
+            Atom > FuncCall,
+
+            FuncCall > (id, lpar, ExprList, rpar),
+
+            ExprList > Expr,
+            ExprList > (Expr, comma, ExprList),
+
+            If > (@if, Expr, lbrace, StatList, rbrace),  // @todo IR A UntType Y SOBREESCRIBIR PA EL # D GENT D LA TUPLA
+
+            Return > (@return, Expr)
+        );
     }
 }

@@ -74,6 +74,9 @@ namespace Compiler {
             /// </summary>
             Eq,
 
+            /// <summary>
+            /// ;
+            /// </summary>
             EndOfLine,
 
             /// <summary>

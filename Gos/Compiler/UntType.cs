@@ -12,6 +12,7 @@ namespace Compiler {
         public readonly static UntType X = new UntType(typeof(FakeX));
         public readonly static UntType Y = new UntType(typeof(FakeY));
         public readonly static UntType S = new UntType(typeof(FakeS));
+        public readonly static UntType Prog = new UntType(typeof(ProgramUnt));
 
         public UntType(Type unterminal) {
             if (!unterminal.Inherits(typeof(Unterminal))) {
@@ -42,9 +43,35 @@ namespace Compiler {
             return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3);
         }
 
+        public static Production operator >(UntType @this, (GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
+            return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3, symbols.Item4);
+        }
+
+        public static Production operator <(UntType @this, (GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
+            return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3, symbols.Item4);
+        }
+
+        public static Production operator >(
+                UntType @this, 
+                (GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
+            return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3, symbols.Item4, symbols.Item5, symbols.Item6, symbols.Item7, symbols.Item8);
+        }
+
+        public static Production operator <(
+                UntType @this,
+                (GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
+            throw new NotImplementedException();
+        }
+
         public static Production operator >(UntType @this, GramSymType symbol) {
             return new Production(@this, symbol);
         }
+
+
+        public static Production operator -(UntType @this, GramSymType symbol) {
+            return new Production(@this, symbol);
+        }
+
 
         public static Production operator <(UntType _, GramSymType __) {
             throw new NotImplementedException();
