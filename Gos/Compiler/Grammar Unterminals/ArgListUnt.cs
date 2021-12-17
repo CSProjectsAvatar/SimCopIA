@@ -10,11 +10,10 @@ namespace Compiler {
         //<arg-list> := ID | ID "," <arg-list>
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
-            Args = new List<string>();
-            Args.Add((derivation[0] as Token).Lexem);
+            Args = new [] { (derivation[0] as Token).Lexem };
             if(derivation.Count > 1){
                 var argList = (derivation[2] as ArgListUnt).Args;
-                Args.Append(argList);
+                Args = Args.Concat(argList);
             }
             return null;
         }

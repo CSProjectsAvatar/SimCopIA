@@ -128,7 +128,7 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 
 <stat-list> := <stat> ";"
              | <stat> ";" <stat-list>
-        	 | <block-stat>
+        	   | <block-stat>
              | <block-stat> <stat-list>
              
 <block-stat> := <if>
