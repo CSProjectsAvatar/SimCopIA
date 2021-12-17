@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using DataClassHierarchy;
 
 namespace Compiler {
@@ -9,12 +10,12 @@ namespace Compiler {
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
             string id = (derivation[1] as Token).Lexem;
-            var arg = (derivation[3] as Unterminal).Ast as List<string>;
-            var statements = (derivation[6] as Unterminal).Ast as List<IStatement>;
+            var arg = (derivation[3] as ArgListUnt).Args;
+            var statements = (derivation[6] as StatListUnt).Statements;
 
             return new DefFun(){
                 Identifier = id,
-                Arguments = arg,
+                Arguments = arg.ToList(),
                 Body = statements
             };
         }

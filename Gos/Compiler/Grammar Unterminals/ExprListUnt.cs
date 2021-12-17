@@ -1,24 +1,18 @@
-﻿using DataClassHierarchy;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DataClassHierarchy;
 
-namespace Compiler.Grammar_Unterminals {
-    class ExprListUnt : Unterminal {
-        public IEnumerable<Expression> Expressions { get; private set; }
-
-        protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation) {
-            /*
-             <expr-list> := <expr>
-                          | <expr> "," <expr-list>
-             */
-            Expressions = new[] { ((Unterminal)derivation[0]).Ast as Expression };
-
-            if (derivation.Count != 1) {
-                var insideExprs = ((ExprListUnt)derivation[2]).Expressions;
-                Expressions = Expressions.Concat(insideExprs);
+namespace Compiler {
+    internal class ExprListUnt : Unterminal
+    {
+        public IEnumerable<Expression> Exprs { get; set; }
+        // <expr-list> := <expr> | <expr> "," <expr-list>
+        protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
+        {
+            Exprs = new [] { (derivation[0] as ExpressionUnt).Ast };
+            if(derivation.Count > 1){
+                var exprList = (derivation[2] as ExprListUnt).Exprs;
+                Exprs = Exprs.Concat(exprList);
             }
             return null;
         }

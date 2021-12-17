@@ -4,6 +4,8 @@ using DataClassHierarchy;
 namespace Compiler {
     internal class LetVarUnt : Unterminal
     {
+
+        // <let-var> := "let" ID "=" <expr>
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
             string id = (derivation[1] as Token).Lexem;
