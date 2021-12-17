@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
-
+using Agents;
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
@@ -24,19 +24,18 @@ namespace Compiler {
 
 
             //Probando los agentes con servidores simples.
-            var env = new AgentesDiscretos.Environment();
+            var env = new Agents.Environment();
             var a1 = env.Build.SimpleServer();
 
             env.AddRequest("0","1",10);
-            env.AddRequest("0","1",28);
+            env.AddRequest("0","1",17);
+            env.AddRequest("0","1",22);
             
-            foreach( var a in env.Enumerable()){
-                a();
-            }
+            env.Run();
 
+            System.Console.WriteLine("Responses To Env:");
             foreach(var r in env.solutionResponses) 
                 System.Console.WriteLine($"time:{r.responseTime} body:{r.body}");
-
 
 
 
