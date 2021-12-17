@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace Compiler {
     static class Helper {
+        internal static ILoggerFactory logFact;
+
         /// <summary>
         /// Convierte un símbolo a una representación en <see cref="string"/>.
         /// </summary>
@@ -29,6 +32,10 @@ namespace Compiler {
             } while (@base != null);
 
             return false;
+        }
+
+        internal static ILogger<T> Logger<T>() {
+            return logFact.CreateLogger<T>();
         }
 
         /// <summary>
