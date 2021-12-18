@@ -12,13 +12,12 @@ namespace DataClassHierarchy
     public class EvalVisitor:Visitor<(bool, object)>
     {
         private Stack<Context> stackC;
-        private readonly ILogger<EvalVisitor> _logger;
-        private ILogger log;
+        private readonly ILogger<EvalVisitor> log;
         private (bool Found, object Value) _returnFlag;
 
         public Context Context { get => stackC.Peek(); set => stackC.Push(value); }
 
-        public EvalVisitor(Context global, ILogger logger)
+        public EvalVisitor(Context global, ILogger<EvalVisitor> logger)
         {
             this.stackC = new Stack<Context>();
             Context = global;

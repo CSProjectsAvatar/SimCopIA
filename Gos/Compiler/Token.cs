@@ -41,6 +41,26 @@ namespace Compiler {
         /// </summary>
         internal static Token Eq => new Token(TypeEnum.Eq, 1, ++colHelper, "=");
 
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Let => new Token(TypeEnum.Let, 1, ++colHelper, "let");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Print => new Token(TypeEnum.Print, 1, ++colHelper, "print");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token VarX => new Token(TypeEnum.Id, 1, ++colHelper, "x");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Endl => new Token(TypeEnum.EndOfLine, 1, ++colHelper, Environment.NewLine);
+
         public enum TypeEnum {
             /// <summary>
             /// Fin de archivo.

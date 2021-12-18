@@ -25,6 +25,14 @@ namespace Compiler {
             return (@this, TokenType.Div, other);
         }
 
+        public static (GramSymType, TokenType, GramSymType) operator >(GramSymType @this, GramSymType other) {
+            return (@this, new TokenType(Token.TypeEnum.GreaterThan), other);
+        }
+
+        public static (GramSymType, TokenType, GramSymType) operator <(GramSymType @this, GramSymType other) {
+            throw new NotImplementedException();
+        }
+
         public override bool Equals(object obj) {
             return obj is GramSymType other && this.Name == other.Name;
         }

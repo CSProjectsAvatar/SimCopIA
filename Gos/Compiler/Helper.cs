@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Compiler {
-    static class Helper {
-        internal static ILoggerFactory logFact;  // @todo ASIGNAR ESTO
+    public static class Helper {
+        public static ILoggerFactory LogFact;  // @remind ASIGNAR ESTO
 
         /// <summary>
         /// Convierte un símbolo a una representación en <see cref="string"/>.

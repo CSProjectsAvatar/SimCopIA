@@ -28,6 +28,7 @@ namespace Compiler {
         protected static readonly UntType ArgList = new UntType(typeof(ArgListUnt));
         protected static readonly UntType Expr = new UntType(typeof(ExpressionUnt));
         protected static readonly UntType Math = new UntType(typeof(MathUnt));
+        protected static readonly GramSymType Math_ = Math;  // para poder aplicar los operadores > y <
         protected static readonly UntType Term = new UntType(typeof(TermUnt));
         protected static readonly UntType Factor = new UntType(typeof(FactorUnt));
         protected static readonly UntType Atom = new UntType(typeof(AtomUnt));
@@ -86,9 +87,11 @@ namespace Compiler {
             ArgList > id,
             ArgList > (id, comma, ArgList),
 
-            ExprList > (Math, lt, Math),
-            ExprList > (Math, gt, Math),
+#pragma warning disable CS1718 // Comparison made to same variable
+            ExprList > (Math_ < Math_),
+            ExprList > (Math_ > Math_),
             ExprList > Math,
+#pragma warning restore CS1718 // Comparison made to same variable
 
             Math > Math + Term,
             Math > Math - Term,
