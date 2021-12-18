@@ -46,6 +46,10 @@ namespace Compiler {
         /// </summary>
         internal static Token Let => new Token(TypeEnum.Let, 1, ++colHelper, "let");
 
+        internal static Token VarFor(string id) {
+            return new Token(TypeEnum.Id, 1, ++colHelper, id);
+        }
+
         /// <summary>
         /// Propiedad helper para debuguear y testear.
         /// </summary>
@@ -60,6 +64,30 @@ namespace Compiler {
         /// Propiedad helper para debuguear y testear.
         /// </summary>
         internal static Token Endl => new Token(TypeEnum.EndOfLine, 1, ++colHelper, Environment.NewLine);
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Times => new Token(TypeEnum.Times, 1, ++colHelper, "*");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token LPar => new Token(TypeEnum.LPar, 1, ++colHelper, "(");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token RPar => new Token(TypeEnum.RPar, 1, ++colHelper, ")");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Minus => new Token(TypeEnum.Minus, 1, ++colHelper, "-");
+
+        internal static Token NumberFor(double x) {
+            return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());
+        }
 
         public enum TypeEnum {
             /// <summary>

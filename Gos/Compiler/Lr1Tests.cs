@@ -12,13 +12,11 @@ namespace Compiler {
     public class Lr1Tests : CompilerTests {
         private ILogger<Lr1> log;
         private ILogger<Lr1Dfa> dfaLog;
-        private ILogger<EvalVisitor> evalLog;
 
         [TestInitialize]
         public void Init() {
             this.log = LoggerFact.CreateLogger<Lr1>();
             this.dfaLog = LoggerFact.CreateLogger<Lr1Dfa>();
-            this.evalLog = LoggerFact.CreateLogger<EvalVisitor>();
             Helper.LogFact = LoggerFact;
         }
 
@@ -64,37 +62,6 @@ namespace Compiler {
                 Assert.IsInstanceOfType(stack.Peek().Symbol, typeof(FakeE));
                 Assert.AreEqual(0u, stack.Peek().State);
             }
-        }
-
-
-        [TestMethod]
-        public void LetAndPrint() {
-            var parser = new Lr1(Grammar, this.log, this.dfaLog);
-            var let = Token.Let;
-            var x = Token.VarX;
-            var eq = Token.Eq;
-            var five = Token.Number;
-            var eof = Token.Eof;
-            var print = Token.Print;
-            var endl = Token.Endl;
-
-            Assert.IsTrue(parser.TryParse(
-                new[] {
-                    let, x, eq, five, endl,
-                    print, x, endl, eof
-                }, 
-                out var root));
-
-            var prog = root as ProgramNode;
-            Assert.IsNotNull(prog);
-            
-            var global = new Context();
-
-            Assert.IsTrue(prog.Validate(global));
-
-            var vis = new EvalVisitor(global, this.evalLog);
-            var (success, _) = vis.Visit(prog);
-            Assert.IsTrue(success);
         }
     }
 }

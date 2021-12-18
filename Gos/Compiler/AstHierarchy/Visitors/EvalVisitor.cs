@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 
@@ -13,15 +14,17 @@ namespace DataClassHierarchy
     {
         private Stack<Context> stackC;
         private readonly ILogger<EvalVisitor> log;
+        private readonly TextWriter _writer;
         private (bool Found, object Value) _returnFlag;
 
         public Context Context { get => stackC.Peek(); set => stackC.Push(value); }
 
-        public EvalVisitor(Context global, ILogger<EvalVisitor> logger)
+        public EvalVisitor(Context global, ILogger<EvalVisitor> logger, TextWriter textWriter)
         {
             this.stackC = new Stack<Context>();
             Context = global;
             this.log = logger;
+            _writer = textWriter;
         }
         
         public (bool, object) Visiting(AstNode node) {
@@ -165,7 +168,7 @@ namespace DataClassHierarchy
                 log.LogError("Could not Evaluate {node.Expr}", node.Expr);
                 return (false, null);
             }
-            log.LogInformation(result.ToString()); // @audit Como imprimimos?
+            _writer.WriteLine(result.ToString());
             return (true, null); // @audit No tenemos soportado null creo, puede dar bateo
         }
 
