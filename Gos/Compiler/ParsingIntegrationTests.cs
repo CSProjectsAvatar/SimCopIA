@@ -29,9 +29,14 @@ namespace Compiler {
         new private Token print;
         new private Token endl;
         new private Token lpar;
+        new private Token lbrace;
+        new private Token rbrace;
         new private Token rpar;
+        new private Token fun;
         private Token y;
         private Token z;
+        private Token f;
+        private Token n;
         private Token minus;
 
         [TestInitialize]
@@ -53,9 +58,14 @@ namespace Compiler {
             endl = Token.Endl;
             lpar = Token.LPar;
             rpar = Token.RPar;
-            y = Token.VarFor("y");
-            z = Token.VarFor("z");
+            y = Token.IdFor("y");
+            z = Token.IdFor("z");
             minus = Token.Minus;
+            fun = Token.Fun;
+            f = Token.IdFor("f");
+            lbrace = Token.LBrace;
+            rbrace = Token.RBrace;
+            n = Token.IdFor("n");
         }
 
         [TestMethod]
@@ -109,6 +119,22 @@ namespace Compiler {
                     },
                     out var root));
                 AssertIntegration(root, "29", "64", "-6");
+            }
+        }
+
+        [TestMethod]
+        public void Func() {
+            using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new[] {
+                        fun, f, lpar, n, rpar, lbrace,       // fun f(n) {
+                            print, n, endl,                  //     print n;
+                        rbrace,                              // }
+                        print, f, lpar, five, rpar, endl,    // f(5);
+                        eof
+                    },
+                    out var root));
+                AssertIntegration(root, "5");
             }
         }
     }

@@ -46,7 +46,12 @@ namespace Compiler {
         /// </summary>
         internal static Token Let => new Token(TypeEnum.Let, 1, ++colHelper, "let");
 
-        internal static Token VarFor(string id) {
+        /// <summary>
+        /// Crea un identificador con el nombre dado (<paramref name="id"/>).
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        internal static Token IdFor(string id) {
             return new Token(TypeEnum.Id, 1, ++colHelper, id);
         }
 
@@ -84,6 +89,21 @@ namespace Compiler {
         /// Propiedad helper para debuguear y testear.
         /// </summary>
         internal static Token Minus => new Token(TypeEnum.Minus, 1, ++colHelper, "-");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Fun => new Token(TypeEnum.Fun, 1, ++colHelper, "fun");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token LBrace => new Token(TypeEnum.LBrace, 1, ++colHelper, "{");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token RBrace => new Token(TypeEnum.RBrace, 1, ++colHelper, "}");
 
         internal static Token NumberFor(double x) {
             return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());
