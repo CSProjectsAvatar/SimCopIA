@@ -6,11 +6,14 @@ namespace Agents
 {
     public class Request:IExecutable{
        
+        private static int lastRequestID = 0; 
+        public int ID {get;}    // un identificador unico para los request
         public string sender {get;} 
         public int time {get;}
         public Agent agent {get;private set;}
         public Environment environment {get;}
         public Request(string sender,string ID, Environment e){
+            this.ID = lastRequestID++;
             this.agent = e.GetAgent(ID);
             environment = e;
             this.sender = sender;
@@ -20,19 +23,21 @@ namespace Agents
             agent.HandleRequest(this);
         }
         public void MakeResponse(string body){
-            environment.SubscribeResponse(new Response(agent,sender,environment,body));
+            environment.SubscribeResponse(new Response(ID,agent,sender,environment,body));
         }
         public void ChangeReciever(Agent a){
             this.agent = a; 
         }
     }
     public class Response:IExecutable{
+        public int requestID {get;}
         public Agent sender{get;} 
         public string receiver{get;}
         public int responseTime{get;private set;}
         public string body{get;}
         public Environment env{get;}
-        public Response(Agent sender, string receiver, Environment env, string body){
+        public Response(int requestID,Agent sender, string receiver, Environment env, string body){
+            this.requestID = requestID;
             this.sender = sender;
             this.receiver = receiver;
             this.env = env;

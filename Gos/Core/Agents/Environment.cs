@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace Agents{
 
-    // Cualquiera que sea capaz de ejecutarse en un momento dado en la linea de tiempo.
+    // Cualquiera que sea capaz de ejecutarse en un momento dado en la linea de tiempo del Environment.
     public interface IExecutable{
         void Execute();
     }
     // El medio de ejecucion de los agentes.
     public class Environment{
- 
+        
         const int RESPONSE_TIME = 2;
         List<Agent> agents;
         public List<Response> solutionResponses; // poner privado y hacer como que un Enumerable :D
@@ -22,7 +22,7 @@ namespace Agents{
             solutionResponses = new();
         }
         private Utils.Heap<IExecutable> turn; //el proximo evento que le toca ejecutarse...
-        public IEnumerable<Action> Enumerable(){
+        public IEnumerable<Action> EnumerateActions(){
             while (turn.Count != 0){
                 (int time, IExecutable exe ) = this.turn.RemoveMin();
                 this.currentTime = time;
@@ -30,7 +30,7 @@ namespace Agents{
             }
         }
         public void Run(){
-            foreach (var item in this.Enumerable())
+            foreach (var item in this.EnumerateActions())
                 item();
         }
         public void AddAgent(Agent a){

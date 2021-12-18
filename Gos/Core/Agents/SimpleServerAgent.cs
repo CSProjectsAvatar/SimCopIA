@@ -16,7 +16,7 @@ namespace Agents
 
         private void GettingRequest(IRequestable status, Request r){
             if(!status.IsAvailable){ 
-                this.environment.PrintAgent(this,"No esta disponible "+this.ID);
+                this.environment.PrintAgent(this,"No esta disponible para nuevos request.");
                 return;
             }
             
@@ -30,11 +30,10 @@ namespace Agents
 
         private void SendResponse(IObservable status,Observer o){
             status.SetAvailibility(true);
-            string sender = (o.Object as Request).sender;
-            Response response = new(this,sender,environment,"Cosas de servidor simple.");
+            Request originalRequest = (o.Object as Request);
+            Response response = new(originalRequest.ID,this,originalRequest.sender,environment,"Cosas de servidor simple.");
             response.SetTime(environment.currentTime);
             status.AddEvent(environment.currentTime,response);
-
         }
         private int TimeOffset() => new Random().Next(5,10);
     } 
