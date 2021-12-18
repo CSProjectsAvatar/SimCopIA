@@ -88,9 +88,9 @@ namespace Compiler {
             ArgList > (id, comma, ArgList),
 
 #pragma warning disable CS1718 // Comparison made to same variable
-            ExprList > (Math_ < Math_),
-            ExprList > (Math_ > Math_),
-            ExprList > Math,
+            Expr > (Math_ < Math_),
+            Expr > (Math_ > Math_),
+            Expr > Math,
 #pragma warning restore CS1718 // Comparison made to same variable
 
             Math > Math + Term,

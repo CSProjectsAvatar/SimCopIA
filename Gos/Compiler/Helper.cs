@@ -35,7 +35,7 @@ namespace Compiler {
         }
 
         internal static ILogger<T> Logger<T>() {
-            return logFact.CreateLogger<T>();
+            return LogFact.CreateLogger<T>();
         }
 
         /// <summary>

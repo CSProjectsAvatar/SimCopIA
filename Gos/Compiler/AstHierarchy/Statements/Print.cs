@@ -1,15 +1,12 @@
 
 
 using System.Collections.Generic;
-namespace DataClassHierarchy
-{
-    public class Print:AstNode, IStatement
-    {
+namespace DataClassHierarchy {
+    public class Print:AstNode, IStatement {
         public Expression Expr { get; set; }
 
-        public override bool Validate(Context context)
-        {
-            throw new System.NotImplementedException();
+        public override bool Validate(Context context) {
+            return Expr.Validate(context);
         }
     }
 }

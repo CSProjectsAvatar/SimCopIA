@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Compiler.Grammar_Unterminals;
 using DataClassHierarchy;
 
 namespace Compiler {
@@ -7,13 +9,8 @@ namespace Compiler {
         //<program> := <stat-list>
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
-            List<IStatement> list = new List<IStatement>();
-            foreach (var symbol in derivation)
-            {   
-                list.Add((((Unterminal)symbol).Ast) as IStatement);
-            }
-            return new ProgramNode(){
-                Statements = list
+            return new ProgramNode {
+                Statements = (derivation[0] as StatListUnt).Statements.ToList()
             };
         }
     }

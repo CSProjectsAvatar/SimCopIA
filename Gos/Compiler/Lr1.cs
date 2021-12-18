@@ -66,7 +66,7 @@ namespace Compiler {
                 }
             }
             var (symbol, _) = history.Pop();  // no-terminal inicial (this.gram.Initial)
-            root = (symbol as Unterminal).Ast;
+            root = (symbol as FakeS).Ast;
             return true;
         }
 

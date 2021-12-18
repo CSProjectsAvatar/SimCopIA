@@ -30,7 +30,7 @@ namespace Compiler {
         }
 
         public static (GramSymType, TokenType, GramSymType) operator <(GramSymType @this, GramSymType other) {
-            throw new NotImplementedException();
+            return (@this, new TokenType(Token.TypeEnum.LessThan), other);
         }
 
         public override bool Equals(object obj) {
