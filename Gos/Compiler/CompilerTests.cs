@@ -91,11 +91,11 @@ namespace Compiler {
             ExprList > Math,
 
             Math > Math + Term,
-            Math > Math - Term,  // @todo sobreescribir el - (clase GramSymType)
+            Math > Math - Term,
             Math > Term,
 
             Term > Term * Factor,
-            Term > Term / Factor,  // @todo lo mismo con el /
+            Term > Term / Factor,
             Term > Factor,
 
             Factor > Atom,
@@ -110,7 +110,7 @@ namespace Compiler {
             ExprList > Expr,
             ExprList > (Expr, comma, ExprList),
 
-            If > (@if, Expr, lbrace, StatList, rbrace),  // @todo IR A UntType Y SOBREESCRIBIR PA EL # D GENT D LA TUPLA
+            If > (@if, Expr, lbrace, StatList, rbrace),
 
             Return > (@return, Expr)
         );

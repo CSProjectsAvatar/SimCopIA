@@ -46,9 +46,15 @@ namespace Compiler {
         public static Production operator >(UntType @this, (GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
             return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3, symbols.Item4);
         }
+        public static Production operator >(UntType @this, (GramSymType, GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
+            return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3, symbols.Item4, symbols.Item5);
+        }
 
         public static Production operator <(UntType @this, (GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
             return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3, symbols.Item4);
+        }
+        public static Production operator <(UntType @this, (GramSymType, GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
+            return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3, symbols.Item4, symbols.Item5);
         }
 
         public static Production operator >(
@@ -67,10 +73,11 @@ namespace Compiler {
             return new Production(@this, symbol);
         }
 
-
-        public static Production operator -(UntType @this, GramSymType symbol) {
-            return new Production(@this, symbol);
-        }
+        // @audit Revisa esto, me molestaba y comente el metodo para que lo coja de la clase padre
+        
+        // public static Production operator -(UntType @this, GramSymType symbol) {
+        //     return new Production(@this, symbol);
+        // }
 
 
         public static Production operator <(UntType _, GramSymType __) {

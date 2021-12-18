@@ -11,12 +11,14 @@ namespace Compiler {
     public class TokenType : GramSymType {
         public static TokenType Number = new TokenType(Token.TypeEnum.Number);
         public static TokenType Plus = new TokenType(Token.TypeEnum.Plus);
+        public static TokenType Minus = new TokenType(Token.TypeEnum.Minus);
         public static TokenType Epsilon = new TokenType(Token.TypeEnum.Epsilon);
 
         /// <summary>
         /// *
         /// </summary>
         public static TokenType Times = new TokenType(Token.TypeEnum.Times);
+        public static TokenType Div = new TokenType(Token.TypeEnum.Div);
         private readonly Token.TypeEnum token;
 
         public TokenType(Token.TypeEnum token) {

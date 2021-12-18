@@ -14,9 +14,15 @@ namespace Compiler {
         public static (GramSymType, TokenType, GramSymType) operator +(GramSymType @this, GramSymType other) {
             return (@this, TokenType.Plus, other);
         }
+        public static (GramSymType, TokenType, GramSymType) operator -(GramSymType @this, GramSymType other) {
+            return (@this, TokenType.Minus, other);
+        }
 
         public static (GramSymType, TokenType, GramSymType) operator *(GramSymType @this, GramSymType other) {
             return (@this, TokenType.Times, other);
+        }
+        public static (GramSymType, TokenType, GramSymType) operator /(GramSymType @this, GramSymType other) {
+            return (@this, TokenType.Div, other);
         }
 
         public override bool Equals(object obj) {
