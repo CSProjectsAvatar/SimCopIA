@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using DataClassHierarchy;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Tests {
     [TestClass]
@@ -22,7 +23,7 @@ namespace Tests {
             global = new Context();
             _log = LoggerFact.CreateLogger<HierarchyTest>();
             var _evallog = LoggerFact.CreateLogger<EvalVisitor>();
-            evalVisitor = new EvalVisitor(global, _evallog);
+            evalVisitor = new EvalVisitor(global, _evallog, new StringWriter());
         }
 
         [TestMethod]

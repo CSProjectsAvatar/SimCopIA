@@ -13,31 +13,31 @@ namespace Compiler {
     /// <summary>
     /// Testea la integración del parseo con la creación de los nodos AST, su validación y ejecución.
     /// </summary>
-    public class ParsingIntegrationTests : CompilerTests {
+    public class ParsingIntegrationTests : CompilerTests {  // @audit LOS TESTS D ESTA CLASE FALLAN CUAN2 C CORREN AL MISMO TIEMPO
         private ILogger<Lr1> log;
         private ILogger<Lr1Dfa> dfaLog;
         private ILogger<EvalVisitor> evalLog;
-        new private Token let;
-        new private Token x;
-        new private Token eq;
-        new private Token five;
-        new private Token plus;
-        new private Token three;
-        new private Token times;
-        new private Token eight;
-        new private Token eof;
-        new private Token print;
-        new private Token endl;
-        new private Token lpar;
-        new private Token lbrace;
-        new private Token rbrace;
-        new private Token rpar;
-        new private Token fun;
-        private Token y;
-        private Token z;
-        private Token f;
-        private Token n;
-        private Token minus;
+        private Token let => Token.Let;
+        private Token x => Token.VarX;
+        private Token eq => Token.Eq;
+        private Token five => Token.Number;
+        private Token plus => Token.Plus;
+        private Token three => Token.NumberFor(3);
+        private Token times => Token.Times;
+        private Token eight => Token.NumberFor(8);
+        private Token eof => Token.Eof;
+        private Token print => Token.Print;
+        private Token endl => Token.Endl;
+        private Token lpar => Token.LPar;
+        private Token rpar => Token.RPar;
+        private Token y => Token.IdFor("y");
+        private Token z => Token.IdFor("z");
+        private Token minus => Token.Minus;
+        private Token fun => Token.Fun;
+        private Token f => Token.IdFor("f");
+        private Token lbrace => Token.LBrace;
+        private Token rbrace => Token.RBrace;
+        private Token n => Token.IdFor("n");
 
         [TestInitialize]
         public void Init() {
@@ -45,27 +45,6 @@ namespace Compiler {
             this.dfaLog = LoggerFact.CreateLogger<Lr1Dfa>();
             this.evalLog = LoggerFact.CreateLogger<EvalVisitor>();
             Helper.LogFact = LoggerFact;
-            let = Token.Let;
-            x = Token.VarX;
-            eq = Token.Eq;
-            five = Token.Number;
-            plus = Token.Plus;
-            three = Token.NumberFor(3);
-            times = Token.Times;
-            eight = Token.NumberFor(8);
-            eof = Token.Eof;
-            print = Token.Print;
-            endl = Token.Endl;
-            lpar = Token.LPar;
-            rpar = Token.RPar;
-            y = Token.IdFor("y");
-            z = Token.IdFor("z");
-            minus = Token.Minus;
-            fun = Token.Fun;
-            f = Token.IdFor("f");
-            lbrace = Token.LBrace;
-            rbrace = Token.RBrace;
-            n = Token.IdFor("n");
         }
 
         [TestMethod]
@@ -130,7 +109,7 @@ namespace Compiler {
                         fun, f, lpar, n, rpar, lbrace,       // fun f(n) {
                             print, n, endl,                  //     print n;
                         rbrace,                              // }
-                        print, f, lpar, five, rpar, endl,    // f(5);
+                        f, lpar, five, rpar, endl,           // f(5);
                         eof
                     },
                     out var root));

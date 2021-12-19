@@ -61,7 +61,7 @@ namespace Compiler {
 
         #endregion
 
-        protected static Grammar Grammar = new Grammar(
+        protected static Grammar Grammar => new Grammar(
             Prog,
 
             Prog > StatList,
@@ -77,6 +77,7 @@ namespace Compiler {
             Stat > LetVar,
             Stat > Print,
             Stat > Return,
+            Stat > FuncCall,
 
             LetVar > (let, id, eq, Expr),
 

@@ -137,6 +137,7 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 <stat> := <let-var>
         | <print-stat>
         | <return>
+        | <func-call>
 
 <let-var> := "let" ID "=" <expr>
 
