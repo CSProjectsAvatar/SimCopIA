@@ -10,6 +10,10 @@ namespace Agents
     }
     public interface IRequestable: IStatus{
         void SaveRequest(Request r);
+        void AddRequestToProcessed(Request r);
+        List<Request> GetListRequest();
+        void DeleteRequest(Request r);
+
 
     }
     public interface IResponsable : IStatus{
@@ -23,13 +27,31 @@ namespace Agents
         public bool IsAvailable {get; private set;}
         public List<Request> requests  {get; private set;}
         public List<Response> responses  {get; private set;}
+        public List<Request> requestToProcessed { get; private set; }
         public Status(){
             IsAvailable = true;
             toExecute = new();
             requests = new();
+            requestToProcessed = new();
         }
-        public void AddEvent(int time,IExecutable e){
-            toExecute.Add((time,e));
+
+        public List<Request> GetListRequest()
+        {
+            return this.requestToProcessed;
+        }
+
+        public void DeleteRequest(Request r)
+        {
+            requestToProcessed.Remove(r);//aqui hay que redefinir el compare?
+        }
+
+        public void AddEvent(int time, IExecutable e)
+        {
+            toExecute.Add((time, e));
+        }
+        public void AddRequestToProcessed(Request r)
+        {
+            requestToProcessed.Add(r);
         }
         public IEnumerable<(int,IExecutable)> EnumerateAndClear() {
             foreach(var x in toExecute){
