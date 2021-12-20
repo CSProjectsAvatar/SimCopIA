@@ -23,7 +23,8 @@ namespace Tests {
             global = new Context();
             _log = LoggerFact.CreateLogger<HierarchyTest>();
             var _evallog = LoggerFact.CreateLogger<EvalVisitor>();
-            evalVisitor = new EvalVisitor(global, _evallog, new StringWriter());
+            var @out = new StringWriter();
+            evalVisitor = new EvalVisitor(global, _evallog, @out);
         }
 
         [TestMethod]

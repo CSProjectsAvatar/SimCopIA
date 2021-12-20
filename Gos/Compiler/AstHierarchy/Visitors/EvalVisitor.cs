@@ -168,8 +168,8 @@ namespace DataClassHierarchy
                 log.LogError("Could not Evaluate {node.Expr}", node.Expr);
                 return (false, null);
             }
-            _writer.WriteLine(result.ToString());
-            return (true, null); // @audit No tenemos soportado null creo, puede dar bateo
+            _writer.WriteLine(result?.ToString());
+            return (true, null); // @audit No tenemos soportado null(por eso el ? de arriba), hay q ver eso
         }
 
         public (bool, object) Visiting(ProgramNode node){
