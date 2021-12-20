@@ -42,6 +42,7 @@ namespace Compiler {
         private Token geq => Token.Geq;
         private Token gt => Token.Gt;
         private Token one => Token.NumberFor(1);
+        private Token two => Token.NumberFor(2);
         private Token zero => Token.NumberFor(0);
         private Token @if => Token.If;
         private Token @return => Token.Return;
@@ -166,7 +167,34 @@ namespace Compiler {
         }
 
         // Test para la funcion fibonacci f n = f(n-1) + f(n-2)
-        //[TestMethod]
+        [TestMethod]
+        public void Fibonacci() {
+            using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new[] {
+                        fun, f, lpar, n, rpar, lbrace,                                 // fun f(n) {
+                            @if, n, eqeq, one, lbrace,                                 //     if n == 1 {
+                                @return, one, endl,                                    //         return 1;
+                            rbrace,                                                    //     }
+                            @if, n, eqeq, two, lbrace,                                 //     if n == 2 {
+                                @return, one, endl,                                    //         return 1;
+                            rbrace,                                                    //     }
+                            @if, n, gt, two, lbrace,                                   //     if n > 2 {
+                                @return, f, lpar, n, minus, one, rpar, plus,           //         return f(n-1) + f(n-2);
+                                    f, lpar, n, minus, two, rpar, endl, 
+                            rbrace,                                                    //     }
+                        rbrace,                                                        // }
+                        print, f, lpar, five, rpar, endl,                              // print f(5);
+
+                        let, x, eq, eight, endl,                                       // let x = 8;
+                        print, f, lpar, x, rpar, endl,                                 // print f(x);
+                        eof
+                    },
+                    out var root));
+                AssertIntegration(root, "5", "21");
+            }
+        }
+
 
         
         

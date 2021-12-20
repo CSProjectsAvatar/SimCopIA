@@ -206,7 +206,7 @@ namespace Compiler {
         /// <returns></returns>
         internal bool DerivesEpsilon(IEnumerable<GramSymType> delta) {
             foreach (var t in delta) {
-                if (IsToken(t.Name, out _) || !DerivesEpsilon(t.Name)) {
+                if (IsToken(t.Name, out var token) && token != Token.TypeEnum.Epsilon || !DerivesEpsilon(t.Name)) {
                     return false;
                 }
             }
