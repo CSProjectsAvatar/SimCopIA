@@ -11,7 +11,6 @@ namespace DataClassHierarchy
     Luego, con un Visitor, pasamos por el Ast y creamos el automata que reconoce una cadena dado el regex
 
 
-
 Gramatica de regex:
 <RE> ::=  <union> | <simple-RE>
 
@@ -48,6 +47,8 @@ Gramatica de regex:
 <set-items>    ::=     <range> | <char>
 
 <range>    ::=     <char> "-" <char>
+
+//  --------------------
 
 expression = term
 

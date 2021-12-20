@@ -9,6 +9,7 @@
 - [2da Entrega](#2da-entrega)
   - [Gram&aacute;tica](#gramática)
   - [Reglas Sem&aacute;nticas](#reglas-semánticas)
+  - [Gram&aacute;tica de REGEX](#gramática-de-regex)
 
 ## Propuesta
 
@@ -198,3 +199,40 @@ variables definidas globalmente o a argumentos definidos en
 otras funciones.
 - En el cuerpo de una función, los nombres de los argumentos
 ocultan los nombres de variables iguales.
+
+
+
+### Gram&aacute;tica de REGEX 
+```
+<regex> := <union>
+
+<union> := <union> "|" <concat>
+         | <concat>
+
+<concat> := <concat> <basic>
+          | <basic>
+
+<basic> := <atom> "*" 
+         | <atom> "+" 
+         | <atom> "?" 
+         | <atom>
+
+<atom> := <group> 
+        | <char> 
+        | <set>
+
+<group> := "(" <regex> ")"
+
+<set> := "[" <item-list> "]"
+
+<item-list> := <item> 
+             | <item> <item-list>
+
+<item> := <range>
+        | <char>
+
+<range> := <char> "-" <char>
+
+<char> := NON-META
+        | "\" META
+```
