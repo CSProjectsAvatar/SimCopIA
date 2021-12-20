@@ -14,6 +14,7 @@ namespace Compiler {
     /// Testea la integración del parseo con la creación de los nodos AST, su validación y ejecución.
     /// </summary>
     public class ParsingIntegrationTests : CompilerTests {  // @audit LOS TESTS D ESTA CLASE FALLAN CUAN2 C CORREN AL MISMO TIEMPO
+        #region private fields
         private ILogger<Lr1> log;
         private ILogger<Lr1Dfa> dfaLog;
         private ILogger<EvalVisitor> evalLog;
@@ -21,6 +22,7 @@ namespace Compiler {
         private Token x => Token.VarX;
         private Token eq => Token.Eq;
         private Token five => Token.Number;
+        private Token one => Token.NumberFor(1);
         private Token plus => Token.Plus;
         private Token three => Token.NumberFor(3);
         private Token times => Token.Times;
@@ -38,6 +40,7 @@ namespace Compiler {
         private Token lbrace => Token.LBrace;
         private Token rbrace => Token.RBrace;
         private Token n => Token.IdFor("n");
+        #endregion
 
         [TestInitialize]
         public void Init() {
@@ -101,6 +104,26 @@ namespace Compiler {
             }
         }
 
+
+        [TestMethod]
+        public void UnrecognizedToken() {
+            using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new[] {
+                        let, x, eq, five, plus, Token.IdFor("a"), endl,  // let x = 5 + a; 
+                        eof
+                    },
+                    out var root));
+                
+                var prog = root as ProgramNode;
+                Assert.IsNotNull(prog);
+
+                var global = new Context();
+                Assert.IsFalse(prog.Validate(global)); // Comilation Error
+            }
+
+        }
+
         [TestMethod]
         public void Func() {
             using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
@@ -114,6 +137,23 @@ namespace Compiler {
                     },
                     out var root));
                 AssertIntegration(root, "5");
+            }
+        }
+    
+
+        [TestMethod]
+        public void Sucesor() { // Funcion Sucesor
+            using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new[] {
+                        fun, f, lpar, n, rpar, lbrace,       // fun f(n) {
+                            print, n, plus, one, endl,       //     print n + 1;
+                        rbrace,                              // }
+                        f, lpar, five, rpar, endl,           // f(5);
+                        eof
+                    },
+                    out var root));
+                AssertIntegration(root, "6");
             }
         }
     }
