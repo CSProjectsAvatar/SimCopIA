@@ -169,7 +169,7 @@ namespace DataClassHierarchy
                 return (false, null);
             }
             _writer.WriteLine(result?.ToString());
-            return (true, null); // @audit No tenemos soportado null(por eso el ? de arriba), hay q ver eso
+            return (true, null); // @todo No tenemos soportado null(por eso el ? de arriba), hay q ver eso
         }
 
         public (bool, object) Visiting(ProgramNode node){
