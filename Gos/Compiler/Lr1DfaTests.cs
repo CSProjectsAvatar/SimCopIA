@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Compiler {
     [TestClass]
-    public class Lr1DfaTests {
+    public class Lr1DfaTests : CompilerTests {
         public static readonly UntType S = UntType.S;
         public static readonly UntType E = UntType.E;
         public static readonly UntType T = UntType.T;
@@ -21,6 +22,12 @@ namespace Compiler {
         public static readonly TokenType rpar = Token.TypeEnum.RPar;
         public static readonly TokenType eq = Token.TypeEnum.Eq;
         public static readonly TokenType dollar = Token.TypeEnum.Eof;
+        private ILogger<Lr1Dfa> _log;
+
+        [TestInitialize]
+        public void Init() {
+            _log = LoggerFact.CreateLogger<Lr1Dfa>();
+        }
 
         [TestMethod]
         public void EpsilonDerivation() {
@@ -43,6 +50,7 @@ namespace Compiler {
                 Assert.IsFalse(dfa.DerivesEpsilon(nameof(FakeX)));
                 Assert.IsTrue(dfa.DerivesEpsilon(nameof(FakeF)));
                 Assert.IsTrue(dfa.DerivesEpsilon(nameof(FakeT)));
+                Assert.IsFalse(dfa.DerivesEpsilon(new[] { n }));
             }
         }
 
@@ -105,6 +113,10 @@ namespace Compiler {
                         Token.TypeEnum.Plus
                     }
                     .All(t => ft.Contains(t)));
+
+                var tokenFirst = dfa.First(new[] { n });
+                Assert.AreEqual(1, tokenFirst.Count);
+                Assert.IsTrue(tokenFirst.Contains(Token.TypeEnum.Number));
             }
         }
 
@@ -194,7 +206,7 @@ namespace Compiler {
                     E > n,
                     F > n + F,
                     F > n)) {
-                var dfa = new Lr1Dfa(gram, null);
+                var dfa = new Lr1Dfa(gram, _log);
                 var actionStates = dfa.action.Keys
                     .Select(k => k.Item1)
                     .Distinct()
