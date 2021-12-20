@@ -22,7 +22,7 @@ namespace Compiler {
 
         public override bool Equals(object obj) {
             return obj is Production other
-                && this.Unterminal == other.Unterminal
+                && this.Unterminal.Equals(other.Unterminal)
                 && this.Derivation.Count == other.Derivation.Count
                 && this.Derivation.Zip(other.Derivation)
                     .All(pair => pair.First.Equals(pair.Second));

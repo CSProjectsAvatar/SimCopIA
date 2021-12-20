@@ -13,7 +13,7 @@ namespace Compiler {
     /// <summary>
     /// Testea la integración del parseo con la creación de los nodos AST, su validación y ejecución.
     /// </summary>
-    public class ParsingIntegrationTests : CompilerTests {  // @audit LOS TESTS D ESTA CLASE FALLAN CUAN2 C CORREN AL MISMO TIEMPO
+    public class ParsingIntegrationTests : CompilerTests {
         #region private fields
         private ILogger<Lr1> log;
         private ILogger<Lr1Dfa> dfaLog;
@@ -40,8 +40,16 @@ namespace Compiler {
         private Token lbrace => Token.LBrace;
         private Token rbrace => Token.RBrace;
         private Token n => Token.IdFor("n");
+        private Token lt => Token.Lt;
+        private Token geq => Token.Geq;
+        private Token gt => Token.Gt;
+        private Token two => Token.NumberFor(2);
+        private Token zero => Token.NumberFor(0);
+        private Token @if => Token.If;
+        private Token @return => Token.Return;
+        private Token eqeq => Token.EqEq;
         #endregion
-
+        
         [TestInitialize]
         public void Init() {
             this.log = LoggerFact.CreateLogger<Lr1>();
@@ -139,22 +147,79 @@ namespace Compiler {
                 AssertIntegration(root, "5");
             }
         }
-    
 
         [TestMethod]
-        public void Sucesor() { // Funcion Sucesor
+        public void If() {
             using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
                 Assert.IsTrue(parser.TryParse(
                     new[] {
-                        fun, f, lpar, n, rpar, lbrace,       // fun f(n) {
-                            print, n, plus, one, endl,       //     print n + 1;
-                        rbrace,                              // }
-                        f, lpar, five, rpar, endl,           // f(5);
+                        @if, five, lt, eight, lbrace,   // if 5 < 8 {
+                            print, one, endl,           //  print 1;
+                        rbrace,                         // }
+                        @if, five, gt, eight, lbrace,   // if 5 > 8 {
+                            print, zero, endl,          //  print 0;
+                        rbrace,                         // }
                         eof
                     },
                     out var root));
-                AssertIntegration(root, "6");
+                AssertIntegration(root, "1");
             }
         }
+
+        // Test para la funcion factorial f n = n * f(n-1)
+        [TestMethod]
+        public void Factorial() {
+            using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new[] {
+                        fun, f, lpar, n, rpar, lbrace,                                 // fun f(n) {
+                            @if, n, eqeq, one, lbrace,                                 //     if n == 1 {
+                                @return, one, endl,                                    //         return 1;
+                            rbrace,                                                    //     }
+                            @if, n, gt, one, lbrace,                                   //     if n > 1 {
+                                @return, n, times, f, lpar, n, minus, one, rpar, endl, //        return n * f(n-1);
+                            rbrace,                                                    //     }
+                        rbrace,                                                        // }
+                        print, f, lpar, five, rpar, endl,                              // print f(5);
+                        eof
+                    },
+                    out var root));
+                AssertIntegration(root, "120");
+            }
+        }
+
+        // Test para la funcion fibonacci f n = f(n-1) + f(n-2)
+        [TestMethod]
+        public void Fibonacci() {
+            using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new[] {
+                        fun, f, lpar, n, rpar, lbrace,                                 // fun f(n) {
+                            @if, n, eqeq, one, lbrace,                                 //     if n == 1 {
+                                @return, one, endl,                                    //         return 1;
+                            rbrace,                                                    //     }
+                            @if, n, eqeq, two, lbrace,                                 //     if n == 2 {
+                                @return, one, endl,                                    //         return 1;
+                            rbrace,                                                    //     }
+                            @if, n, gt, two, lbrace,                                   //     if n > 2 {
+                                @return, f, lpar, n, minus, one, rpar, plus,           //         return f(n-1) + f(n-2);
+                                    f, lpar, n, minus, two, rpar, endl, 
+                            rbrace,                                                    //     }
+                        rbrace,                                                        // }
+                        print, f, lpar, five, rpar, endl,                              // print f(5);
+
+                        let, x, eq, eight, endl,                                       // let x = 8;
+                        print, f, lpar, x, rpar, endl,                                 // print f(x);
+                        eof
+                    },
+                    out var root));
+                AssertIntegration(root, "5", "21");
+            }
+        }
+
+
+        
+        
+
     }
 }

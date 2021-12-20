@@ -30,7 +30,15 @@ namespace Compiler {
         }
 
         public static (GramSymType, TokenType, GramSymType) operator <(GramSymType @this, GramSymType other) {
-            return (@this, new TokenType(Token.TypeEnum.LessThan), other);
+            return (@this, new TokenType(Token.TypeEnum.LowerThan), other);
+        }
+
+        public static (GramSymType, TokenType, GramSymType) operator ==(GramSymType @this, GramSymType other) {
+            return (@this, new TokenType(Token.TypeEnum.EqEq), other);
+        }
+
+        public static (GramSymType, TokenType, GramSymType) operator !=(GramSymType @this, GramSymType other) {
+            return (@this, new TokenType(Token.TypeEnum.NotEq), other);
         }
 
         public override bool Equals(object obj) {

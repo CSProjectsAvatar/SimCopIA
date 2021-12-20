@@ -105,6 +105,36 @@ namespace Compiler {
         /// </summary>
         internal static Token RBrace => new Token(TypeEnum.RBrace, 1, ++colHelper, "}");
 
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (<).
+        /// </summary>
+        internal static Token Lt => new Token(TypeEnum.LowerThan, 1, ++colHelper, "<");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (>=).
+        /// </summary>
+        internal static Token Geq => new Token(TypeEnum.GreaterOrEqualThan, 1, ++colHelper, ">=");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token If => new Token(TypeEnum.If, 1, ++colHelper, "if");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (>).
+        /// </summary>
+        internal static Token Gt => new Token(TypeEnum.GreaterThan, 1, ++colHelper, ">");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (==).
+        /// </summary>
+        internal static Token EqEq => new Token(TypeEnum.EqEq, 1, ++colHelper, "==");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (==).
+        /// </summary>
+        internal static Token Return => new Token(TypeEnum.Return, 1, ++colHelper, "return");
+
         internal static Token NumberFor(double x) {
             return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());
         }
@@ -173,7 +203,7 @@ namespace Compiler {
             /// <summary>
             /// <
             /// </summary>
-            LessThan,
+            LowerThan,
 
             /// <summary>
             /// >
@@ -193,7 +223,18 @@ namespace Compiler {
             Id,
 
             If,
-            Return
+            Return,
+            GreaterOrEqualThan,
+
+            /// <summary>
+            /// ==
+            /// </summary>
+            EqEq,
+
+            /// <summary>
+            /// !=
+            /// </summary>
+            NotEq
         }
 
         public override string ToString() {

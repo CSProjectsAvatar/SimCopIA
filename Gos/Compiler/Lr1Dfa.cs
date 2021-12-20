@@ -92,6 +92,9 @@ namespace Compiler {
                     }
                 }
             } while (change);
+            this.log?.LogDebug(this.derivesEps.Aggregate(
+                "", 
+                (accum, kv) => $"{accum}{kv.Key} -{(kv.Value ? '-' : '/')}-> eps{Environment.NewLine}"));
         }
 
         /// <summary>
@@ -127,6 +130,9 @@ namespace Compiler {
             } while (change);
 
             this.first = firsts.ToDictionary(kv => kv.Key, kv => kv.Value as ICollection<Token.TypeEnum>);
+            this.log?.LogDebug(this.first.Aggregate(
+                "",
+                (accum, kv) => accum + $"First({kv.Key}) = " + string.Join(", ", kv.Value) + Environment.NewLine));
         }
 
         /// <summary>
@@ -200,14 +206,14 @@ namespace Compiler {
         /// <returns></returns>
         internal bool DerivesEpsilon(IEnumerable<GramSymType> delta) {
             foreach (var t in delta) {
-                if (!IsToken(t.Name, out _) && !DerivesEpsilon(t.Name)) {
+                if (IsToken(t.Name, out var token) && token != Token.TypeEnum.Epsilon || !DerivesEpsilon(t.Name)) {
                     return false;
                 }
             }
             return true;
         }
 
-        private ICollection<Token.TypeEnum> First(IEnumerable<GramSymType> symbols) {
+        internal ICollection<Token.TypeEnum> First(IEnumerable<GramSymType> symbols) {
             var res = new List<Token.TypeEnum>();
 
             foreach (var s in symbols) {
@@ -284,12 +290,27 @@ namespace Compiler {
                 switch (action) {
                     case ActionEnum.Shift when old.Item1 == ActionEnum.Reduce:  // conflicto shift-reduce
                         this.action[(state, token)] = (ActionEnum.ShiftReduce, default);
+                        this.log.LogError(
+                            "{conflict} conflict found in state {state} at token {token}.",
+                            ActionEnum.ShiftReduce,
+                            state,
+                            token);
                         break;
                     case ActionEnum.Reduce when old.Item1 == ActionEnum.Shift:  // conflicto shift-reduce
                         this.action[(state, token)] = (ActionEnum.ShiftReduce, default);
+                        this.log.LogError(
+                            "{conflict} conflict found in state {state} at token {token}.",
+                            ActionEnum.ShiftReduce,
+                            state,
+                            token);
                         break;
                     case ActionEnum.Reduce when old.Item1 == ActionEnum.Reduce:  // conflicto reduce-reduce
                         this.action[(state, token)] = (ActionEnum.ReduceReduce, default);
+                        this.log.LogError(
+                            "{conflict} conflict found in state {state} at token {token}.",
+                            ActionEnum.ReduceReduce,
+                            state,
+                            token);
                         break;
                     default:
                         throw new NotImplementedException();

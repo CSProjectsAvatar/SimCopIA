@@ -128,6 +128,62 @@ namespace Tests {
             var dB = global.GetVar(letB.Identifier);
             Assert.AreEqual((double)20, dB);
         }
+
+        [TestMethod]
+        public void EvaluatingEqEqOperand() {
+        #region Program
+        
+            var letA = new LetVar(){ 
+                Identifier = "a",
+                Expr = new Number(){ Value = "10"}
+             };
+            var letB = new LetVar(){ 
+                Identifier = "b",
+                Expr = new Number(){ Value = "10"}
+             };
+            var letC = new LetVar(){ 
+                Identifier = "c",
+                Expr = new Number(){ Value = "11"}
+             };
+            var letD = new LetVar(){ 
+                Identifier = "d", // d = a == b (true)
+                Expr = new EqEqOp(){
+                    Left = new Variable(){ Identifier = "a"},
+                    Right = new Variable(){ Identifier = "b"}
+                }
+             };
+            var letE = new LetVar(){ 
+                Identifier = "e", // e = a == c (false)
+                Expr = new EqEqOp(){
+                    Left = new Variable(){ Identifier = "a"},
+                    Right = new Variable(){ Identifier = "c"}
+                }
+             };
+
+            var prog = new ProgramNode() {
+                Statements = new List<IStatement>() {
+                    letA,       // a = 10
+                    letB,       // b = 10
+                    letC,       // c = 11
+                    letD,       // d = a == b (true)
+                    letE        // e = a == c (false)
+                }
+            };
+            
+        #endregion
+
+            var valid = prog.Validate(global);
+            Assert.IsTrue(valid);
+
+            var (success, result) = evalVisitor.Visit(prog);
+            Assert.IsTrue(success);
+
+            var dD = global.GetVar(letD.Identifier);
+            Assert.IsTrue((bool)dD);
+
+            var dE = global.GetVar(letE.Identifier);
+            Assert.IsFalse((bool)dE);
+        }
     
         [TestMethod]
         public void EvalFunMultiLine() {

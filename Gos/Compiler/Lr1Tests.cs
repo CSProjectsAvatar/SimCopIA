@@ -63,5 +63,24 @@ namespace Compiler {
                 Assert.AreEqual(0u, stack.Peek().State);
             }
         }
+
+        [TestMethod]
+        public void Conflicts() {
+            using (var parser = new Lr1(new Grammar(
+                    E,
+                    E > F,
+                    F > F + T,
+                    F > T,
+                    T > n),
+                    this.log,
+                    this.dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new Token[] {
+                        Token.Number, Token.Plus, Token.Number,
+                        Token.Eof
+                    },
+                    out _));
+            }
+        }
     }
 }

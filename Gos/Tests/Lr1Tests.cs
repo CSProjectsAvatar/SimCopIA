@@ -43,6 +43,8 @@ namespace Tests {
                 },
                 out _));
 
+            parser.Dispose();
+
             parser = new Lr1(new Grammar(
                     E,
                     E > E + T,
@@ -64,6 +66,27 @@ namespace Tests {
                     n1, plus, n2, times, eof  // int + int * $
                 },
                 out _));
+
+            parser.Dispose();
+        }
+
+        [TestMethod]
+        public void AvoidSlr1Conflicts() {
+            using (var parser = new Lr1(new Grammar(
+                    E,
+                    E > (F, eq, F),
+                    E > n,
+                    F > n + F,
+                    F > n),
+                    this.log,
+                    this.dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new[] {
+                        new Token(Token.TypeEnum.Number, 1, 1, "5"),
+                        new Token(Token.TypeEnum.Eof, 1, 2, "$")
+                    },
+                    out _));
+            }
         }
     }
 }
