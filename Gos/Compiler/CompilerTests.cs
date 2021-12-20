@@ -36,6 +36,7 @@ namespace Compiler {
         protected static readonly UntType ExprList = new UntType(typeof(ExprListUnt));
         protected static readonly UntType If = new UntType(typeof(IfUnt));
         protected static readonly UntType Return = new UntType(typeof(ReturnUnt));
+        protected static readonly UntType Condition = new UntType(typeof(ConditionUnt));
         #endregion
 
         #region terminales
@@ -51,7 +52,7 @@ namespace Compiler {
         protected static readonly TokenType lbrace = Token.TypeEnum.LBrace;
         protected static readonly TokenType rbrace = Token.TypeEnum.RBrace;
         protected static readonly TokenType print = Token.TypeEnum.Print;
-        protected static readonly TokenType lt = Token.TypeEnum.LessThan;
+        protected static readonly TokenType lt = Token.TypeEnum.LowerThan;
         protected static readonly TokenType gt = Token.TypeEnum.GreaterThan;
         protected static readonly TokenType semicolon = Token.TypeEnum.EndOfLine;
         protected static readonly TokenType let = Token.TypeEnum.Let;
@@ -89,10 +90,13 @@ namespace Compiler {
             ArgList > (id, comma, ArgList),
 
 #pragma warning disable CS1718 // Comparison made to same variable
-            Expr > (Math_ < Math_),
-            Expr > (Math_ > Math_),
-            Expr > Math,
+            Condition > (Math_ < Math_),
+            Condition > (Math_ > Math_),
+            Condition > (Math == Math),
 #pragma warning restore CS1718 // Comparison made to same variable
+
+            Expr > Condition,
+            Expr > Math,
 
             Math > Math + Term,
             Math > Math - Term,
@@ -114,7 +118,7 @@ namespace Compiler {
             ExprList > Expr,
             ExprList > (Expr, comma, ExprList),
 
-            If > (@if, Expr, lbrace, StatList, rbrace),
+            If > (@if, Condition, lbrace, StatList, rbrace),
 
             Return > (@return, Expr)
         );

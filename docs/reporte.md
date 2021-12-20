@@ -148,8 +148,11 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 <arg-list> := ID
             | ID "," <arg-list>
 
-<expr> := <math> "<" <math>
+<cond> := <math> "<" <math>
 		| <math> ">" <math>
+        | <math> "==" <math>
+
+<expr> := <cond>
 		| <math>
 
 <math> := <math> "+" <term>
@@ -172,7 +175,7 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 <expr-list> := <expr>
              | <expr> "," <expr-list>
              
-<if> := "if" <expr> "{" <stat-list> "}"
+<if> := "if" <cond> "{" <stat-list> "}"
 
 <return> := "return" <expr>
 ```
