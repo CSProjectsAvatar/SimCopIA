@@ -28,7 +28,7 @@ namespace Compiler {
             var a1 = env.Build.SimpleServer();
 
             env.AddRequest("0","1",10);
-            env.AddRequest("0","1",17);
+            env.AddRequest("0","1",15);
             env.AddRequest("0","1",22);
             
             env.Run();
