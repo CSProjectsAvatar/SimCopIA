@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Agents
 {
@@ -7,10 +8,12 @@ namespace Agents
         void SetAvailibility(bool b);
         bool IsAvailable {get;}
         void AddEvent(int time,IExecutable e);
+        void DeleteRequest(Request r);
     }
     public interface IRequestable: IStatus{
         void SaveRequest(Request r);
-
+        void AddRequestToProcessed(Request r);
+        List<Request> GetListRequest();
     }
     public interface IResponsable : IStatus{
         void SaveResponse(Response r);
@@ -23,13 +26,35 @@ namespace Agents
         public bool IsAvailable {get; private set;}
         public List<Request> requests  {get; private set;}
         public List<Response> responses  {get; private set;}
+        public List<Request> requestToProcessed { get; private set; }
         public Status(){
             IsAvailable = true;
             toExecute = new();
             requests = new();
+            requestToProcessed = new();
         }
-        public void AddEvent(int time,IExecutable e){
-            toExecute.Add((time,e));
+
+        public List<Request> GetListRequest()
+        {
+            return this.requestToProcessed;
+        }
+
+        public void DeleteRequest(Request r)
+        {
+           // requestToProcessed.Remove(r);//aqui hay que redefinir el compare?
+
+            this.requestToProcessed =  (from res in this.requestToProcessed 
+                                        where r.ID != res.ID
+                                        select res).ToList();
+        }
+
+        public void AddEvent(int time, IExecutable e)
+        {
+            toExecute.Add((time, e));
+        }
+        public void AddRequestToProcessed(Request r)
+        {
+            requestToProcessed.Add(r);
         }
         public IEnumerable<(int,IExecutable)> EnumerateAndClear() {
             foreach(var x in toExecute){

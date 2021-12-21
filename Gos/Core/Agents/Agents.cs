@@ -8,8 +8,9 @@ namespace Agents{
         public Environment environment {get;}
         protected List<Action<IRequestable,Request>> functionsToHandleRequests; 
         protected List<Action<IResponsable, Response>> functionsToHandleResponses; 
-        protected List<Action<IObservable, Observer>> functionsToHandleStatus; 
+        protected List<Action<IObservable, Observer>> functionsToHandleStatus;
         public Status status;
+
         public Agent(Environment e, string ID){
             this.environment = e;    
             this.ID = ID;
@@ -19,8 +20,8 @@ namespace Agents{
             this.status=new Status();
         }
         public void HandleRequest(Request r){
-            var status = this.status; 
-            
+            var status = this.status;
+            status.SaveRequest(r);
             foreach(var f in functionsToHandleRequests){
                 f(status,r);
             }

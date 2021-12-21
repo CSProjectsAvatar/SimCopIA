@@ -10,6 +10,7 @@ namespace Agents
         public int ID {get;}    // un identificador unico para los request
         public string sender {get;} 
         public int time {get;}
+        public bool satisfied { get;  set; }
         public Agent agent {get;private set;}
         public Environment environment {get;}
         public Request(string sender,string ID, Environment e){
@@ -20,6 +21,7 @@ namespace Agents
         }
         public void Execute(){
 
+            this.satisfied = true;
             agent.HandleRequest(this);
         }
         public void MakeResponse(string body){
