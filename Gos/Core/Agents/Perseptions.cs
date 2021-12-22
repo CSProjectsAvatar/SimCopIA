@@ -13,12 +13,15 @@ namespace Agents
         public bool satisfied { get;  set; }
         public Agent agent {get;private set;}
         public Environment environment {get;}
+        public bool ToKnowAvailibility {get; private set;}
         public Request(string sender,string ID, Environment e){
             this.ID = lastRequestID++;
             this.agent = e.GetAgent(ID);
             environment = e;
             this.sender = sender;
         }
+        public Request(string sender, string ID, Environment e, bool forKnowAvailibity) : this(sender,ID,e)
+            => this.ToKnowAvailibility = forKnowAvailibity;
         public void Execute(){
 
             this.satisfied = true;
@@ -30,6 +33,7 @@ namespace Agents
         public void ChangeReciever(Agent a){
             this.agent = a; 
         }
+        public void SetKnowAvailibity(bool b) => this.ToKnowAvailibility = b;
     }
     public class Response:IExecutable{
         public int requestID {get;}
@@ -38,6 +42,11 @@ namespace Agents
         public int responseTime{get;private set;}
         public string body{get;}
         public Environment env{get;}
+        
+        //para preguntar si esta disponible.          
+        public bool ToKnowAvailibility {get; private set;}
+        public bool IsAvailable{get; private set;}
+
         public Response(int requestID,Agent sender, string receiver, Environment env, string body){
             this.requestID = requestID;
             this.sender = sender;
@@ -45,6 +54,12 @@ namespace Agents
             this.env = env;
             this.responseTime = -1;  
             this.body = body;
+        }
+
+        // response para conocer si un servidor esta disponible
+        public Response(int requestID,Agent sender, string receiver, Environment env, bool isAvailable) : this(requestID,sender,receiver,env,"AvailibityChecker:"+isAvailable){
+            this.ToKnowAvailibility = true;
+            this.IsAvailable = isAvailable;
         }
         public void Execute(){
             if(receiver == "0"){ // si es "0" es que el request asociado venia del response.
@@ -55,6 +70,7 @@ namespace Agents
             agent.HandleResponse(this);
         }
         public void SetTime(int time) => this.responseTime = time;
+        public void SetKnowAvailibity(bool b) => this.ToKnowAvailibility = true;
     }
     public class Observer:IExecutable{
         public Agent agent {get;}

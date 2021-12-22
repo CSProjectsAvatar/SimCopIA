@@ -18,10 +18,19 @@ namespace Agents{
             this.functionsToHandleResponses = new();
             this.functionsToHandleStatus = new();
             this.status=new Status();
+            this.environment.PrintAgent(this,"Agente creado!!");
         }
         public void HandleRequest(Request r){
             var status = this.status;
             status.SaveRequest(r);
+
+            if(r.ToKnowAvailibility){ //para saber si es un request para conocer si un server esta disponible
+                Response res = new Response(r.ID, this, r.sender, this.environment,status.IsAvailable);
+                environment.SubsribeEvent(res,this.environment.currentTime);
+                environment.PrintAgent(this,$"LLega request de disponibilidad desde {r.sender}. Respondiendo con {res.IsAvailable}."); // debug
+                return;
+            }
+
             foreach(var f in functionsToHandleRequests){
                 f(status,r);
             }

@@ -11,6 +11,7 @@ namespace Agents{
     public class Environment{
         
         const int RESPONSE_TIME = 2;
+        const int REQUEST_TIME = 1;
         List<Agent> agents;
         public List<Response> solutionResponses; // poner privado y hacer como que un Enumerable :D
         public int currentTime {get; set;}
@@ -42,8 +43,15 @@ namespace Agents{
                     return a;
             return null;
         }
+        // se suscribe un evento en la linea temporal (mas el timpo extra dependiendo este que tipo de evento sea)
         public void SubsribeEvent(IExecutable e, int time){
-            turn.Add(time,e);
+            if(e is Request) 
+                turn.Add(time + REQUEST_TIME,e);
+            else if(e is Response) 
+                turn.Add(time + RESPONSE_TIME,e);
+            else 
+                turn.Add(time,e);
+
         }
         public void PrintAgent(Agent a,string toPrint){ // debug...
             System.Console.WriteLine($"( Time:{this.currentTime},  Agent:{a.ID} ) - {toPrint}"); 
@@ -74,8 +82,8 @@ namespace Agents{
                 var agent = new SimpleServer(env, (nextInt++).ToString());
                 return RegisterAgent(agent) as SimpleServer;
             } 
-            public DistributionServer DistributionServer(){
-                var agent = new DistributionServer(env,(nextInt++).ToString(),null);
+            public DistributionServer DistributionServer(List<string> workers){
+                var agent = new DistributionServer(env,(nextInt++).ToString(),workers);
                 return RegisterAgent(agent) as DistributionServer;
             }
         }

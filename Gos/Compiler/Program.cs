@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using Agents;
 namespace Compiler {
     class Program {
@@ -26,10 +27,13 @@ namespace Compiler {
             //Probando los agentes con servidores simples.
             var env = new Agents.Environment();
             var a1 = env.Build.SimpleServer();
+            var a2 = env.Build.SimpleServer();
+            var a3 = env.Build.DistributionServer(new List<string>(){"1","2"});
 
-            env.AddRequest("0","1",10);
-            env.AddRequest("0","1",15);
-            env.AddRequest("0","1",22);
+
+            env.AddRequest("0","3",10);
+            env.AddRequest("0","3",15);
+            env.AddRequest("0","3",22);
             
             env.Run();
 

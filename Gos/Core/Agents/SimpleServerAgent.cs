@@ -4,8 +4,10 @@ using System.Collections.Generic;
 namespace Agents
 {
     public class SimpleServer : Agent{ 
-        const int TOTAL_REQUEST = 1;
-        public SimpleServer (Environment env, string ID): base(env, ID){
+        public int TotalRequests {get;}
+        public SimpleServer (Environment env, string ID, int totalRequests = 1): base(env, ID){
+            this.TotalRequests = totalRequests;
+
             this.functionsToHandleRequests.Add(this.GettingRequest);
             this.functionsToHandleRequests.Add(this.ProcessRequest);
              
@@ -23,7 +25,8 @@ namespace Agents
                 return;
             }
             
-            environment.PrintAgent(this,"LLega paquete.");
+            environment.PrintAgent(this,$"LLega request desde {r.sender}.");
+
                         
             Observer o = new Observer(this,environment, r);
 
@@ -35,7 +38,7 @@ namespace Agents
             if (status.IsAvailable)
             {
                 status.AddRequestToProcessed(r);
-                if (status.GetListRequest().Count >= TOTAL_REQUEST)
+                if (status.GetListRequest().Count >= TotalRequests)
                     status.SetAvailibility(false);
             }
         }
