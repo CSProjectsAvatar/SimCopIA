@@ -218,7 +218,7 @@ ocultan los nombres de variables iguales.
          | <atom>
 
 <atom> := <group> 
-        | <char> 
+        | CHAR 
         | <set>
 
 <group> := "(" <regex> ")"
@@ -229,10 +229,7 @@ ocultan los nombres de variables iguales.
              | <item> <item-list>
 
 <item> := <range>
-        | <char>
+        | CHAR
 
-<range> := <char> "-" <char>
-
-<char> := NON-META
-        | "\" META
+<range> := CHAR "-" CHAR
 ```

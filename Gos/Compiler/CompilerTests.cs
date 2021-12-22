@@ -59,6 +59,11 @@ namespace Compiler {
         protected static readonly TokenType fun = Token.TypeEnum.Fun;
         protected static readonly TokenType @if = Token.TypeEnum.If;
         protected static readonly TokenType @return = Token.TypeEnum.Return;
+        protected static readonly TokenType pipe = Token.TypeEnum.Pipe;
+        protected static readonly TokenType quest = Token.TypeEnum.Quest;
+        protected static readonly TokenType rbrak = Token.TypeEnum.RBracket;
+        protected static readonly TokenType lbrak = Token.TypeEnum.LBracket;
+        protected static readonly TokenType times = Token.TypeEnum.Times;
 
         #endregion
 
@@ -122,5 +127,9 @@ namespace Compiler {
 
             Return > (@return, Expr)
         );
+
+        #region helpers para tokens
+        protected static Token eof => Token.Eof;
+        #endregion
     }
 }

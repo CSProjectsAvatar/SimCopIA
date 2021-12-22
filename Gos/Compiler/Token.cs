@@ -16,6 +16,10 @@ namespace Compiler {
             Lexem = lex;
         }
 
+        internal static Token CharFor(char v) {
+            return new Token(TypeEnum.Char, 1, ++colHelper, v.ToString());
+        }
+
         /// <summary>
         /// Propiedad helper para debuguear y testear.
         /// </summary>
@@ -135,6 +139,21 @@ namespace Compiler {
         /// </summary>
         internal static Token Return => new Token(TypeEnum.Return, 1, ++colHelper, "return");
 
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (|).
+        /// </summary>
+        internal static Token Pipe => new Token(TypeEnum.Pipe, 1, ++colHelper, "|");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear ([).
+        /// </summary>
+        internal static Token LBracket => new Token(TypeEnum.LBracket, 1, ++colHelper, "[");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (]).
+        /// </summary>
+        public static Token RBracket => new Token(TypeEnum.RBracket, 1, ++colHelper, "]");
+
         internal static Token NumberFor(double x) {
             return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());
         }
@@ -234,7 +253,32 @@ namespace Compiler {
             /// <summary>
             /// !=
             /// </summary>
-            NotEq
+            NotEq,
+
+            /// <summary>
+            /// ?
+            /// </summary>
+            Quest,
+
+            /// <summary>
+            /// [
+            /// </summary>
+            LBracket,
+
+            /// <summary>
+            /// ]
+            /// </summary>
+            RBracket,
+
+            /// <summary>
+            /// Representa a un caracter cualquiera. Su lexema debe contener sólo al caracter que representa.
+            /// </summary>
+            Char,
+
+            /// <summary>
+            /// |
+            /// </summary>
+            Pipe
         }
 
         public override string ToString() {
