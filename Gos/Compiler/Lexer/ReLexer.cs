@@ -25,6 +25,12 @@ namespace Compiler.Lexer {
             _log = logger;
         }
 
+        /// <summary>
+        /// Inicializa un nuevo lexer de REGEX con los meta-caracteres siguientes:
+        /// <code>* + - [ ] ( ) | ? \</code>
+        /// cuyos tipos de token son los triviales.
+        /// </summary>
+        /// <param name="logger"></param>
         public ReLexer(ILogger<ReLexer> logger) : this(new Dictionary<char, Token.TypeEnum> {
                     ['*'] = Token.TypeEnum.Times,
                     ['+'] = Token.TypeEnum.Plus,

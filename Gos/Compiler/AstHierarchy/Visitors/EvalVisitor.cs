@@ -28,9 +28,7 @@ namespace DataClassHierarchy
         }
         
         public (bool, object) Visiting(AstNode node) {
-            throw new Exception("Se llego por el visitor a la raiz, falta implementacion de Visiting"); // @audit esto es para probar, comentar dsp 
-            // Se llego por el visitor a la raiz, no hay implementacion de Visiting en la clase hijo
-            return (true, null);
+            throw new Exception("Se llego por el visitor a la raiz, falta implementacion de Visiting"); // @remind esto es para probar, comentar
         }  
     
         public object CheckBinar(BinaryExpr node) {

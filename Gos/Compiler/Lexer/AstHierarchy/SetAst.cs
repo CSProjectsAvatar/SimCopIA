@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Compiler.Lexer.AstHierarchy {
     class SetAst : BaseRegexAst {
-        public SetAst(IEnumerable<BaseRegexAst> items) {
+        public SetAst(IReadOnlyList<BaseRegexAst> items) {
             Items = items;
         }
 
-        public IEnumerable<BaseRegexAst> Items { get; }
+        public IReadOnlyList<BaseRegexAst> Items { get; }
 
         public override bool Validate(Context context) {
             return Items.Aggregate(true, (accum, i) => accum && i.Validate(context));  // validando todos los elementos
