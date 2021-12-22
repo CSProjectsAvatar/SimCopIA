@@ -154,6 +154,11 @@ namespace Compiler {
         /// </summary>
         public static Token RBracket => new Token(TypeEnum.RBracket, 1, ++colHelper, "]");
 
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (?).
+        /// </summary>
+        public static Token Quest => new Token(TypeEnum.Quest, 1, ++colHelper, "?");
+
         internal static Token NumberFor(double x) {
             return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());
         }
@@ -278,7 +283,12 @@ namespace Compiler {
             /// <summary>
             /// |
             /// </summary>
-            Pipe
+            Pipe,
+
+            /// <summary>
+            /// \
+            /// </summary>
+            Scape
         }
 
         public override string ToString() {
