@@ -10,42 +10,42 @@ namespace Compiler.Lexer.AstHierarchy {
     /// Visita los AST de REGEX para construir un autómata que sea capaz de reconocer cadenas de caracteres que cumplan con una
     /// expresión regular.
     /// </summary>
-    internal class NfaBuilderVisitor : Visitor<Automaton> {
-        internal Automaton Visiting(BaseRegexAst charAst) {
+    internal class NfaBuilderVisitor : Visitor<NFA> {
+        internal NFA Visiting(BaseRegexAst charAst) {
             throw new NotImplementedException($"{nameof(Visiting)} method not found.");  // se busco' x un me'todo Visiting en la jerarqui'a y no c encontro'
         }
 
-        internal Automaton Visiting(CharAst charAst) {
-            return Automaton.FromChar(charAst.Value);
+        internal NFA Visiting(CharAst charAst) {
+            return NFA.FromChar(charAst.Value);
         }
 
-        internal Automaton Visiting(ClosureAst closureAst) {
+        internal NFA Visiting(ClosureAst closureAst) {
             return Visit(closureAst.Target)
                 .Mult();
         }
 
-        internal Automaton Visiting(ConcatAst concatAst) {
+        internal NFA Visiting(ConcatAst concatAst) {
             return Visit(concatAst.Left)
                 .Concat(Visit(concatAst.Right));
         }
 
-        internal Automaton Visiting(PositClosureAst positClosureAst) {
+        internal NFA Visiting(PositClosureAst positClosureAst) {
             return Visit(positClosureAst.Target)
                 .Plus();
         }
 
-        internal Automaton Visiting(RangeAst rangeAst) {
+        internal NFA Visiting(RangeAst rangeAst) {
             var count = rangeAst.Right - rangeAst.Left + 1;
-            var first = Automaton.FromChar(rangeAst.Left);
+            var first = NFA.FromChar(rangeAst.Left);
 
             if (count == 1) {
                 return first;
             }
             return Enumerable.Range(rangeAst.Left + 1, count - 1)  // se omite el 1er elemento, ya q c cog d semilla en el Aggregate
-                .Aggregate(first, (accum, x) => accum.Union(Automaton.FromChar((char)x)));  // unio'n d los auto'matas d cada char
+                .Aggregate(first, (accum, x) => accum.Union(NFA.FromChar((char)x)));  // unio'n d los auto'matas d cada char
         }
 
-        internal Automaton Visiting(SetAst setAst) {
+        internal NFA Visiting(SetAst setAst) {
             var first = Visit(setAst.Items[0]);
 
             if (setAst.Items.Count == 1) {
@@ -56,12 +56,12 @@ namespace Compiler.Lexer.AstHierarchy {
                 .Aggregate(first, (accum, x) => accum.Union(Visit(x)));  // la unio'n d todos los auto'matas
         }
 
-        internal Automaton Visiting(UnionAst unionAst) {
+        internal NFA Visiting(UnionAst unionAst) {
             return Visit(unionAst.Left)
                 .Union(Visit(unionAst.Right));
         }
 
-        internal Automaton Visiting(ZeroOnceAst zeroOnceAst) {
+        internal NFA Visiting(ZeroOnceAst zeroOnceAst) {
             return Visit(zeroOnceAst.Target)
                 .Maybe();
         }

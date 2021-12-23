@@ -58,6 +58,10 @@ namespace Compiler.Lexer
             return nfa;
         }
 
+        internal static NFA FromChar(char c) {
+            return new NFA(c);
+        }
+
         public NFA Concat(NFA other)
         {
             var nfa = new NFA();

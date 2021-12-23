@@ -6,7 +6,7 @@ using System.Linq;
 namespace Compiler.Lexer
 {
     // <summary>
-    // Clase que representa un Automata Finito No Determinista
+    // Convertidor de autómata no determinista a uno determinista.
     // </summary>
     public class ConverterToDFA
     {
