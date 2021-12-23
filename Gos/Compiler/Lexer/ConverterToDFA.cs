@@ -52,25 +52,40 @@ namespace Compiler.Lexer
         public DFA ToDFA(){
             var dfa = new DFA();
             var q0 = eClosure(automat.Initial);
+            dfa.States.Add(q0);
 
             var q = new Queue<DFAState>();
             q.Enqueue(q0);
 
-            var set = new HashSet<DFAState>();
-            set.Add(q0);
+            var set = new HashSet<string>();
+            set.Add(q0.StringHash());
 
             while (q.Count != 0) {
                 var q_i = q.Dequeue();
                 foreach (char c in automat.Transitions.Keys.Select(g => g.Item2).Distinct()) {
                     var q_next = eClosure(GoTo(q_i, c).MicroStates); // Qj = eClosure(Goto(Qj, c)).
-                    if (set.Contains(q_next.StNumber)) continue; // @audit Hacer bien con subc( C )
 
-                    q.Enqueue(q_next);
-                    set.Add(q_next);
-                    dfa.Transitions.Add((q_i.StNumber, c), q_next); // @audit ver lo de que los estados finales sean los que tienen alguien q pert a un estado final del original
+                    if (!set.Contains(q_next.StringHash())) { // Qj no esta en Q, no lo he analizado
+                        q.Enqueue(q_next);
+                        set.Add(q_next.StringHash());
+                        dfa.States.Add(q_next);
+                    }
+                    dfa.Transitions.Add((q_i.StNumber, c), q_next.StNumber); // @audit ver lo de que los estados finales sean los que tienen alguien q pert a un estado final del original
                 }
             }
+
+            MarkFinalStates(dfa);
             return dfa;
+            
+        }
+
+        // Marca como finales los estados del dfa que contienen algun microestado final del automat
+        internal void MarkFinalStates(DFA dfa){
+            foreach (var state in dfa.States) {
+                if (state.Contains(automat.Final)) {
+                    dfa.FinalStates.Add(state.StNumber);
+                }
+            }
         }
     }
 

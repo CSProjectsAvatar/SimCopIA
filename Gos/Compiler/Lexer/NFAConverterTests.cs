@@ -18,7 +18,7 @@ namespace Tests {
 
             var nfa = new NFA('a');
 
-            var dfa = new ConverterToDFA(nfa).Closure(nfa.Initial);
+            var dfa = new ConverterToDFA(nfa).eClosure(nfa.Initial);
 
             Assert.AreEqual(1, dfa.Count);
             Assert.IsTrue(dfa.Contains(nfa.Initial));
@@ -34,7 +34,7 @@ namespace Tests {
 
             var nfaUnion = nfa1.Union(nfa2);
 
-            var firstClousure = new ConverterToDFA(nfaUnion).Closure(nfaUnion.Initial);
+            var firstClousure = new ConverterToDFA(nfaUnion).eClosure(nfaUnion.Initial);
 
             Assert.AreEqual(3, firstClousure.Count);
             Assert.IsTrue(firstClousure.Contains(nfa1.Initial));
@@ -51,7 +51,7 @@ namespace Tests {
 
             var firstClnfaMult = nfa1.Mult();
 
-            var firstClousure = new ConverterToDFA(firstClnfaMult).Closure(firstClnfaMult.Initial);
+            var firstClousure = new ConverterToDFA(firstClnfaMult).eClosure(firstClnfaMult.Initial);
 
             Assert.AreEqual(2, firstClousure.Count);
             Assert.IsTrue(firstClousure.Contains(nfa1.Initial));
@@ -67,7 +67,7 @@ namespace Tests {
 
             var firstClnfaMaybe = nfa1.Maybe();
 
-            var firstClousure = new ConverterToDFA(firstClnfaMaybe).Closure(firstClnfaMaybe.Initial);
+            var firstClousure = new ConverterToDFA(firstClnfaMaybe).eClosure(firstClnfaMaybe.Initial);
 
             Assert.AreEqual(4, firstClousure.Count);
             Assert.IsTrue(firstClousure.Contains(nfa1.Initial));
@@ -86,7 +86,7 @@ namespace Tests {
 
             var nfaUnion = nfa1.Union(nfa2);
 
-            var firstClousure = new ConverterToDFA(nfaUnion).Closure(nfaUnion.Initial);
+            var firstClousure = new ConverterToDFA(nfaUnion).eClosure(nfaUnion.Initial); 
 
             var firstGoto = new ConverterToDFA(nfaUnion).GoTo(firstClousure, 'a');
 
@@ -99,5 +99,41 @@ namespace Tests {
             Assert.IsTrue(secondGoto.Contains(nfa2.Final));
         }
     
+        // Test para probar el StringHash de DFAState para usar el HashSet
+        [TestMethod]
+        public void GetHashTest(){
+            var arr = new uint [] { 1, 2, 3};
+            var arr2 = new uint [] { 1, 5, 3};
+            var arr3 = new uint [] { 1, 2, 3, 8};
+            var Q0 = new DFAState(arr);
+            var Q1 = new DFAState(arr);
+            var Q2 = new DFAState(arr2);
+            var Q3 = new DFAState(arr3);
+
+            Assert.AreEqual(Q0.StringHash(), Q1.StringHash());
+            Assert.AreNotEqual(Q0.StringHash(), Q2.StringHash());
+            Assert.AreNotEqual(Q0.StringHash(), Q3.StringHash());
+
+            var set = new HashSet<string>();
+            set.Add(Q0.StringHash());
+            set.Add(Q1.StringHash());
+            set.Add(Q2.StringHash());
+            set.Add(Q3.StringHash());
+
+            Assert.AreEqual(3, set.Count);
+        }
+
+        // Test para el MarkFinalStates
+        [TestMethod]
+        public void MarkFinalStatesA() {
+            var nfa = new NFA('a');
+            
+            var dfa = new DFA();
+            new ConverterToDFA(nfa).MarkFinalStates(dfa);
+
+            Assert.AreEqual(1, dfa.FinalStates.Count);
+            Assert.IsTrue(dfa.FinalStates.Contains(nfa.Final));
+        }
     }
+
 }
