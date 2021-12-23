@@ -1,0 +1,65 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "gos",
+	"patterns": [
+		{ "include": "#comments" },
+		{ "include": "#keywords" },
+		{ "include": "#strings" },
+		{ "include": "#numbers" },
+		{ "include": "#ids" }
+	],
+	"repository": {
+		"comments": {
+			"patterns": [{
+					"name": "comment.line.double-dash.gos",
+					"begin": "\\/\\/",
+					"while": "(?=not)possible"
+				}, {
+					"name": "comment.block.gos",
+					"begin": "\\/\\*",
+					"end": "\\*\\/"
+				}]
+		},
+		"keywords": {
+			"patterns": [{
+					"name": "keyword.control.gos",
+					"match": "\\b(if|return)\\b"
+				}, {
+					"name": "keyword.other.gos",
+					"match": "\\b(fun|let|print)\\b"
+				}, {
+					"name": "keyword.operator.gos",
+					"match": ">|<|\\=|==|\\+|\\-|\\*|\\/"
+				}]
+		},
+		"strings": {
+			"name": "string.quoted.double.gos",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.gos",
+					"match": "\\\\."
+				}
+			]
+		},
+		"numbers": {
+			"patterns": [{
+				"name": "constant.numeric.gos",
+				"match": "[0-9]+(\\.[0-9]+)?"
+			}]
+		},
+		"ids": {
+			"patterns": [{
+					"comment": "Llamado a función.",
+					"name": "support.function.gos",
+					"match": "\\b_?[a-zA-Z][_a-zA-Z0-9]*\\b(?=\\s*\\()"
+				}, {
+					"comment": "Variable",
+					"name": "variable.other.gos",
+					"match": "\\b_?[a-zA-Z][_a-zA-Z0-9]*\\b"
+				}]
+		}
+	},
+	"scopeName": "source.gos"
+}
