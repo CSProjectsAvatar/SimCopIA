@@ -21,5 +21,6 @@
             "scopeName": "source.gos",
             "path": "./syntaxes/gos.tmLanguage.json"
         }]
-    }
+    },
+    "repository": "https://github.com/CSProjectsAvatar/SimCopIA"
 }
