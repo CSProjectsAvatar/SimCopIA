@@ -1,7 +1,7 @@
 {
     "name": "gos",
     "displayName": "GoS",
-    "description": "Syntax highlight for the GoS language.",
+    "description": "Syntax highlight para el lenguaje GoS.",
     "version": "0.0.1",
     "engines": {
         "vscode": "^1.63.0"
@@ -22,5 +22,6 @@
             "path": "./syntaxes/gos.tmLanguage.json"
         }]
     },
-    "repository": "https://github.com/CSProjectsAvatar/SimCopIA"
+    "repository": "https://github.com/CSProjectsAvatar/SimCopIA",
+    "publisher": "TheGoSTeam"
 }
