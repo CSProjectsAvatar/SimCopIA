@@ -84,7 +84,6 @@ namespace Compiler.Lexer
 
         public NFA Maybe()
         {
-            var nfa = new NFA();
             var empty = EmptyNFA();
 
             return this.Union(empty);
@@ -92,19 +91,15 @@ namespace Compiler.Lexer
 
         public NFA Mult()
         {
-            //  -----------------------
-            //  |                     |
-            // q_01 -> ... -> q_f1 -> e -> q'_f
+            // q_01 -> ... -> q_f1
+            //  |              |       
+            //  <---------------
+
             var nfa = new NFA();
-            nfa.Final = NFA.GetState;
+            nfa.Initial = this.Initial;
+            nfa.Final = nfa.Initial;
 
-            Transitions.Add((this.Final, null), new List<uint>() { nfa.Final });
-
-            if(Transitions.TryGetValue((Initial, null), out var nextStates)){
-                nextStates.Add(nfa.Final);
-            } else {
-                Transitions.Add((Initial, null), new List<uint>() { nfa.Final });
-            }
+            nfa.Transitions.Add((this.Final, null), new List<uint>() { nfa.Initial });
 
             nfa.Transitions = nfa.Transitions.Concat(this.Transitions)
                                              .ToDictionary(g => g.Key, g => g.Value);
@@ -114,8 +109,30 @@ namespace Compiler.Lexer
 
         public NFA Plus()
         {
-            return this.Concat(this.Mult());
+            var mult = this.Mult();
+            UpFloor();
+            return this.Concat(mult); // pp*
         }
+
+        // Le suma un valor a todos los valores de las transiciones, necesario para el Plus
+        private void UpFloor()
+        {
+            var floor = _lastState;
+            this.Initial += floor;
+            this.Final += floor;
+
+            var newDict = new Dictionary<(uint, char?), List<uint>>();
+
+            foreach (var tr in Transitions)
+            {
+                var newKey = (tr.Key.Item1 + floor, tr.Key.Item2);
+                var newValue = tr.Value.Select(v => v + floor).ToList();
+                newDict.Add(newKey, newValue);
+            }
+
+            Transitions = newDict;
+        }
+
         public static NFA EmptyNFA()
         {
             var nfa = new NFA();
@@ -125,6 +142,24 @@ namespace Compiler.Lexer
         public static void ResetStateCounter()
         {
             _lastState = 0;
+        }
+
+        public override string ToString()
+        {
+            var s = string.Empty;
+            foreach (var tr in Transitions)
+            {
+                s += $"{tr.Key.Item1}, {tr.Key.Item2} -> {string.Join(", ", tr.Value.ForPrint())} | " ;
+            }
+            return s;
+        }
+    }
+
+    public static class AutomatExtensions
+    {
+        public static string ForPrint(this IEnumerable<uint> states)
+        {
+            return string.Join(", ", states.Select(s => s.ToString()));
         }
     }
 }

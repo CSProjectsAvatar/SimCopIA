@@ -79,12 +79,11 @@ namespace Tests {
 
             Assert.AreEqual((uint)0, nfaMult.Initial);
 
-            Assert.AreEqual((uint)2, nfaMult.Final);
+            Assert.AreEqual((uint)0, nfaMult.Final);
 
             Assert.IsTrue(nfaMult.Transitions.ContainsKey((nfa.Initial, 'a')));
             Assert.IsTrue(nfaMult.Transitions[(0, 'a')].Contains(1));
-            Assert.IsTrue(nfaMult.Transitions[(0, null)].Contains(2));
-            Assert.IsTrue(nfaMult.Transitions[(1, null)].Contains(2));            
+            Assert.IsTrue(nfaMult.Transitions[(1, null)].Contains(0));            
         }
 
         [TestMethod]
@@ -97,11 +96,11 @@ namespace Tests {
 
             Assert.AreEqual((uint)0, nfaMult.Initial);
 
-            Assert.AreEqual((uint)2, nfaMult.Final);
+            Assert.AreEqual((uint)0, nfaMult.Final);
 
             Assert.IsTrue(nfaMult.Transitions.ContainsKey((nfa.Initial, 'a')));
             Assert.IsTrue(nfaMult.Transitions[(0, 'a')].Contains(1));
-            Assert.IsTrue(nfaMult.Transitions[(1, null)].Contains(2));            
+            Assert.IsTrue(nfaMult.Transitions[(1, null)].Contains(0));            
         }
 
         
