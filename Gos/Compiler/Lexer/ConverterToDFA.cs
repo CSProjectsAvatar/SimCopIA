@@ -62,15 +62,23 @@ namespace Compiler.Lexer
 
             while (q.Count != 0) {
                 var q_i = q.Dequeue();
-                foreach (char c in automat.Transitions.Keys.Select(g => g.Item2).Distinct()) {
+                var chars = automat.Transitions.Keys.Where(g => g.Item2 is not null).Select(g => g.Item2).Distinct();
+                
+                foreach (char c in chars) {
                     var q_next = eClosure(GoTo(q_i, c).MicroStates); // Qj = eClosure(Goto(Qj, c)).
 
-                    if (!set.Contains(q_next.StringHash())) { // Qj no esta en Q, no lo he analizado
-                        q.Enqueue(q_next);
-                        set.Add(q_next.StringHash());
-                        dfa.States.Add(q_next);
+                    if(!q_next.Empty){
+                        if (!set.Contains(q_next.StringHash())) { // Qj no esta en Q, no lo he analizado
+                            q.Enqueue(q_next);
+                            set.Add(q_next.StringHash());
+                            dfa.States.Add(q_next);
+                            dfa.Transitions.Add((q_i.StNumber, c), q_next.StNumber); 
+                        }
+                        else { // Qj esta en Q, lo he analizado
+                            var q_old = dfa.States.Where(q => q.StringHash() == q_next.StringHash()).First();
+                            dfa.Transitions.Add((q_i.StNumber, c), q_old.StNumber);
+                        }
                     }
-                    dfa.Transitions.Add((q_i.StNumber, c), q_next.StNumber); // @audit ver lo de que los estados finales sean los que tienen alguien q pert a un estado final del original
                 }
             }
 

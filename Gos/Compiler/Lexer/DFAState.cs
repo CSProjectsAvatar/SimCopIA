@@ -14,6 +14,9 @@ namespace Compiler.Lexer
         private List<uint> mStates { get; set; }
         internal IEnumerable<uint> MicroStates { get => mStates; }
         public int Count => mStates.Count;
+
+        public bool Empty => mStates.Count == 0;
+
         public DFAState(IEnumerable<uint> microStates) {
             this.mStates = microStates.ToList();
             this.mStates.Sort();
@@ -22,8 +25,7 @@ namespace Compiler.Lexer
         public bool Contains(uint microState) {
             return MicroStates.Contains(microState);
         }
-
-        
+    
         public string StringHash()
         {
             if(_getHashCode == string.Empty){
@@ -32,6 +34,15 @@ namespace Compiler.Lexer
                 }
             }
             return _getHashCode;
+        }
+
+        public override string ToString()
+        {
+            return StringHash();
+        }
+        public static void ResetStateCounter()
+        {
+            _lastState = 0;
         }
     }
 }
