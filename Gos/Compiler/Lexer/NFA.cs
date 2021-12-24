@@ -39,7 +39,8 @@ namespace Compiler.Lexer
             // q_03 
             //     \
             //      q_02 -> ...
-            nfa.Transitions.Add((nfa.Initial, null), new List<uint>() { this.Initial, other.Initial});
+            nfa.AddTransition(nfa.Initial, null, new uint[] {this.Initial, other.Initial});
+            // nfa.Transitions.Add((nfa.Initial, null), new List<uint>() { this.Initial, other.Initial});
 
             //      ... -> q_f1
             //                 \
@@ -47,13 +48,20 @@ namespace Compiler.Lexer
             //                 /
             //      ... -> q_f2
             nfa.Final = NFA.GetState;
-            foreach (var prevFinal in new [] { this.Final, other.Final}) {
-                nfa.Transitions.Add((prevFinal, null), new List<uint>() { nfa.Final });
-            }
+            nfa.AddTransition(this.Final, null, new uint[] {nfa.Final});
+            nfa.AddTransition(other.Final, null, new uint[] {nfa.Final});
 
-            nfa.Transitions = nfa.Transitions.Concat(this.Transitions)
-                                             .Concat(other.Transitions)
-                                             .ToDictionary(g => g.Key, g => g.Value);
+            // foreach (var prevFinal in new [] { this.Final, other.Final}) {
+            //     nfa.Transitions.Add((prevFinal, null), new List<uint>() { nfa.Final });
+            // }
+
+            foreach (var tr in this.Transitions.Concat(other.Transitions))
+            {
+                nfa.AddTransition(tr.Key.Item1, tr.Key.Item2, tr.Value);
+            }
+            // nfa.Transitions = nfa.Transitions.Concat(this.Transitions)
+            //                                  .Concat(other.Transitions)
+            //                                  .ToDictionary(g => g.Key, g => g.Value);
 
             return nfa;
         }
@@ -70,14 +78,20 @@ namespace Compiler.Lexer
             nfa.Initial = this.Initial;
 
             //   ... -> q_f1 -> e -> q_02 -> ... 
-            nfa.Transitions.Add((this.Final, null), new List<uint>() { other.Initial });
+            nfa.AddTransition(this.Final, null, new uint[] { other.Initial});
+            // nfa.Transitions.Add((this.Final, null), new List<uint>() { other.Initial });
 
             //   ... -> q_f2 
             nfa.Final = other.Final;
 
-            nfa.Transitions = nfa.Transitions.Concat(this.Transitions)
-                                             .Concat(other.Transitions)
-                                             .ToDictionary(g => g.Key, g => g.Value);
+            foreach (var tr in this.Transitions.Concat(other.Transitions))
+            {
+                nfa.AddTransition(tr.Key.Item1, tr.Key.Item2, tr.Value);
+            }
+
+            // nfa.Transitions = nfa.Transitions.Concat(this.Transitions)
+            //                                  .Concat(other.Transitions)
+            //                                  .ToDictionary(g => g.Key, g => g.Value);
                                              
             return nfa;
         }
@@ -91,6 +105,7 @@ namespace Compiler.Lexer
 
         public NFA Mult()
         {
+            //(Final)
             // q_01 -> ... -> q_f1
             //  |              |       
             //  <---------------
@@ -99,19 +114,42 @@ namespace Compiler.Lexer
             nfa.Initial = this.Initial;
             nfa.Final = nfa.Initial;
 
-            nfa.Transitions.Add((this.Final, null), new List<uint>() { nfa.Initial });
+            nfa.AddTransition(this.Final, null, new uint[] {nfa.Final});
+            // nfa.Transitions.Add((this.Final, null), new List<uint>() { nfa.Initial });
 
-            nfa.Transitions = nfa.Transitions.Concat(this.Transitions)
-                                             .ToDictionary(g => g.Key, g => g.Value);
+            foreach (var tr in this.Transitions)
+            {
+                nfa.AddTransition(tr.Key.Item1, tr.Key.Item2, tr.Value);
+            }
+
+            // nfa.Transitions = nfa.Transitions.Concat(this.Transitions)
+            //                                  .ToDictionary(g => g.Key, g => g.Value);
 
             return nfa;
         }
 
         public NFA Plus()
         {
-            var mult = this.Mult();
-            UpFloor();
-            return this.Concat(mult); // pp*
+            //              (Final)
+            // q_01 -> ... -> q_f1
+            //  |              |       
+            //  <----- e -------
+            var nfa = new NFA();
+            nfa.Initial = this.Initial;
+            nfa.Final = this.Final;
+
+
+            // nfa.Transitions = nfa.Transitions.Concat(this.Transitions)
+            //                                  .ToDictionary(g => g.Key, g => g.Value);
+            
+            nfa.AddTransition(this.Final, null, new uint[] {nfa.Initial});
+            // nfa.Transitions.Add((this.Final, null), new List<uint>() { nfa.Initial });
+
+            foreach (var tr in this.Transitions)
+            {
+                nfa.AddTransition(tr.Key.Item1, tr.Key.Item2, tr.Value);
+            }
+            return nfa;
         }
 
         // Le suma un valor a todos los valores de las transiciones, necesario para el Plus
@@ -131,6 +169,16 @@ namespace Compiler.Lexer
             }
 
             Transitions = newDict;
+        }
+
+        private void AddTransition(uint from, char? c, IEnumerable<uint> to)
+        {
+            var key = (from, c);
+            if (!Transitions.ContainsKey(key))
+            {
+                Transitions.Add(key, new List<uint>());
+            }
+            Transitions[key].AddRange(to);
         }
 
         public static NFA EmptyNFA()

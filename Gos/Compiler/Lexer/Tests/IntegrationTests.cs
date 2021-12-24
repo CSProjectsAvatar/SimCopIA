@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tests;
 
 namespace Compiler.Lexer.Tests {
     [TestClass]
@@ -39,6 +40,8 @@ namespace Compiler.Lexer.Tests {
         [DataRow("_?[a-zA-Z][_a-zA-Z0-9]*", "0Esteno", false)]
         [DataRow("_?[a-zA-Z][_a-zA-Z0-9]*", "_0EsteTampoco", false)]
         public void RecognizeToken(string regex, string word, bool match) {
+            NFAConverterTests.ResetStatesCounter();
+
             Assert.IsTrue(new ReLexer(_logReLexer).TryTokenize(regex, out var tokens));
 
             using var parser = new Lr1(RegexGram, _log, _logDfa);
@@ -48,11 +51,14 @@ namespace Compiler.Lexer.Tests {
             var nfa = new NfaBuilderVisitor().Visit(reAst);
             var dfa = new ConverterToDFA(nfa).ToDFA();
 
-            if (TryWalk(dfa, word, out var lastState)) {  // pu2 consumir toa la palabra
-                Assert.AreEqual(match, dfa.FinalStates.Contains(lastState));  // el u'ltimo estado es un estado final?
-            } else {
-                Assert.IsFalse(match);
-            }
+            var accept = dfa.Accept(word);
+            Assert.AreEqual(match, accept);
+
+            // if (TryWalk(dfa, word, out var lastState)) {  // pu2 consumir toa la palabra
+            //     Assert.AreEqual(match, dfa.FinalStates.Contains(lastState));  // el u'ltimo estado es un estado final?
+            // } else {
+            //     Assert.IsFalse(match);
+            // }
         }
 
         private bool TryWalk(DFA dfa, string word, out uint lastState) {
