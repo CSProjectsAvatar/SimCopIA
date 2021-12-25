@@ -241,12 +241,13 @@ namespace Compiler {
             /// </summary>
             Div,
 
+            If,
+
             /// <summary>
             /// Identificador.
             /// </summary>
             Id,
-
-            If,
+            
             Return,
             GreaterOrEqualThan,
 
