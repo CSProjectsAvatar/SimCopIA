@@ -8,6 +8,7 @@ namespace Agents
        
         private static int lastRequestID = 0; 
         public int ID {get;}    // un identificador unico para los request
+        public string URL { get; }
         public string sender {get;} 
         public int time {get;}
         public bool satisfied { get;  set; }
