@@ -14,8 +14,8 @@ namespace Compiler.Grammar_Unterminals {
                      | <func-call>
             */
             return derivation[0] switch {
-                Token { Type: Token.TypeEnum.Number } t => new Number { Value = t.Lexem },
-                Token { Type: Token.TypeEnum.Id } t => new Variable { Identifier = t.Lexem },
+                Token { Type: Token.TypeEnum.Number } t => new Number { Value = t.Lexem, Token = t },
+                Token { Type: Token.TypeEnum.Id } t => new Variable(Helper.Logger< Variable>()) { Identifier = t.Lexem, Token = t },
                 FunCallUnt u => u.Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };

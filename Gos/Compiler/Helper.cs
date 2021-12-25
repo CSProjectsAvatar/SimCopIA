@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using DataClassHierarchy;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,14 @@ namespace Compiler {
             } while (@base != null);
 
             return false;
+        }
+
+        internal static GosType GetType(object obj) {
+            return obj switch {
+                double => GosType.Number,
+                bool => GosType.Bool,
+                _ => throw new NotImplementedException()
+            };
         }
 
         internal static ILogger<T> Logger<T>() {

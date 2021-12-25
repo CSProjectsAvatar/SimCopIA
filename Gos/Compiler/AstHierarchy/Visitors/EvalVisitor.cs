@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Compiler;
 using Microsoft.Extensions.Logging;
 
 namespace DataClassHierarchy
@@ -31,38 +32,53 @@ namespace DataClassHierarchy
             throw new Exception("Se llego por el visitor a la raiz, falta implementacion de Visiting"); // @remind esto es para probar, comentar
         }  
     
-        public object CheckBinar(BinaryExpr node) {
-            var (lSuccess, lResult) = Visit(node.Left);
-            if(!lSuccess){
-                log.LogError("Left operand could not be Evalued");
-                return null;
-            }
+        public bool CheckBinar(BinaryExpr node, out object leftResult, out object rightResult) {
+            leftResult = rightResult = default;
 
-            var (rSuccess, rResult) = Visit(node.Right);
-            if(!rSuccess){
-                log.LogError("Right operand could not be Evalued");
-                return null;
+            bool lSuccess;
+            (lSuccess, leftResult) = Visit(node.Left);
+
+            if(!lSuccess){
+                //log.LogError(
+                //    "Line {line}, column {col}: left operand could not be evaluated.", 
+                //    node.Token.Line, 
+                //    node.Token.Column);  @note CREO Q ESTO NO HAC FALTA, CADA CUAL LOGUEA CUAN2 C PART ALGO
+                return false;
             }
-            return (lResult, rResult);
+            bool rSuccess;
+            (rSuccess, rightResult) = Visit(node.Right);
+
+            if(!rSuccess){
+                //log.LogError(
+                //    "Line {line}, column {col}: right operand could not be evaluated.", 
+                //    node.Token.Line, 
+                //    node.Token.Column);  @note CREO Q ESTO NO HAC FALTA, CADA CUAL LOGUEA CUAN2 C PART ALGO
+                return false;
+            }
+            return true;
         }
         public (bool, object) Visiting(BinaryExpr node) {  
-            var tResults = CheckBinar(node);
-            if(tResults is null){
+            if(!CheckBinar(node, out var left, out var right)) {
                 return (false, null);
             }
+            var tResults = (left, right);
 
-            switch (tResults)
-            {
+            switch (tResults) {  // @audit SEGURAMENT NECESITAREMOS UN DICCIONARIO PA SABER Q TIPOS ADMITE CADA OPERADOR EN SUS OPERANDOS
                 case (double lNum, double rNum):
                     var (succ, result) = node.TryCompute(lNum, rNum);
                     if(!succ){
-                        log.LogError("Could not compute {lNum} {this} {rNum}", lNum, this, rNum);
                         return (false, null);
                     }
                     return (true, result);
                 
                 default:
-                    log.LogError("Could not compute {node}", node);
+                    log.LogError(
+                        "Line {line}, column {col}: only numbers can be computed by this operator. Left operand is {ltype} " +
+                            "and right operand is {rtype}.",
+                        node.Token.Line,
+                        node.Token.Column,
+                        Helper.GetType(left),
+                        Helper.GetType(right));
                     return (false, null);
             }
         }
@@ -73,7 +89,6 @@ namespace DataClassHierarchy
             foreach(var expr in node.Args){
                 var (success, result) = Visit(expr);
                 if(!success){
-                    log.LogError("Could not Evaluate {expr}", expr);
                     return (false, null);
                 }
                 exprValues.Add(result);
@@ -97,7 +112,6 @@ namespace DataClassHierarchy
             stackC.Pop(); // destruyendo el ultimo contexto
 
             if(!f_success){
-                log.LogError("Could not Evaluate {defFun}", defFun);
                 return (false, null);
             }
             return (true, returnedValue);
@@ -106,7 +120,6 @@ namespace DataClassHierarchy
         public (bool, object) Visiting(LetVar node){
             var (success, result) = Visit(node.Expr);
             if(!success){
-                log.LogError("Could not Evaluate {node.Expr}", node.Expr);
                 return (false, null);
             }
             Context.SetVar(node.Identifier, result);
@@ -133,7 +146,6 @@ namespace DataClassHierarchy
         public (bool, object) Visiting(Print node){
             var (success, result) = Visit(node.Expr);
             if(!success){
-                log.LogError("Could not Evaluate {node.Expr}", node.Expr);
                 return (false, null);
             }
             _writer.WriteLine(result?.ToString());
@@ -146,8 +158,13 @@ namespace DataClassHierarchy
         
         public (bool, object) Visiting(IfStmt node){
             var (success, result) = Visit(node.Condition);
-            if(!success || result is not bool){ // Error
-                log.LogError("Could not Evaluate {st}", node.Condition);
+            if(!success) {
+                if (result is not bool) {  // @note ESTE CHEKEO NO HAC FALTA XQ LA SINTAXIS ASEGURA Q ESO SEA BOOLEANO
+                    log.LogError(
+                        "Line {line}, column {col}: the conditional can't be a non-boolean expression.", 
+                        node.Token.Line,
+                        node.Token.Column);
+                }
                 return (false, null);
             }
             if(result is bool r && r == true){
@@ -167,7 +184,6 @@ namespace DataClassHierarchy
             foreach (var st in statements){
                 var (success, result) = Visit(st);
                 if(!success){
-                    log.LogError("Could not Evaluate {st}", st);
                     return (false, null);
                 }
                 lastR = result;
@@ -180,7 +196,6 @@ namespace DataClassHierarchy
         public (bool, object) Visiting(Return node){
             var (success, result) = Visit(node.Expr);
             if(!success){
-                log.LogError("Could not Evaluate {node.Expr}", node.Expr);
                 return (false, null);
             }
             _returnFlag = (true, result);
