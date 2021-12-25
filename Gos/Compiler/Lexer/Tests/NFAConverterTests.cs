@@ -11,7 +11,7 @@ namespace Tests {
     [TestClass]
     public class NFAConverterTests : CompilerTests {
 
-        private void ResetStatesCounter(){
+        public static void ResetStatesCounter(){
             NFA.ResetStateCounter();
             DFA.ResetStateCounter();
             DFAState.ResetStateCounter();
@@ -222,8 +222,8 @@ namespace Tests {
             var nfa6 = new NFA('l');
 
             var nfaC2 = nfa4.Concat(nfa5).Concat(nfa6);
-
-            var dfa = new ConverterToDFA(nfaC.Union(nfaC2)).ToDFA();
+            var nfaUnion = nfaC.Union(nfaC2);
+            var dfa = new ConverterToDFA(nfaUnion).ToDFA();
 
             Assert.IsTrue(dfa.Accept("ala"));
             Assert.IsTrue(dfa.Accept("col"));
@@ -578,7 +578,120 @@ namespace Tests {
             Assert.IsFalse(dfa.Accept("pico"));
             Assert.IsFalse(dfa.Accept("alaala"));
         }
-    
+
+        // Test de Upfloor con union
+        [TestMethod]
+        public void TestingUpfloorUnion() {
+            ResetStatesCounter();
+
+            var nfa1 = new NFA('8');
+            var nfa2 = new NFA('8');
+            var nfaConcat = nfa1.Concat(nfa2);
+
+            var dfa = new ConverterToDFA(nfaConcat).ToDFA();
+
+            Assert.IsTrue(dfa.Accept("88"));
+
+            Assert.IsFalse(dfa.Accept("."));
+            Assert.IsFalse(dfa.Accept("88."));
+            Assert.IsFalse(dfa.Accept("8."));
+        }
+
+
+
+        // Test de ToDFA probando el +
+        [TestMethod]
+        public void PlusTest() {
+            ResetStatesCounter();
+
+            var nfa1 = new NFA('8');
+            var nfa2 = new NFA('9');
+            var nfa3 = nfa1.Union(nfa2);
+            var nfaDigit = (nfa3).Plus(); // [8-9]+
+
+            var dfa = new ConverterToDFA(nfaDigit).ToDFA();
+
+            Assert.IsTrue(dfa.Accept("9"));
+            Assert.IsTrue(dfa.Accept("8"));
+            Assert.IsTrue(dfa.Accept("89"));
+            Assert.IsTrue(dfa.Accept("989"));
+
+            Assert.IsFalse(dfa.Accept(".99"));
+            Assert.IsFalse(dfa.Accept(".88"));
+            Assert.IsFalse(dfa.Accept(".8"));
+            Assert.IsFalse(dfa.Accept("."));
+            Assert.IsFalse(dfa.Accept("99."));
+            Assert.IsFalse(dfa.Accept("8."));
+        }
+       
+        // Test de ToDFA probando el +
+        [TestMethod]
+        public void PlusTestMini() {
+            ResetStatesCounter();
+
+            var nfaPt = new NFA('.');
+            var nfa4 = new NFA('8');
+            var nfa5 = new NFA('9');
+            var nfa6 = nfa4.Union(nfa5); // [8-9]
+            var nfaDigit2 = nfa6.Plus(); // [8-9]+
+
+            var nfaDecimal = nfaPt.Concat(nfaDigit2); // .[8-9]+
+            var nfaDec = nfaDecimal.Maybe(); // (.[8-9]+)?
+
+            var dfa = new ConverterToDFA(nfaDec).ToDFA();
+
+            Assert.IsTrue(dfa.Accept(""));
+            Assert.IsTrue(dfa.Accept(".8"));
+            Assert.IsTrue(dfa.Accept(".89"));
+            Assert.IsTrue(dfa.Accept(".989"));
+
+            Assert.IsFalse(dfa.Accept("99"));
+            Assert.IsFalse(dfa.Accept("88"));
+            Assert.IsFalse(dfa.Accept("8.8"));
+            Assert.IsFalse(dfa.Accept("9."));
+            Assert.IsFalse(dfa.Accept("99.1"));
+            Assert.IsFalse(dfa.Accept("8."));
+        }
+       
+
+        // [DataRow("[8-9]+(.[8-9]+)?", "1.23", true)]
+        // Test de ToDFA probando Accept del DFA con union, concat, ?, * y +
+        [TestMethod]
+        public void Digits() {
+            ResetStatesCounter();
+
+            var nfa1 = new NFA('8');
+            var nfa2 = new NFA('9');
+            var nfa3 = nfa1.Union(nfa2);
+            var nfaDigit = (nfa3).Plus(); // [8-9]+
+
+            var nfaPt = new NFA('.');
+            var nfa4 = new NFA('8');
+            var nfa5 = new NFA('9');
+            var nfa6 = nfa4.Union(nfa5); // [8-9]
+            var nfaDigit2 = (nfa6).Plus(); // [8-9]+
+
+            var nfaDecimal = nfaPt.Concat(nfaDigit2); // .[8-9]+
+            var nfaDec = nfaDecimal.Maybe(); // (.[8-9]+)?
+
+            var nfaConcat = nfaDigit.Concat(nfaDec); // [8-9]+(.[8-9]+)?
+
+            var dfa = new ConverterToDFA(nfaConcat).ToDFA();
+
+            Assert.IsTrue(dfa.Accept("89"));
+            Assert.IsTrue(dfa.Accept("989"));
+            Assert.IsTrue(dfa.Accept("89.9"));
+            Assert.IsTrue(dfa.Accept("9.89"));
+            Assert.IsTrue(dfa.Accept("88.8999"));
+
+            Assert.IsFalse(dfa.Accept(".99"));
+            Assert.IsFalse(dfa.Accept(".88"));
+            Assert.IsFalse(dfa.Accept(".8"));
+            Assert.IsFalse(dfa.Accept("."));
+            Assert.IsFalse(dfa.Accept("99."));
+            Assert.IsFalse(dfa.Accept("8."));
+        }
+        
     
     
     
