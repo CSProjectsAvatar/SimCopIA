@@ -2,11 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Compiler.Token;
 
 namespace Compiler.Lexer
 {
     // <summary>
-    // Convertidor de autómata no determinista a uno determinista.
+    // Convertidor de autï¿½mata no determinista a uno determinista.
     // </summary>
     public class ConverterToDFA
     {
@@ -83,8 +84,31 @@ namespace Compiler.Lexer
             }
 
             MarkFinalStates(dfa);
+            MarkLabels(dfa);
             return dfa;
             
+        }
+
+        // Asigna a cada estado del DFA una etiqueta del dict Labels, la menor de las que le corresponden a cada microestado
+        private void MarkLabels(DFA dfa)
+        {
+            foreach (var state in dfa.States) // Qi
+            {
+                var labels = new List<TypeEnum>();
+                foreach (var microState in state.MicroStates) // q_i
+                {
+                    automat.Labels.TryGetValue(microState, out var labelList);
+                    if (labelList is not null){
+                        labels.AddRange(labelList); // labels = labels U labels(q_i)
+                    }
+                   
+                }
+                if (labels.Count != 0){
+                    dfa.Labels[state.StNumber] = labels.Min(); // labels(Qi) = min(labels)
+                }
+                   
+            }
+
         }
 
         // Marca como finales los estados del dfa que contienen algun microestado final del automat
