@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Compiler": {
+      "commandName": "Project",
+      "commandLineArgs": "Sources/fact.gos > out.txt"
+    }
+  }
+}

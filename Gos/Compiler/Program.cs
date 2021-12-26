@@ -1,4 +1,6 @@
+using Compiler.Lexer;
 using Core;
+using DataClassHierarchy;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -9,40 +11,32 @@ using System.Threading;
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
+            using var loggerFactory = LoggerFactory.Create(builder => { // configurando niveles de logueo
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("Core", LogLevel.Information)
+                    .AddFilter("Compiler", LogLevel.Information)
+                    .AddConsole();
+            });
+            Helper.LogFact = loggerFactory;
 
-            // using var loggerFactory = LoggerFactory.Create(builder => { // configurando niveles de logueo
-            //     builder
-            //         .AddFilter("Microsoft", LogLevel.Warning)
-            //         .AddFilter("System", LogLevel.Warning)
-            //         .AddFilter("Core", LogLevel.Information)
-            //         .AddConsole();
-            // });
-            // var @params = JsonSerializer.Deserialize<SimParameters>(File.ReadAllText("appsettings.json"));
+            ILogger<ReLexer> logReLex = loggerFactory.CreateLogger<ReLexer>();
+            ILogger<Lr1> logLr1 = loggerFactory.CreateLogger<Lr1>();
+            ILogger<Lr1Dfa> logLr1Dfa = loggerFactory.CreateLogger<Lr1Dfa>();
+            ILogger<Lexer.Lexer> logLex = loggerFactory.CreateLogger<Lexer.Lexer>();
+            var lex = new Lexer.Lexer(Helper.TokenWithRegexs, new ReGrammar(), logReLex, logLr1, logLr1Dfa, logLex);
+            var tokens = lex.Tokenize(File.ReadAllText(args[0]));
+            var parser = new Lr1(new GosGrammar(), logLr1, logLr1Dfa);
 
-            // var log = loggerFactory.CreateLogger<Program>();
+            if (parser.TryParse(tokens, out var ast)) {
+                var ctx = new Context();
 
-            // var simtor = new OneLeaderFollowersSimulator(
-            //     @params.Followers,
-            //     @params.Lambda,
-            //     loggerFactory.CreateLogger<OneLeaderFollowersSimulator>());
-
-            // log.LogInformation("Comienzo de la simulación...");
-            // log.LogInformation(
-            //     $"{@params.Followers} seguidores, " +
-            //     $"lambda = {@params.Lambda} y " +
-            //     $"el sistema cierra en el tiempo {@params.CloseTime}.");
-
-            // simtor.Run(@params.CloseTime);
-
-            // log.LogInformation("Simulación terminada.");
-
-            // Thread.Sleep(100); // esperando a q el mensaje d arriba se escriba
-
-            // Console.WriteLine("\n===========Resultados===========\n");
-            // Console.WriteLine("Arribos:");
-            // Console.WriteLine(string.Join('\n', simtor.Arrivals));
-            // Console.WriteLine("\nPartidas:");
-            // Console.WriteLine(string.Join('\n', simtor.GetDepartures()));
+                if (ast.Validate(ctx)) {
+                    var vis = new EvalVisitor(ctx, loggerFactory.CreateLogger<EvalVisitor>(), Console.Out);
+                    vis.Visit(ast);
+                }
+            }
         }
     }
 }
