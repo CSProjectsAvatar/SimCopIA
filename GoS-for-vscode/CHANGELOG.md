@@ -1,7 +1,31 @@
 # Change Log
-
+Todos los cambios notables de este proyecto se documentarán en este archivo.
+El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 <!-- Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file. -->
 
-## [Unreleased]
+## 0.1.1
+### Fixed
+- Imagen *demo* del README. Ten&iacute;a un formato de comentario que no se admite.
+## 0.1.0
+### Added
+- Lo que se hizo en la versi&oacute;n [0.0.1](#v001) en el CHANGELOG.
+### Changed
+- Los comentarios de una l&iacute;nea se colocan con `#`.
+- Soportamos el Visual Studio Code de su versi&oacute;n 1.62.0 en adelante.
 
-- Initial release
+### Removed
+- No soportamos comentarios de bloque.
+
+## 0.0.1
+### Added
+- *Syntax highlight* para el lenguaje GoS:
+  -  comentarios
+  -  *keywords* de control: `if`, `return`
+  -  otros *keywords*: `fun`, `let`, `print`
+  -  operadores aritm&eacute;ticos: `>`, `<`, `=`, `==`, `+`, `-`, `*`, `/`
+  -  n&uacute;meros
+  -  identificadores
+  -  funciones
+-  README
+-  CHANGELOG
+-  Autocompletamiento de caracteres grupales, como son `{`, `(`, etc.

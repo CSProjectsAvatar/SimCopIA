@@ -11,13 +11,9 @@
 	"repository": {
 		"comments": {
 			"patterns": [{
-					"name": "comment.line.double-dash.gos",
-					"begin": "\\/\\/",
+					"name": "comment.line.number-sign.gos",
+					"begin": "#",
 					"while": "(?=not)possible"
-				}, {
-					"name": "comment.block.gos",
-					"begin": "\\/\\*",
-					"end": "\\*\\/"
 				}]
 		},
 		"keywords": {

@@ -2,25 +2,34 @@
     "name": "gos",
     "displayName": "GoS",
     "description": "Syntax highlight para el lenguaje GoS.",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "engines": {
-        "vscode": "^1.63.0"
+        "vscode": "^1.62.0"
     },
     "categories": [
         "Programming Languages"
     ],
     "contributes": {
-        "languages": [{
-            "id": "gos",
-            "aliases": ["gos", "gos"],
-            "extensions": [".gos"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "gos",
-            "scopeName": "source.gos",
-            "path": "./syntaxes/gos.tmLanguage.json"
-        }]
+        "languages": [
+            {
+                "id": "gos",
+                "aliases": [
+                    "gos",
+                    "gos"
+                ],
+                "extensions": [
+                    ".gos"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "gos",
+                "scopeName": "source.gos",
+                "path": "./syntaxes/gos.tmLanguage.json"
+            }
+        ]
     },
     "repository": "https://github.com/CSProjectsAvatar/SimCopIA",
     "publisher": "TheGoSTeam"
