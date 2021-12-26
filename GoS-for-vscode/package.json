@@ -2,7 +2,7 @@
     "name": "gos",
     "displayName": "GoS",
     "description": "Syntax highlight para el lenguaje GoS.",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "engines": {
         "vscode": "^1.62.0"
     },
