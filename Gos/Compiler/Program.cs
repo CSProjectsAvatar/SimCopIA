@@ -25,12 +25,23 @@ namespace Compiler {
 
             //Probando los agentes con servidores simples.
             var env = new Agents.Environment();
-            var a1 = env.Build.SimpleServer();
-
-            env.AddRequest("0","1",10);
-            env.AddRequest("0","1",15);
-            env.AddRequest("0","1",22);
             
+
+            env.AddAgent(new Agent(env, "2"));
+            env.AddAgent(new Agent(env, "3"));
+            env.AddAgent(new Agent(env, "4"));
+            env.AddAgent(new Agent(env, "5"));
+            env.AddAgent(new Agent(env, "6"));
+            env.AddAgent(new Agent(env, "7"));
+
+            var a1 = env.Build.DistributionRequestServer();
+
+            env.AddRequest("0","1", "youtube.com", 10);
+            env.AddRequest("0","1", "amazon.com", 15);
+            env.AddRequest("0","1", "facebook.com", 22);
+            env.AddRequest("0", "1", "claudia.com", 24);
+
+
             env.Run();
 
             System.Console.WriteLine("Responses To Env:");

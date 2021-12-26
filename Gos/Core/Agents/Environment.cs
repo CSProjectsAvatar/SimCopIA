@@ -47,7 +47,10 @@ namespace Agents{
         }
         public void PrintAgent(Agent a,string toPrint){ // debug...
             System.Console.WriteLine($"( Time:{this.currentTime},  Agent:{a.ID} ) - {toPrint}"); 
-        } 
+        }
+
+        public void AddRequest(string sender, string toAgent, string url, int time)//con URL
+            => turn.Add(time, new Request(sender, toAgent, this,url));
         public void AddRequest(string sender,string toAgent, int time)
             => turn.Add(time,new Request(sender,toAgent,this));
         public void AddRequest(Request r, int time) => turn.Add(time, r);
@@ -77,6 +80,12 @@ namespace Agents{
             public DistributionServer DistributionServer(){
                 var agent = new DistributionServer(env,(nextInt++).ToString(),null);
                 return RegisterAgent(agent) as DistributionServer;
+            }
+
+            public DistributionRequestServer DistributionRequestServer()
+            {
+                var agent = new DistributionRequestServer(env, (nextInt++).ToString());
+                return RegisterAgent(agent) as DistributionRequestServer;
             }
         }
     }

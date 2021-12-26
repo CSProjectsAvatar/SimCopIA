@@ -20,6 +20,14 @@ namespace Agents
             environment = e;
             this.sender = sender;
         }
+        public Request(string sender, string ID, Environment e,string URL)//con url
+        {
+            this.ID = lastRequestID++;
+            this.agent = e.GetAgent(ID);
+            environment = e;
+            this.sender = sender;
+            this.URL = URL;
+        }
         public void Execute(){
 
             this.satisfied = true;
