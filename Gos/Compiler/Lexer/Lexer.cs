@@ -10,13 +10,17 @@ using System.Threading.Tasks;
 namespace Compiler.Lexer {
     class Lexer : IDisposable {
         private readonly DFA _dfa;
+        private readonly ILogger<Lexer> _log;
 
         public Lexer(
                 IEnumerable<(string Regex, Token.TypeEnum Token)> tokenRegexs,
                 Grammar regexGrammar,
                 ILogger<ReLexer> reLexerLog,
                 ILogger<Lr1> lr1Logger,
-                ILogger<Lr1Dfa> lr1DfaLogger) {
+                ILogger<Lr1Dfa> lr1DfaLogger,
+                ILogger<Lexer> log = null) {
+            _log = log;
+
             var reLex = new ReLexer(reLexerLog);
             using var reParser = new Lr1(regexGrammar, lr1Logger, lr1DfaLogger);
             var reVis = new NfaBuilderVisitor();
@@ -73,13 +77,17 @@ namespace Compiler.Lexer {
                     } else if (labMark.HasValue) {
                         var (lastI, tokenType) = labMark.Value;
 
+                        col -= (uint)lexeme.Length;  // retrocediendo hasta el 1er caracter del lexema
+
                         if (i != lastI) {
                             lexeme.Remove(lastI, i - lastI);
                         }
-                        yield return new Token(tokenType, line, col - (uint)lastI, lexeme.ToString());
+                        var tok = new Token(tokenType, line, col, lexeme.ToString());
+                        LogToken(tok);
+                        yield return tok;
 
                         i = lastI - 1;  // pa q en la pro'xima iteracio'n sea lastI
-                        col = col - (uint)lastI - 1;  // pa q en la pro'xima iteracio'n sea lastI
+                        col += (uint)lexeme.Length - 1;  // posiciona'ndose en el u'ltimo caracter del lexema, pa en la pro'xima iter ser el caracter siguient
                         state = _dfa.Initial;
                         labMark = null;
                         lexeme.Clear();
@@ -91,9 +99,11 @@ namespace Compiler.Lexer {
                 if (gosCode[i] == '#') {
                     ignoreRestOfLine = true;
                 }
-                else if (IsNewLine(gosCode, i) && endl.HasValue) {
-                    if (endl.Value) {
-                        yield return new Token(Token.TypeEnum.EndOfLine, line, col, Environment.NewLine);
+                else if (IsNewLine(gosCode, ref i)) {
+                    if (endl.HasValue && endl.Value) {
+                        var tok = new Token(Token.TypeEnum.EndOfLine, line, col, Environment.NewLine);
+                        LogToken(tok);
+                        yield return tok;
                     }
                     endl = null;  // la li'nea c akbo', x tanto, vuelvo a indefinir la bandera
                     line++;
@@ -105,9 +115,25 @@ namespace Compiler.Lexer {
             yield return new Token(Token.TypeEnum.Eof, line, col, "");
         }
 
-        private static bool IsNewLine(string str, int idx) {
-            return str[idx] == '\r' && idx + 1 < str.Length && str[idx + 1] == '\n'  // fin d li'nea en plataformas no-Unix
-                || str[idx] == '\n';  // fin d li'nea en plataformas Unix
+        private void LogToken(Token tok) {
+            _log?.LogDebug(
+                "Token produced. Type: {type}, lexeme: {lex}, line: {l}, column: {c}",
+                tok.Type,
+                tok.Lexem,
+                tok.Line,
+                tok.Column);
+        }
+
+        private static bool IsNewLine(string str, ref int idx) {
+            switch (str[idx]) {
+                case '\r' when idx + 1 < str.Length && str[idx + 1] == '\n':  // fin d li'nea en plataformas no-Unix
+                    idx++;
+                    return true;
+                case '\n':
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

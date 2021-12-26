@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Compiler.Lexer.Tests {
     [TestClass]
     public class LexerTests : LexerBaseTests {
-        private IEnumerable<(string Regex, Token.TypeEnum Token)> _tknRes;
+        private IEnumerable<(string Regex, Token.TypeEnum Token)> _tknRes => Helper.TokenWithRegexs;
         private ILogger<ReLexer> _logReLex;
         private ILogger<Lr1> _logLr1;
         private ILogger<Lr1Dfa> _logLr1Dfa;
@@ -22,20 +22,6 @@ namespace Compiler.Lexer.Tests {
             _logLr1 = LoggerFact.CreateLogger<Lr1>();
             _logLr1Dfa = LoggerFact.CreateLogger<Lr1Dfa>();
             _log = LoggerFact.CreateLogger<LexerTests>();
-            _tknRes = new[] {
-                ("print", Token.TypeEnum.Print),
-                ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
-                ("if", Token.TypeEnum.If),
-                ("{", Token.TypeEnum.LBrace),
-                ("}", Token.TypeEnum.RBrace),
-                ("_?[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
-                ("<", Token.TypeEnum.LowerThan),
-                (@"\+", Token.TypeEnum.Plus),
-                ("let", Token.TypeEnum.Let),
-                ("=", Token.TypeEnum.Eq),
-                (@"\-", Token.TypeEnum.Minus),
-                ("/", Token.TypeEnum.Div)
-            };
             Helper.LogFact = LoggerFact;
         }
 
@@ -158,11 +144,30 @@ namespace Compiler.Lexer.Tests {
         }
 
         [TestMethod]
-        public void LineComment() {
+        public void RestOfLineComment() {
             using var lex = new Lexer(_tknRes, RegexGram, _logReLex, _logLr1, _logLr1Dfa);
             var tokens = lex.Tokenize(
                 @"let a=5+3#esto suma
                   print 2-1  #y esto imprime 1");
+            _log.LogInformation("{tokens}", tokens.Select(t => t.Lexem));
+
+            Assert.IsTrue(Enumerable.SequenceEqual(
+                tokens,
+                new[] {
+                    Token.Let, Token.IdFor("a"), Token.Eq, Token.NumberFor(5), Token.Plus, Token.NumberFor(3), Token.Endl,
+                    Token.Print, Token.NumberFor(2), Token.Minus, Token.NumberFor(1), Token.Endl,
+                    Token.Eof
+                },
+                new TokenCmp()));
+        }
+
+        [TestMethod]
+        public void EntireLineComment() {
+            using var lex = new Lexer(_tknRes, RegexGram, _logReLex, _logLr1, _logLr1Dfa);
+            var tokens = lex.Tokenize(
+                @"let a=5+3
+                  # lo d alla' arriba suma
+                  print 2-1");
             _log.LogInformation("{tokens}", tokens.Select(t => t.Lexem));
 
             Assert.IsTrue(Enumerable.SequenceEqual(
