@@ -570,9 +570,11 @@ namespace Tests {
             Assert.IsFalse(dfa.Accept("8."));
         }
         
-    
-    
-    
+        [TestCleanup]
+        public void Clean() {
+            NFA.ResetStateCounter();
+            DFAState.ResetStateCounter();
+        }
     }
 
 }

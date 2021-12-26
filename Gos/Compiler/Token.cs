@@ -200,7 +200,7 @@ namespace Compiler {
             return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());
         }
 
-        public enum TypeEnum {
+        public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
             /// <summary>
             /// Fin de archivo.
             /// </summary>
@@ -278,13 +278,13 @@ namespace Compiler {
             /// </summary>
             Div,
 
+            If,
+            Return,
+
             /// <summary>
             /// Identificador.
             /// </summary>
             Id,
-
-            If,
-            Return,
             GreaterOrEqualThan,
 
             /// <summary>
