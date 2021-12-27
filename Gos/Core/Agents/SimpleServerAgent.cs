@@ -19,11 +19,11 @@ namespace Agents
                 var res = new Response(r.ID,this,r.sender,this.environment,"Servidor no disponible");
                 res.SetTime(this.environment.currentTime);
                 status.AddEvent(this.environment.currentTime, res );
-                this.environment.PrintAgent(this,"No esta disponible para nuevos request.");
+                this.environment.PrintAgent(this,"Llega requst pero no esta disponible.");
                 return;
             }
             
-            environment.PrintAgent(this,"LLega paquete.");
+			this.environment.PrintAgent(this,"llega request de "+r.sender);
                         
             Observer o = new Observer(this,environment, r);
 
@@ -42,7 +42,7 @@ namespace Agents
 
         private void SendResponse(IObservable status,Observer o){
             Request originalRequest = (o.Object as Request);
-            Response response = new(originalRequest.ID,this,originalRequest.sender,environment,"Cosas de servidor simple.");
+            Response response = new(originalRequest.ID,this,originalRequest.sender,environment,$"Cosas de servidor simple {this.ID}.");
             response.SetTime(environment.currentTime);
             status.AddEvent(environment.currentTime,response);
         }

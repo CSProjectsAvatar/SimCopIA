@@ -15,7 +15,8 @@ namespace Agents{
         public List<Response> solutionResponses; // poner privado y hacer como que un Enumerable :D
         public int currentTime {get; set;}
 
-        public Environment(){
+        public Environment(bool debug=false){
+			this.debug = debug;
             currentTime = 0;
             agents = new();
             turn = new();
@@ -42,10 +43,12 @@ namespace Agents{
                     return a;
             return null;
         }
+		bool debug;
         public void SubsribeEvent(IExecutable e, int time){
             turn.Add(time,e);
         }
         public void PrintAgent(Agent a,string toPrint){ // debug...
+			if( !this.debug ) return;
             System.Console.WriteLine($"( Time:{this.currentTime},  Agent:{a.ID} ) - {toPrint}"); 
         }
 

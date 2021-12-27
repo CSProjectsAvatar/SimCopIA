@@ -24,15 +24,15 @@ namespace Compiler {
 
 
             //Probando los agentes con servidores simples.
-            var env = new Agents.Environment();
+            var env = new Agents.Environment(debug:true);
             
 
-            env.AddAgent(new Agent(env, "2"));
-            env.AddAgent(new Agent(env, "3"));
-            env.AddAgent(new Agent(env, "4"));
-            env.AddAgent(new Agent(env, "5"));
-            env.AddAgent(new Agent(env, "6"));
-            env.AddAgent(new Agent(env, "7"));
+            env.AddAgent(new SimpleServer(env, "2"));
+            env.AddAgent(new SimpleServer(env, "3"));
+            env.AddAgent(new SimpleServer(env, "4"));
+            env.AddAgent(new SimpleServer(env, "5"));
+            env.AddAgent(new SimpleServer(env, "6"));
+            env.AddAgent(new SimpleServer(env, "7"));
 
             var a1 = env.Build.DistributionRequestServer();
 

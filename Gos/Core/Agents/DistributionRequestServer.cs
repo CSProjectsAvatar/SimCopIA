@@ -29,11 +29,15 @@ namespace Agents
 
             if (requestNeeds.ContainsKey(r.URL))
             {
+				this.environment.PrintAgent(this,"llega request de "+r.sender);
+
                 originalRequest.Add(r, new List<Request> { });
                 responseRequest.Add(r.ID, "");
                 List<Agent> servers = requestNeeds[r.URL];
                 foreach (var item in servers)
                 {
+					this.environment.PrintAgent(this,"mandando request a "+item.ID);
+
                     Request new_request = new Request(this.ID, item.ID, environment);
                     status.AddEvent(environment.currentTime, new_request);
                     originalRequest[r].Add(new_request);
@@ -42,9 +46,9 @@ namespace Agents
 
         }
 
-        private void GiveResponse(IResponsable
-            status, Response r)
+        private void GiveResponse(IResponsable status, Response r)
         {
+			this.environment.PrintAgent(this,"llega response de "+r.sender.ID);
             bool mark = false;
             foreach (var item in originalRequest.Keys)
             {
@@ -58,6 +62,7 @@ namespace Agents
                         if (originalRequest[item].Count == 0)
                         {
                             var new_response = new Response(item.ID, this, item.sender, environment, responseRequest[item.ID]);
+							new_response.SetTime(this.environment.currentTime);
                             status.AddEvent(environment.currentTime, new_response);
                             responseRequest.Remove(item.ID);
                             originalRequest.Remove(item);
