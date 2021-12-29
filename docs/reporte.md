@@ -139,6 +139,7 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
         | <print-stat>
         | <return>
         | <func-call>
+        | ID <right-conn>
 
 <let-var> := "let" ID "=" <expr>
 
@@ -156,11 +157,9 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 <expr> := <cond>
 		| <math>
         | "simplew"
-        | <distrib>
+        | "distw"
 
-<distrib> := "distw" <work-conn>
-
-<work-conn> := "->" <id-list>
+<right-conn> := "->" <id-list>
 
 <math> := <math> "+" <term>
         | <math> "-" <term>

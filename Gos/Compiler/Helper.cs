@@ -1,4 +1,5 @@
-﻿using DataClassHierarchy;
+﻿using Agents;
+using DataClassHierarchy;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,10 @@ namespace Compiler {
             (@"\)", Token.TypeEnum.RPar),
             (@"\*", Token.TypeEnum.Times),
             ("fun", Token.TypeEnum.Fun),
-            ("return", Token.TypeEnum.Return)
+            ("return", Token.TypeEnum.Return),
+            ("simplew", Token.TypeEnum.SimpleWorker),
+            ("distw", Token.TypeEnum.DistWorker),
+            (@"\->", Token.TypeEnum.RightArrow)
         };
 
         /// <summary>
@@ -59,6 +63,7 @@ namespace Compiler {
             return obj switch {
                 double => GosType.Number,
                 bool => GosType.Bool,
+                Agent => GosType.Server,
                 _ => throw new NotImplementedException()
             };
         }

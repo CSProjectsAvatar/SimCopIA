@@ -9,7 +9,7 @@ namespace Compiler {
         private static readonly UntType LetVar = new UntType(typeof(LetVarUnt));
         private static readonly UntType DefFunc = new UntType(typeof(DefFunUnt));
         private static readonly UntType Print = new UntType(typeof(PrintUnt));
-        private static readonly UntType ArgList = new UntType(typeof(ArgListUnt));
+        private static readonly UntType IdList = new UntType(typeof(IdListUnt));
         private static readonly UntType Expr = new UntType(typeof(ExpressionUnt));
         private static readonly UntType Math = new UntType(typeof(MathUnt));
         private static readonly GramSymType Math_ = Math;  // para poder aplicar los operadores > y <
@@ -21,6 +21,8 @@ namespace Compiler {
         private static readonly UntType If = new UntType(typeof(IfUnt));
         private static readonly UntType Return = new UntType(typeof(ReturnUnt));
         private static readonly UntType Condition = new UntType(typeof(ConditionUnt));
+        private static readonly UntType RightConn = new UntType(typeof(RightConnUnt));
+
 
         #region terminales
         private static readonly TokenType n = TokenType.Number;
@@ -47,6 +49,9 @@ namespace Compiler {
         private static readonly TokenType rbrak = Token.TypeEnum.RBracket;
         private static readonly TokenType lbrak = Token.TypeEnum.LBracket;
         private static readonly TokenType times = Token.TypeEnum.Times;
+        private static readonly TokenType simplew = Token.TypeEnum.SimpleWorker;
+        private static readonly TokenType distw = Token.TypeEnum.DistWorker;
+        private static readonly TokenType rightArrow = Token.TypeEnum.RightArrow;
 
         #endregion
         public GosGrammar() : base(
@@ -66,15 +71,16 @@ namespace Compiler {
             Stat > Print,
             Stat > Return,
             Stat > FuncCall,
+            Stat > (id, RightConn),
 
             LetVar > (let, id, eq, Expr),
 
-            DefFunc > (fun, id, lpar, ArgList, rpar, lbrace, StatList, rbrace),
+            DefFunc > (fun, id, lpar, IdList, rpar, lbrace, StatList, rbrace),
 
             Print > (print, Expr),
 
-            ArgList > id,
-            ArgList > (id, comma, ArgList),
+            IdList > id,
+            IdList > (id, comma, IdList),
 
 #pragma warning disable CS1718 // Comparison made to same variable
             Condition > (Math_ < Math_),
@@ -83,7 +89,11 @@ namespace Compiler {
 #pragma warning restore CS1718 // Comparison made to same variable
 
             Expr > Condition,
-            Expr > Math,
+            Expr > Math, 
+            Expr > simplew,
+            Expr > distw,
+
+            RightConn > (rightArrow, IdList),
 
             Math > Math + Term,
             Math > Math - Term,

@@ -9,7 +9,7 @@ namespace Compiler {
             // <def-func> := "fun" ID "(" <arg-list> ")" "{" <stat-list> "}"
             var t = derivation[1] as Token;
             string id = t.Lexem;
-            var arg = (derivation[3] as ArgListUnt).Args;
+            var arg = (derivation[3] as IdListUnt).Ids;
             var statements = (derivation[6] as StatListUnt).Statements;
 
             return new DefFun(Helper.Logger<DefFun>()){

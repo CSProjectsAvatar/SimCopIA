@@ -4,6 +4,7 @@
     /// </summary>
     internal enum GosType {
         Number,
-        Bool
+        Bool,
+        Server
     }
 }
