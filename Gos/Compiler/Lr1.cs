@@ -101,7 +101,7 @@ namespace Compiler {
         }
 
         private void SyntaxError(Token token) {
-            _log?.LogError("Syntax error in line {line}, column {col} at {lexem}.",  // @todo MEJORA ESTE MENSAG 
+            _log?.LogError("Syntax error in line {line}, column {col} at {lexem}.",
                 token.Line,
                 token.Column,
                 token.Type switch {

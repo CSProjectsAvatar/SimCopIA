@@ -129,7 +129,7 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 
 <stat-list> := <stat> ";"
              | <stat> ";" <stat-list>
-	           | <block-stat>
+	         | <block-stat>
              | <block-stat> <stat-list>
              
 <block-stat> := <if>
@@ -142,12 +142,12 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 
 <let-var> := "let" ID "=" <expr>
 
-<def-func> := "fun" ID "(" <arg-list> ")" "{" <stat-list> "}"
+<def-func> := "fun" ID "(" <id-list> ")" "{" <stat-list> "}"
 
 <print-stat> := "print" <expr>
 
-<arg-list> := ID
-            | ID "," <arg-list>
+<id-list> := ID
+           | ID "," <id-list>
 
 <cond> := <math> "<" <math>
 		| <math> ">" <math>
@@ -155,6 +155,12 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 
 <expr> := <cond>
 		| <math>
+        | "simplew"
+        | <distrib>
+
+<distrib> := "distw" <work-conn>
+
+<work-conn> := "->" <id-list>
 
 <math> := <math> "+" <term>
         | <math> "-" <term>
