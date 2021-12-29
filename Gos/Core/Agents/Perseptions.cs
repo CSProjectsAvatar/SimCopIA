@@ -8,6 +8,7 @@ namespace Agents
        
         private static int lastRequestID = 0; 
         public int ID {get;}    // un identificador unico para los request
+        public string URL { get; }
         public string sender {get;} 
         public int time {get;}
         public bool satisfied { get;  set; }
@@ -22,6 +23,14 @@ namespace Agents
         }
         public Request(string sender, string ID, Environment e, bool forKnowAvailibity) : this(sender,ID,e)
             => this.ToKnowAvailibility = forKnowAvailibity;
+        public Request(string sender, string ID, Environment e,string URL)//con url
+        {
+            this.ID = lastRequestID++;
+            this.agent = e.GetAgent(ID);
+            environment = e;
+            this.sender = sender;
+            this.URL = URL;
+        }
         public void Execute(){
 
             this.satisfied = true;

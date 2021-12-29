@@ -9,16 +9,24 @@ namespace Compiler {
     class Program {
         static void Main(string[] args) {
             //Probando los agentes con servidores simples.
-            var env = new Agents.Environment();
-            var a1 = env.Build.SimpleServer();
-            var a2 = env.Build.SimpleServer();
-            var a3 = env.Build.DistributionServer(new List<string>(){"1","2"});
-
-
-            env.AddRequest("0","3",10);
-            env.AddRequest("0","3",15);
-            env.AddRequest("0","3",22);
+            var env = new Agents.Environment(debug:true);
             
+
+            env.AddAgent(new SimpleServer(env, "2"));
+            env.AddAgent(new SimpleServer(env, "3"));
+            env.AddAgent(new SimpleServer(env, "4"));
+            env.AddAgent(new SimpleServer(env, "5"));
+            env.AddAgent(new SimpleServer(env, "6"));
+            env.AddAgent(new SimpleServer(env, "7"));
+
+            var a1 = env.Build.DistributionRequestServer();
+
+            env.AddRequest("0","1", "youtube.com", 10);
+            env.AddRequest("0","1", "amazon.com", 15);
+            env.AddRequest("0","1", "facebook.com", 22);
+            env.AddRequest("0", "1", "claudia.com", 24);
+
+
             env.Run();
 
             System.Console.WriteLine("Responses To Env:");
