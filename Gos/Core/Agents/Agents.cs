@@ -17,7 +17,7 @@ namespace Agents{
             this.functionsToHandleRequests = new();
             this.functionsToHandleResponses = new();
             this.functionsToHandleStatus = new();
-            this.status=new Status();
+            this.status=new Status(this);
             this.environment.PrintAgent(this,"Agente creado!!");
         }
         public void HandleRequest(Request r){
@@ -58,6 +58,18 @@ namespace Agents{
             foreach(var e in status.EnumerateAndClear()){
                 environment.SubsribeEvent(e.Item2,e.Item1);
             }
+        }
+
+
+        //Para agregar Handlers...
+        public void AddRequestHandlerFunction(Action<IRequestable,Request> fun){
+            this.functionsToHandleRequests.Add(fun);
+        }
+        public void AddResponseHandlerFunction(Action<IResponsable,Response> fun){
+            this.functionsToHandleResponses.Add(fun);
+        }
+        public void AddRequestHandlerFunction(Action<IObservable,Observer> fun){
+            this.functionsToHandleStatus.Add(fun);
         }
     }
 } 

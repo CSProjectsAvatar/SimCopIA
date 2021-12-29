@@ -83,19 +83,22 @@ namespace Agents{
             public AgentCreator(Environment env){
                 this.env = env;
             }
-            public SimpleServer SimpleServer(){
-                var agent = new SimpleServer(env, (nextInt++).ToString());
-                return RegisterAgent(agent) as SimpleServer;
+            public Worker Worker(string ID=""){
+                string id =  ID == "" ? (nextInt++).ToString() : ID;
+                var agent = new Worker(env, id);
+                return RegisterAgent(agent) as Worker;
             } 
-            public DistributionServer DistributionServer(List<string> workers){
-                var agent = new DistributionServer(env,(nextInt++).ToString(),workers);
-                return RegisterAgent(agent) as DistributionServer;
+            public Distributor Distributor(List<string> workers,string ID=""){
+                string id =  ID == "" ? (nextInt++).ToString() : ID;
+                var agent = new Distributor(env,id,workers);
+                return RegisterAgent(agent) as Distributor;
             }
 
-            public DistributionRequestServer DistributionRequestServer()
+            public InteractiveWorker InteractiveWorker(string ID="")
             {
-                var agent = new DistributionRequestServer(env, (nextInt++).ToString());
-                return RegisterAgent(agent) as DistributionRequestServer;
+                string id =  ID == "" ? (nextInt++).ToString() : ID;
+                var agent = new InteractiveWorker(env, id);
+                return RegisterAgent(agent) as InteractiveWorker;
             }
         }
     }

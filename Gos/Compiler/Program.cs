@@ -7,44 +7,37 @@ using Agents;
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
-           /* using var loggerFactory = LoggerFactory.Create(builder => {
-                builder
-                    .AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("Core", LogLevel.Debug)
-                    .AddConsole();
-            });
-            var simtor = new OneServerSimulator(loggerFactory.CreateLogger<OneServerSimulator>());
-            simtor.Run(10);
-
-            Console.WriteLine(string.Join('\n', simtor.Arrivals));
-            Console.WriteLine();
-            Console.WriteLine(string.Join('\n', simtor.Departures));
-            */
-             
-
 
             //Probando los agentes con servidores simples.
             var env = new Agents.Environment(debug:true);
+
+            //workers
+            env.AddAgent(new Worker(env, "2"));
+            env.AddAgent(new Worker(env, "6"));
+            
+            // Distribuidor de carga con 2 workers
+            env.AddAgent(new Worker(env, "4"));
+            env.AddAgent(new Worker(env, "5"));
+            env.AddAgent(new Distributor(env, "dist1", new List<string>{"4","5"}));
             
 
-            env.AddAgent(new SimpleServer(env, "2"));
-            env.AddAgent(new SimpleServer(env, "3"));
-            env.AddAgent(new SimpleServer(env, "4"));
-            env.AddAgent(new SimpleServer(env, "5"));
-            env.AddAgent(new SimpleServer(env, "6"));
-            env.AddAgent(new SimpleServer(env, "7"));
+            // interactive worker con 3 workers enlazados
+            var a1 = env.Build.InteractiveWorker("facebook.com");
+            a1.AddToRequirmentsDic("/",new List<string>{"2","dist1","6"});
+            a1.AddToRequirmentsDic("/other",new List<string>{"4,5"});
+            a1.AddToRequirmentsDic("/about",new List<string>{"6"});
 
-            var a1 = env.Build.DistributionRequestServer();
+            
 
-            env.AddRequest("0","1", "youtube.com", 10);
-            env.AddRequest("0","1", "amazon.com", 15);
-            env.AddRequest("0","1", "facebook.com", 22);
-            env.AddRequest("0", "1", "claudia.com", 24);
-
-
+            // request del lado del cliente (desde el environment, su identificador es 0)
+            env.AddRequest("0","facebook.com", "/", 10);
+            env.AddRequest("0","facebook.com", 15);
+            
+            // corre la simulación
             env.Run();
 
+
+            // Imprime los responses que llegaron al cliente (environment)
             System.Console.WriteLine("Responses To Env:");
             foreach(var r in env.solutionResponses) 
                 System.Console.WriteLine($"time:{r.responseTime} body:{r.body}");

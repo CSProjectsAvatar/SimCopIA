@@ -3,32 +3,36 @@ using System.Collections.Generic;
 
 namespace Agents
 {
-    public class SimpleServer : Agent{ 
+    public class Worker : Agent{ 
         public int TotalRequests {get;}
-        public SimpleServer (Environment env, string ID, int totalRequests = 1): base(env, ID){
+        public Worker (Environment env, string ID, int totalRequests = 1): base(env, ID){
             this.TotalRequests = totalRequests;
 
             this.functionsToHandleRequests.Add(this.GettingRequest);
             this.functionsToHandleRequests.Add(this.ProcessRequest);
-             
+            
             this.functionsToHandleStatus.Add(this.SendResponse);
             this.functionsToHandleStatus.Add(this.SetAvailableAfterSendResponse);
         }
+
+       // public Worker (Environment env, string ID, List<Action<...> functions, int totalRequests = 1): base(env, ID, functions){
+
         
 
         private void GettingRequest(IRequestable status, Request r){
             if(!status.IsAvailable){ 
-                var res = new Response(r.ID,this,r.sender,this.environment,"Servidor no disponible");
-                res.SetTime(this.environment.currentTime);
-                status.AddEvent(this.environment.currentTime, res );
-                this.environment.PrintAgent(this,"Llega requst pero no esta disponible.");
+                
+                var res = new Response(r.ID,status.agent,r.sender,status.environment,"Servidor no disponible");
+                res.SetTime(status.environment.currentTime);
+                status.AddEvent(status.environment.currentTime, res );
+                status.environment.PrintAgent(status.agent,"Llega requst pero no esta disponible.");
                 return;
             }
             
-            environment.PrintAgent(this,$"LLega request desde {r.sender}.");
+            environment.PrintAgent(status.agent,$"LLega request desde {r.sender}.");
 
                         
-            Observer o = new Observer(this,environment, r);
+            Observer o = new Observer(status.agent,status.environment, r);
 
             int time = environment.currentTime + TimeOffset();
             status.AddEvent(time,o);
@@ -45,7 +49,7 @@ namespace Agents
 
         private void SendResponse(IObservable status,Observer o){
             Request originalRequest = (o.Object as Request);
-            Response response = new(originalRequest.ID,this,originalRequest.sender,environment,$"Cosas de servidor simple {this.ID}.");
+            Response response = new(originalRequest.ID,status.agent,originalRequest.sender,status.environment,$"Cosas de servidor simple {status.agent.ID}.");
             response.SetTime(environment.currentTime);
             status.AddEvent(environment.currentTime,response);
         }
