@@ -1,5 +1,4 @@
-
-
+using Agents;
 using Compiler;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
@@ -25,19 +24,7 @@ namespace DataClassHierarchy
                         serv);
                     return false;
                 }
-                
-                var varType = Helper.GetType(context.GetVar(serv));
-                if (varType is not GosType.Server) {
-                    _log?.LogError(
-                        "Line {line}, column {col}: variable '{serv}' has to be of type Server.",
-                        Token.Line,
-                        Token.Column,
-                        serv);
-                    return false;
-                }
             }
-            
-            
         }
     }
 }
