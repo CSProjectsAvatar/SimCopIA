@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Agents;
+using DataClassHierarchy;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +10,29 @@ using System.Threading.Tasks;
 namespace Compiler {
     public static class Helper {
         public static ILoggerFactory LogFact;  // @remind ASIGNAR ESTO
+        internal static IEnumerable<(string Regex, Token.TypeEnum Token)> TokenWithRegexs = new[] {
+            ("print", Token.TypeEnum.Print),
+            ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
+            ("if", Token.TypeEnum.If),
+            ("{", Token.TypeEnum.LBrace),
+            ("}", Token.TypeEnum.RBrace),
+            ("_?[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
+            ("<", Token.TypeEnum.LowerThan),
+            (@"\+", Token.TypeEnum.Plus),
+            ("let", Token.TypeEnum.Let),
+            ("=", Token.TypeEnum.Eq),
+            ("==", Token.TypeEnum.EqEq),
+            (@"\-", Token.TypeEnum.Minus),
+            ("/", Token.TypeEnum.Div),
+            (@"\(", Token.TypeEnum.LPar),
+            (@"\)", Token.TypeEnum.RPar),
+            (@"\*", Token.TypeEnum.Times),
+            ("fun", Token.TypeEnum.Fun),
+            ("return", Token.TypeEnum.Return),
+            ("simplew", Token.TypeEnum.SimpleWorker),
+            ("distw", Token.TypeEnum.DistWorker),
+            (@"\->", Token.TypeEnum.RightArrow)
+        };
 
         /// <summary>
         /// Convierte un símbolo a una representación en <see cref="string"/>.
@@ -32,6 +57,15 @@ namespace Compiler {
             } while (@base != null);
 
             return false;
+        }
+
+        internal static GosType GetType(object obj) {
+            return obj switch {
+                double => GosType.Number,
+                bool => GosType.Bool,
+                Agent => GosType.Server,
+                _ => throw new NotImplementedException()
+            };
         }
 
         internal static ILogger<T> Logger<T>() {

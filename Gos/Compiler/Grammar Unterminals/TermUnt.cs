@@ -14,17 +14,19 @@ namespace Compiler.Grammar_Unterminals {
                      | <factor>
             */
             return derivation[0] switch {
-                TermUnt t when derivation[1] is Token { Type: Token.TypeEnum.Times }
+                TermUnt t when derivation[1] is Token { Type: Token.TypeEnum.Times } tok
                     => new MultOp(
-                        left: t.Ast as Expression,
-                        right: (derivation[2] as FactorUnt).Ast as Expression
-                    ),
-                TermUnt t when derivation[1] is Token { Type: Token.TypeEnum.Div }
+                            left: t.Ast as Expression,
+                            right: (derivation[2] as FactorUnt).Ast as Expression) {
+                        Token = tok
+                    },
+                TermUnt t when derivation[1] is Token { Type: Token.TypeEnum.Div } tok
                     => new DivOp(
-                        left: t.Ast as Expression,
-                        right: (derivation[2] as FactorUnt).Ast as Expression,
-                        logger: Helper.Logger<DivOp>()
-                    ),
+                            left: t.Ast as Expression,
+                            right: (derivation[2] as FactorUnt).Ast as Expression,
+                            logger: Helper.Logger<DivOp>()) {
+                        Token = tok
+                    },
                 FactorUnt f => f.Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };

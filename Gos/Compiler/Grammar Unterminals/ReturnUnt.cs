@@ -10,7 +10,8 @@ namespace Compiler.Grammar_Unterminals {
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation) {
             // <return> := "return" <expr>
             return new Return {
-                Expr = ((Unterminal)derivation[1]).Ast as Expression
+                Expr = ((Unterminal)derivation[1]).Ast as Expression,
+                Token = derivation[0] as Token
             };
         }
     }

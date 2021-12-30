@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Compiler.Lexer.Tests {
     [TestClass]
-    public class RegexTests : LexerTests {
+    public class RegexTests : LexerBaseTests {
         private ILogger<Lr1> _log;
         private ILogger<Lr1Dfa> _dfaLog;
         private Token a => Token.CharFor('a');

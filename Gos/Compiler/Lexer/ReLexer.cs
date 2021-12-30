@@ -47,7 +47,14 @@ namespace Compiler.Lexer {
 
         }
 
-        public bool TryTokenize(string regex, out IEnumerable<Token> tokens) {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="regex"></param>
+        /// <param name="tokens"></param>
+        /// <param name="appendEof">Si se quiere que el último token sea un token de fin de archivo.</param>
+        /// <returns></returns>
+        public bool TryTokenize(string regex, out IEnumerable<Token> tokens, bool appendEof = false) {
             var list = new List<Token>();
             tokens = list;
 
@@ -73,6 +80,9 @@ namespace Compiler.Lexer {
                 } else {  // c es un caracter q no tiene significado especial para el lenguaje de las REGEX 
                     list.Add(new Token(Token.TypeEnum.Char, 1, (uint)(i + 1), c.ToString()));
                 }
+            }
+            if (appendEof) {
+                list.Add(new Token(Token.TypeEnum.Eof, 1, (uint)regex.Length, ""));
             }
             return true;
         }

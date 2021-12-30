@@ -102,7 +102,12 @@ namespace Tests {
             Assert.IsFalse(dfa.Accept("let", TypeEnum.If));
             Assert.IsFalse(dfa.Accept("i", TypeEnum.If));
         }
-    
+        
+        [TestCleanup]
+        public void Clean() {
+            NFA.ResetStateCounter();
+            DFAState.ResetStateCounter();
+        }
     }
 
 }

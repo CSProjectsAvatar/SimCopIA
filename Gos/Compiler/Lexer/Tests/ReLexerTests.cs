@@ -1,15 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Compiler.Lexer.Tests {
     [TestClass]
-    public class ReLexerTests : LexerTests {
+    public class ReLexerTests : LexerBaseTests {
         private Token a => Token.CharFor('a');
         private Token b => Token.CharFor('b');
         private Token c => Token.CharFor('c');
@@ -57,16 +54,6 @@ namespace Compiler.Lexer.Tests {
             Assert.IsTrue(lexer.TryTokenize(@"\*\\ab\-", out var tokens));
             Assert.IsTrue(Enumerable.SequenceEqual(expected, tokens, new TokenCmp()));
             Assert.IsFalse(lexer.TryTokenize(@"\*a\", out _));  // se espera un meta-caracter
-        }
-    }
-
-    internal class TokenCmp : IEqualityComparer<Token> {
-        public bool Equals(Token x, Token y) {
-            return x.Type == y.Type && x.Lexem == y.Lexem;
-        }
-
-        public int GetHashCode([DisallowNull] Token obj) {
-            return HashCode.Combine(obj.Type, obj.Lexem);
         }
     }
 }

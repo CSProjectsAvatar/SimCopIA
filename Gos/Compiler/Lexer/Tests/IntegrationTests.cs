@@ -10,7 +10,7 @@ using Tests;
 
 namespace Compiler.Lexer.Tests {
     [TestClass]
-    public class IntegrationTests : LexerTests {
+    public class IntegrationTests : LexerBaseTests {
         private ILogger<ReLexer> _logReLexer;
         private ILogger<Lr1> _log;
         private ILogger<Lr1Dfa> _logDfa;
@@ -42,10 +42,10 @@ namespace Compiler.Lexer.Tests {
         public void RecognizeToken(string regex, string word, bool match) {
             NFAConverterTests.ResetStatesCounter();
 
-            Assert.IsTrue(new ReLexer(_logReLexer).TryTokenize(regex, out var tokens));
+            Assert.IsTrue(new ReLexer(_logReLexer).TryTokenize(regex, out var tokens, true));
 
             using var parser = new Lr1(RegexGram, _log, _logDfa);
-            Assert.IsTrue(parser.TryParse(tokens.Append(Token.Eof), out var reAst));
+            Assert.IsTrue(parser.TryParse(tokens, out var reAst));
             Assert.IsTrue(reAst.Validate(new DataClassHierarchy.Context()));
 
             var nfa = new NfaBuilderVisitor().Visit(reAst);

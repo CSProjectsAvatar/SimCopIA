@@ -104,6 +104,38 @@ namespace Compiler {
         /// </summary>
         internal static Token LBrace => new Token(TypeEnum.LBrace, 1, ++colHelper, "{");
 
+        internal static string GetDefaultLexeme(TypeEnum token) {
+            // @note SOLO HACEN FALTA ANYADIR AQUELLOS CUYO NOMBRE D TIPO NO ES LO SUFICIENTEMENT EXPLI'CITO, X EJEMPLO, NO HAC
+            // FALTA ANYADIR TypeEnum.Number
+            return token switch {  // @remind ANYADIR NUEVOS ELEMENTOS AL SWITCH PARA SOPORTAR UN MEJOR FEEDBACK CUAN2 OCURRAN ERRORES D SINTAXIS
+                TypeEnum.Comma => ",",
+                TypeEnum.Div => "/",
+                TypeEnum.EndOfLine => throw new ArgumentException(
+                    "Lexeme for end-of-line token can't be provided.", 
+                    nameof(token)),
+                TypeEnum.Eq => "=",
+                TypeEnum.EqEq => "==",
+                TypeEnum.GreaterOrEqualThan => ">=",
+                TypeEnum.GreaterThan => ">",
+                TypeEnum.Id => "Identifier",
+                TypeEnum.LBrace => "{",
+                TypeEnum.LBracket => "[",
+                TypeEnum.LowerThan => "<",
+                TypeEnum.LPar => "(",
+                TypeEnum.Minus => "-",
+                TypeEnum.NotEq => "!=",
+                TypeEnum.Pipe => "|",
+                TypeEnum.Plus => "+",
+                TypeEnum.Quest => "?",
+                TypeEnum.RBrace => "}",
+                TypeEnum.RBracket => "]",
+                TypeEnum.RPar => ")",
+                TypeEnum.Scape => "\\",
+                TypeEnum.Times => "*",
+                _ => token.ToString()
+            };
+        }
+
         /// <summary>
         /// Propiedad helper para debuguear y testear.
         /// </summary>
@@ -152,18 +184,35 @@ namespace Compiler {
         /// <summary>
         /// Propiedad helper para debuguear y testear (]).
         /// </summary>
-        public static Token RBracket => new Token(TypeEnum.RBracket, 1, ++colHelper, "]");
+        internal static Token RBracket => new Token(TypeEnum.RBracket, 1, ++colHelper, "]");
 
         /// <summary>
         /// Propiedad helper para debuguear y testear (?).
         /// </summary>
-        public static Token Quest => new Token(TypeEnum.Quest, 1, ++colHelper, "?");
+        internal static Token Quest => new Token(TypeEnum.Quest, 1, ++colHelper, "?");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (/).
+        /// </summary>
+        internal static Token Div => new Token(TypeEnum.Div, 1, ++colHelper, "/");
 
         internal static Token NumberFor(double x) {
             return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());
         }
 
-        public enum TypeEnum {
+        public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
+            /// <summary>
+            /// simplew
+            /// </summary>
+            SimpleWorker,
+
+            /// <summary>
+            /// distw
+            /// </summary>
+            DistWorker,
+
+            RightArrow,
+            
             /// <summary>
             /// Fin de archivo.
             /// </summary>
@@ -242,13 +291,12 @@ namespace Compiler {
             Div,
 
             If,
+            Return,
 
             /// <summary>
             /// Identificador.
             /// </summary>
             Id,
-            
-            Return,
             GreaterOrEqualThan,
 
             /// <summary>
