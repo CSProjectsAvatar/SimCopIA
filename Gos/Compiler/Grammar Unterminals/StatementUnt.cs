@@ -18,7 +18,7 @@ namespace Compiler.Grammar_Unterminals {
                 Token { Type: Token.TypeEnum.Id } id when derivation[1] is RightConnUnt rc
                     => new RightConn(Helper.Logger<RightConn>()) {
                         Agents = rc.Ids,
-                        Left = id.Lexem,
+                        LeftAgent = id.Lexem,
                         Token = id
                     },
                 LetVarUnt u => u.Ast,
@@ -26,5 +26,6 @@ namespace Compiler.Grammar_Unterminals {
                 ReturnUnt u => u.Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
+        }
     }
 }

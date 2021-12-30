@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Agents{
 
@@ -96,6 +97,16 @@ namespace Agents{
             {
                 var agent = new DistributionRequestServer(env, (nextInt++).ToString());
                 return RegisterAgent(agent) as DistributionRequestServer;
+            }
+        }
+
+        public void AddSomeRequests(int request = 100)
+        {
+            var dist = this.agents.Where(w => w is DistributionServer).First();
+
+            var r = new Random();
+            while(request --> 0) {
+                this.AddRequest("0", dist.ID, this.currentTime + r.Next(10));
             }
         }
     }

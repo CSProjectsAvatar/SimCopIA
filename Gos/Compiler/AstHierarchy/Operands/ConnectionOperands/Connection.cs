@@ -4,12 +4,15 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 namespace DataClassHierarchy
 {
-    public abstract class Connection:Expression
+    public abstract class Connection:AstNode, IStatement  // @todo MOVER ESTAS CLASES PA LA CARPETA D STATEMENTS
     {
         public string LeftAgent;
         public IEnumerable<string> Agents { get; set; }
-        private readonly ILogger<Connection> _log;
+        protected readonly ILogger<Connection> _log;
 
+        public Connection(ILogger<Connection> logger = null) {
+            _log = logger;
+        }
         public abstract (bool, object) TryCompute(Agent left, List<Agent> agents);
 
         public override bool Validate(Context context)
@@ -25,6 +28,7 @@ namespace DataClassHierarchy
                     return false;
                 }
             }
+            return true;
         }
     }
 }

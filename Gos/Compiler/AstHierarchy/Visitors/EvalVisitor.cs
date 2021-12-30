@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Agents;
 using Compiler;
 using Microsoft.Extensions.Logging;
 
@@ -32,32 +33,7 @@ namespace DataClassHierarchy
             throw new Exception("Se llego por el visitor a la raiz, falta implementacion de Visiting"); // @remind esto es para probar, comentar
         }  
     
-        public bool CheckBinar(BinaryExpr node, out object leftResult, out object rightResult) {
-            leftResult = rightResult = default;
-
-            bool lSuccess;
-            (lSuccess, leftResult) = Visit(node.Left);
-
-            if(!lSuccess){
-                //log.LogError(
-                //    "Line {line}, column {col}: left operand could not be evaluated.", 
-                //    node.Token.Line, 
-                //    node.Token.Column);  @note CREO Q ESTO NO HAC FALTA, CADA CUAL LOGUEA CUAN2 C PART ALGO
-                return false;
-            }
-            bool rSuccess;
-            (rSuccess, rightResult) = Visit(node.Right);
-
-            if(!rSuccess){
-                //log.LogError(
-                //    "Line {line}, column {col}: right operand could not be evaluated.", 
-                //    node.Token.Line, 
-                //    node.Token.Column);  @note CREO Q ESTO NO HAC FALTA, CADA CUAL LOGUEA CUAN2 C PART ALGO
-                return false;
-            }
-            return true;
-        }
-        public (bool, object) Visiting(BinaryExpr node) {  
+         public (bool, object) Visiting(BinaryExpr node) {  
             if(!CheckBinar(node, out var left, out var right)) {
                 return (false, null);
             }
@@ -83,6 +59,46 @@ namespace DataClassHierarchy
             }
         }
         
+
+        public (bool, object) Visiting(Connection node) {  
+            var eval = CheckConnection(node, out var left, out var rightList);
+            if(!eval){
+                return (false, null);
+            }
+            var (succ, result) = node.TryCompute(left, rightList);
+
+            if(!succ){
+                return (false, null);
+            }
+
+            return (true, null);
+        }
+
+        private bool CheckConnection(Connection node, out Agent left, out List<Agent> agList)
+        {
+            left = null;
+            agList = new List<Agent>();
+            // Checking Types of Agents
+            foreach (var serv in node.Agents.Concat(new[] { node.LeftAgent }))
+            {
+                var varInstance = Context.GetVar(serv);
+                var varType = Helper.GetType(varInstance);
+
+                if (varType is not GosType.Server) {
+                    log?.LogError(
+                        "Line {line}, column {col}: variable '{serv}' has to be of type Server but it's of type {type}.",
+                        node.Token.Line,
+                        node.Token.Column,
+                        serv,
+                        varType);
+                    return false;
+                }
+                agList.Add(varInstance as Agent);
+            }
+            left = agList.Last();
+            agList.RemoveAt(agList.Count - 1);
+            return true;
+        }
 
         public (bool, object) Visiting(FunCall node){
             var exprValues = new List<object>();
@@ -122,6 +138,9 @@ namespace DataClassHierarchy
             if(!success){
                 return (false, null);
             }
+            if (result is Agent serv) {
+                serv.ID = node.Identifier;
+            }
             Context.SetVar(node.Identifier, result);
             return (true, result);  
         }
@@ -153,7 +172,18 @@ namespace DataClassHierarchy
         }
 
         public (bool, object) Visiting(ProgramNode node){
-            return Visit(node.Statements);
+            Context.Simulation = new Agents.Environment();
+
+            var vis = Visit(node.Statements);
+            // @audit DE JUGUETE
+            Context.Simulation.AddSomeRequests();
+            Context.Simulation.Run();
+
+            log.LogInformation(
+                Context.Simulation.solutionResponses.Aggregate(
+                    $"Responses to environment:{System.Environment.NewLine}",
+                    (accum, r) => accum + $"time:{r.responseTime} body:{r.body}{System.Environment.NewLine}"));
+            return vis;
         }
         
         public (bool, object) Visiting(IfStmt node){
@@ -178,6 +208,22 @@ namespace DataClassHierarchy
         /// <summary>
         /// Evalua una lista de statements y devuelve el resultado de la ultima
         /// </summary>
+       public (bool, object) Visiting(Return node){
+            var (success, result) = Visit(node.Expr);
+            if(!success){
+                return (false, null);
+            }
+            _returnFlag = (true, result);
+            return (true, result);    
+        }
+        
+        public (bool, object) Visiting(DistW node){
+            var ds = new DistributionServer(Context.Simulation, null, new List<string>());
+            Context.Simulation.AddAgent(ds);
+            return (true, ds);       
+        }
+
+        // Auxiliars
         public (bool, object) Visiting(IList<IStatement> statements){
             object lastR = null;
 
@@ -193,14 +239,32 @@ namespace DataClassHierarchy
             }
             return (true, null);
         }
-        public (bool, object) Visiting(Return node){
-            var (success, result) = Visit(node.Expr);
-            if(!success){
-                return (false, null);
-            }
-            _returnFlag = (true, result);
-            return (true, result);    
-        }
         
+        private bool CheckBinar(BinaryExpr node, out object leftResult, out object rightResult) {
+            leftResult = rightResult = default;
+
+            bool lSuccess;
+            (lSuccess, leftResult) = Visit(node.Left);
+
+            if(!lSuccess){
+                //log.LogError(
+                //    "Line {line}, column {col}: left operand could not be evaluated.", 
+                //    node.Token.Line, 
+                //    node.Token.Column);  @note CREO Q ESTO NO HAC FALTA, CADA CUAL LOGUEA CUAN2 C PART ALGO
+                return false;
+            }
+            bool rSuccess;
+            (rSuccess, rightResult) = Visit(node.Right);
+
+            if(!rSuccess){
+                //log.LogError(
+                //    "Line {line}, column {col}: right operand could not be evaluated.", 
+                //    node.Token.Line, 
+                //    node.Token.Column);  @note CREO Q ESTO NO HAC FALTA, CADA CUAL LOGUEA CUAN2 C PART ALGO
+                return false;
+            }
+            return true;
+        }
+       
     }
 }

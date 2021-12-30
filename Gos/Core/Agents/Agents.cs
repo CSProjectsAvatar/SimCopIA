@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace Agents{
 
-    public class Agent  {
-        public string ID{get;}
+    public class Agent  { // @todo poner en esta clase la lista de workers o en el status?
+        public string ID{ get; set;  }
         public Environment environment {get;}
         protected List<Action<IRequestable,Request>> functionsToHandleRequests; 
         protected List<Action<IResponsable, Response>> functionsToHandleResponses; 
@@ -12,7 +12,7 @@ namespace Agents{
         public Status status;
 
         public Agent(Environment e, string ID){
-            this.environment = e;    
+            this.environment = e; // @todo Ver si se puede llamar a AddAgent en la siguiente linea
             this.ID = ID;
             this.functionsToHandleRequests = new();
             this.functionsToHandleResponses = new();

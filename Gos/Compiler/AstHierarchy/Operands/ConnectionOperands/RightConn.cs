@@ -11,10 +11,9 @@ namespace DataClassHierarchy {
     public class RightConn : Connection {
         private ILogger<RightConn> _log;
 
-        public RightConn(ILogger<RightConn> logger = null) {
+        public RightConn(ILogger<RightConn> logger = null) : base(logger) {
             _log = logger;
         }
-
         public override (bool, object) TryCompute(Agent left, List<Agent> servers) {
             if (left is DistributionServer ds) {
                 ds.SetWorkers(servers.Select(s => s.ID).ToList());
