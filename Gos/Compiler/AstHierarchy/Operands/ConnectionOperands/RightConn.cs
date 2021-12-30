@@ -20,9 +20,10 @@ namespace DataClassHierarchy {
                 return (true, ds);
             }
             _log?.LogError(
-                "Line {l}, column {c}: left operand must be a distribution server.",
+                "Line {l}, column {c}: left operand must be a distribution server, but it's a {type} instead.",
                 Token.Line,
-                Token.Column);
+                Token.Column,
+                left.GetType().Name);
             return (false, default);
         }
     }

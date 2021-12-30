@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Agents;
 using Compiler;
+using Compiler.AstHierarchy;
 using Microsoft.Extensions.Logging;
 
 namespace DataClassHierarchy
@@ -175,14 +176,17 @@ namespace DataClassHierarchy
             Context.Simulation = new Agents.Environment();
 
             var vis = Visit(node.Statements);
-            // @audit DE JUGUETE
-            Context.Simulation.AddSomeRequests();
-            Context.Simulation.Run();
+            
+            if (vis.Item1) {  // evaluacio'n exitosa
+                // @audit DE JUGUETE
+                Context.Simulation.AddSomeRequests();
+                Context.Simulation.Run();
 
-            log.LogInformation(
-                Context.Simulation.solutionResponses.Aggregate(
-                    $"Responses to environment:{System.Environment.NewLine}",
-                    (accum, r) => accum + $"time:{r.responseTime} body:{r.body}{System.Environment.NewLine}"));
+                log.LogInformation(
+                    Context.Simulation.solutionResponses.Aggregate(
+                        $"Responses to environment:{System.Environment.NewLine}",
+                        (accum, r) => accum + $"time:{r.responseTime} body:{r.body}{System.Environment.NewLine}"));
+            }
             return vis;
         }
         
@@ -221,6 +225,12 @@ namespace DataClassHierarchy
             var ds = new DistributionServer(Context.Simulation, null, new List<string>());
             Context.Simulation.AddAgent(ds);
             return (true, ds);       
+        }
+
+        public (bool, object) Visiting(SimpleW simpleW) {
+            var ss = new SimpleServer(Context.Simulation, null);
+            Context.Simulation.AddAgent(ss);
+            return (true, ss);
         }
 
         // Auxiliars
