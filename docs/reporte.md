@@ -1,5 +1,7 @@
 <h1> Game of Servers </h1>
 
+<!-- @audit cambiar a 3ra persona ("se logro'", en lugar de "logramos") -->
+
 - [Propuesta](#propuesta)
 - [1ra Entrega](#1ra-entrega)
   - [Ejecutando `gos`](#ejecutando-gos)
@@ -7,9 +9,15 @@
     - [Variables](#variables)
     - [Eventos](#eventos)
 - [2da Entrega](#2da-entrega)
-  - [Gram&aacute;tica](#gramática)
-  - [Reglas Sem&aacute;nticas](#reglas-semánticas)
-  - [Gram&aacute;tica de REGEX](#gramática-de-regex)
+  - [Sobre la Simulaci&oacute;n](#sobre-la-simulación)
+  - [Sobre el Lenguaje](#sobre-el-lenguaje)
+    - [Caracter&iacute;sticas](#características)
+    - [Gram&aacute;tica de GoS](#gramática-de-gos)
+    - [Tipos](#tipos)
+    - [Reglas Sem&aacute;nticas](#reglas-semánticas)
+    - [Gram&aacute;tica de REGEX](#gramática-de-regex)
+    - [DSL para las Gram&aacute;ticas](#dsl-para-las-gramáticas)
+  - [Ejecutando `gos`](#ejecutando-gos-1)
 
 ## Propuesta
 
@@ -123,7 +131,57 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
   El evento de cierre es análogo al evento de partida.
 
 ## 2da Entrega
-### Gram&aacute;tica
+### Sobre la Simulaci&oacute;n
+Se dej&oacute; de utilizar el modelo de eventos discretos y se emplea ahora un modelo de agentes.
+
+Los agentes son los servidores y estos se dividen en 3 tipos:
+- *workers* simples
+- *workers* interactivos
+- distribuidores de carga
+
+<!-- @todo meterc + adentro d esto, hablar d co'mo encapsulamos los comportamientos en funciones. Creo q los comportamientos c dividen en 3 -->
+### Sobre el Lenguaje
+El DSL se llama GoS y es un lenguaje de tipado din&aacute;mico desarrollado en C#. 
+
+Se implement&oacute; un *parser* LR(1).
+
+#### Caracter&iacute;sticas
+Se puede declarar variables:
+
+![let](let.jpg)
+
+Emplear expresiones matem&aacute;ticas:
+
+![math](math.jpg)
+
+Se puede declarar funciones:
+
+![func](func.jpg)
+
+*Statements* en varias l&iacute;neas:
+
+![multiline](multiline.jpg)
+
+Crear servidores de tipo *worker* simple y distribuidores de carga:
+
+![dist/simplew](simplew-distw.jpg)
+
+Conectarlos:
+
+![connections](connections.jpg)
+
+Al primer distribuidor de carga declarado se le har&aacute;n 100 pedidos, resultando el grafo de flujo de la siguiente manera:
+
+```mermaid
+graph LR
+    s[100 pedidos entrantes] --> d1
+    d1{d1} --> w1[w1]
+    d1 --> d2{d2}
+    d1 --> w2[w2]
+    d2 --> w3[w3]
+    d2 --> w4[w4]
+```
+#### Gram&aacute;tica de GoS
 ```
 <program> := <stat-list>
 
@@ -187,8 +245,23 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 ```
 **El `;` lo pone el *lexer***, no es necesario que el usuario lo haga. Este puede emplear `\` para definir *statements* de m&aacute;s de una l&iacute;nea.
 
-### Reglas Sem&aacute;nticas
-Una variable solo puede ser definida una vez en todo el
+N&oacute;tese que bajo esta gram&aacute;tica no se soporta el llamado a funciones en la condigi&oacute;n del `if`:
+
+![if func](if-with-func.jpg)
+
+Esto el equipo lo tiene en cuenta y ser&aacute; rectificado en entregas posteriores.
+
+#### Tipos
+El lenguaje tiene 3 tipos:
+- `Number`: para todo tipo de n&uacute;meros
+- `Bool`: para valores de verdad (*true* o *false*)
+- `Server`: para los servidores
+
+Los operadores `+`, `-`, `*`, `/` solo est&aacute;n permitidos para el tipo `Number`. 
+
+En el caso del operador de conexi&oacute;n de servidores (`->`), solo est&aacute; permitido para el tipo `Server`, y el operando de la izquierda debe ser un distribuidor de carga (lo que se espera es que pueda ser de cualquier tipo de servidor; ser&aacute; rectificado en una entrega posterior).
+#### Reglas Sem&aacute;nticas
+- Una variable solo puede ser definida una vez en todo el
 programa.
 - Los nombres de variables y funciones no comparten el mismo
 ámbito (pueden existir una variable y una función llamadas
@@ -204,10 +277,12 @@ variables definidas globalmente o a argumentos definidos en
 otras funciones.
 - En el cuerpo de una función, los nombres de los argumentos
 ocultan los nombres de variables iguales.
+- En el cuerpo de un *statement* de bloque o una función, los nombres de las variables ocultan los nombres de variables en &aacute;mbitos superiores.
 
+#### Gram&aacute;tica de REGEX 
+El lenguaje de REGEX utilizado es el definido en la correspondiente conferencia de la asignatura.
 
-
-### Gram&aacute;tica de REGEX 
+Para el procesamiento de expresiones regulares se emple&oacute; la siguiente gram&aacute;tica:
 ```
 <regex> := <union>
 
@@ -237,4 +312,56 @@ ocultan los nombres de variables iguales.
         | CHAR
 
 <range> := CHAR "-" CHAR
+```
+`CHAR` es un tipo de *token* definido especialmente para esta gram&aacute;tica. Representa a un caracter del lenguaje que no es *meta*. Por ejemplo, dada la REGEX `a*\+`, el *lexer* de REGEX devuelve los siguientes *tokens*
+
+| Tipo | Lexema |
+|------|--------|
+| CHAR | a |
+| * | * |
+| CHAR | + |
+
+N&oacute;tese que como el `+` est&aacute; precedido por un `\`, entonces el *token* producido es de tipo `CHAR`, en lugar de tipo `+`.
+
+#### DSL para las Gram&aacute;ticas
+El equipo se enfrent&oacute; a la tarea de expresar estas gram&aacute;ticas en C# mediante el empleo de un DSL embebido, desarrollado por el propio equipo :muscle::sunglasses:. Se cree que fue una buena oportunidad para aplicar las ense&ntilde;anzas de las asignaturas Compilaci&oacute;n y LP. Para lograrlo, se utiliz&oacute; principalmente la sobrescritura de operadores.
+
+La gram&aacute;tica de REGEX queda expresada entonces de esta manera:
+```c#
+Regex > Union,
+
+Union > (Union | Concat),
+Union > Concat,
+
+Concat > (Concat, Basic),
+Concat > Basic,
+
+Basic > (Atom, times),
+Basic > (Atom, plus),
+Basic > (Atom, quest),
+Basic > Atom,
+
+Atom > Group,
+Atom > @char,
+Atom > Set,
+
+Group > (lpar, Regex, rpar),
+
+Set > (lbrak, ItemList, rbrak),
+
+ItemList > Item,
+ItemList > (Item, ItemList),
+
+Item > Range,
+Item > @char,
+
+Range > @char - @char
+```
+
+### Ejecutando `gos`
+Ahora el ejecutable del proyecto interpreta un archivo con c&oacute;digo en GoS y ejecuta la simulaci&oacute;n que se configura. La salida del programa es una serie de l&iacute;neas con el tiempo y cuerpo de cada respuesta a los pedidos. Si el pedido no pudo ser procesado, el cuerpo es "Servidor no disponible", mientras que si fue procesado por el servidor $w_1$, entonces el cuerpo es "Cosas de servidor simple w1".
+
+En la entrega se encuentra un archivo `distrb.gos` en la carpeta `Sources/`. Este se puede ejecutar de la siguiente manera:
+```console
+$ gos Sources/distrb.gos
 ```
