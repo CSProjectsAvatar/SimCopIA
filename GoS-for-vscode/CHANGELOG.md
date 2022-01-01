@@ -1,7 +1,19 @@
 # Change Log
 Todos los cambios notables de este proyecto se documentarán en este archivo.
-El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+El formato se basa en [*Keep a Changelog*](https://keepachangelog.com/en/1.0.0/), y este proyecto se adhiere a [*Semantic Versioning*](https://semver.org/spec/v2.0.0.html).
 <!-- Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file. -->
+
+## 0.2.0
+### Added
+- Palabras claves `simplew` y `distw`.
+- Operador `->`.
+- Caracter&iacute;sticas principales del lenguaje en `README.md`:
+  - Declaraci&oacute;n de funciones.
+  - *Statements* en varias l&iacute;neas.
+  - Crear servidores de tipo *worker* simple y distribuidores de carga.
+  - Conexiones.
+- GIFs para explicar lo dicho en el punto anterior.
+- Enlace hacia el reporte en `README.md`.
 
 ## 0.1.1
 ### Fixed
