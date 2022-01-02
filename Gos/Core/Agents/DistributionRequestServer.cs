@@ -18,7 +18,7 @@ namespace Agents
             originalRequest = new Dictionary<Request, List<Request>> { };
             responseRequest = new Dictionary<int, string> { };
             requestNeeds = new Dictionary<string, List<Agent>> { };
-            AñadirAlDiccionario();
+            AñadirAlDiccionario();//esto es para probar
             this.functionsToHandleRequests.Add(this.GettingRequestServer);
             this.functionsToHandleResponses.Add(this.GiveResponse);
         }
