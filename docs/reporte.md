@@ -10,6 +10,10 @@
     - [Eventos](#eventos)
 - [2da Entrega](#2da-entrega)
   - [Sobre la Simulaci&oacute;n](#sobre-la-simulación)
+    - [Ambiente](#ambiente)
+    - [Agentes](#agentes)
+    - [Status](#status)
+    - [Eventos de la L&iacute;nea Temporal](#eventos-de-la-línea-temporal)
   - [Sobre el Lenguaje](#sobre-el-lenguaje)
     - [Caracter&iacute;sticas](#características)
     - [Gram&aacute;tica de GoS](#gramática-de-gos)
@@ -17,13 +21,14 @@
     - [Reglas Sem&aacute;nticas](#reglas-semánticas)
     - [Gram&aacute;tica de REGEX](#gramática-de-regex)
     - [DSL para las Gram&aacute;ticas](#dsl-para-las-gramáticas)
+    - [*Syntax Highlight* en el Code](#syntax-highlight-en-el-code)
   - [Ejecutando `gos`](#ejecutando-gos-1)
 
 ## Propuesta
 
 Somos
 
-* Claudia Puentes Hernández ([@ClauP99](https://github.com/ClauP99)) :bee:,
+* Claudia Puentes Hernández ([@ClauP99](https://github.com/ClauP99)) :honeybee:,
 * Omar Alejandro Hernández Ramírez ([@OmarHernandez99](https://github.com/OmarHernandez99)) :tiger:,
 * Andy Ledesma García ([@MakeMake23](https://github.com/MakeMake23)) :wolf: y
 * Mauricio Mahmud Sánchez ([@maux96](https://github.com/maux96)) :fox_face:
@@ -137,7 +142,7 @@ Se dej&oacute; de utilizar el modelo de eventos discretos y se emplea ahora un m
 
 #### Ambiente
 
-El ambiente tiene variables configurables (por ahora constantes) de el tiempo de llegada de Request y Response, una lista de todos los agentes en la escena, el tiempo actual de la simulación, los responses (una vez haya acabado la simulación) a los request del cliente que se hacen en un inicio y una estructura de datos Heap (de minimos) encargado de llevar acabo el funcionamiento de la linea de tiempo correctamente haciendo que transcurra este.
+El ambiente tiene variables configurables (por ahora constantes) del tiempo de llegada de Request y Response, una lista de todos los agentes en la escena, el tiempo actual de la simulación, los responses (una vez haya acabado la simulación) a los request del cliente que se hacen en un inicio y una estructura de datos Heap (de m&iacute;nimos) encargado de llevar acabo el funcionamiento de la l&iacute;nea de tiempo correctamente haciendo que transcurra este.
 
 #### Agentes
 Los agentes son los servidores y estos se dividen en 3 tipos:
@@ -145,34 +150,33 @@ Los agentes son los servidores y estos se dividen en 3 tipos:
 - *workers* interactivos
 - distribuidores de carga
 
-Se model&oacute; un comportamiento de agente con estados, en el cual también incluímos el concepto de percepciones, este concepto lo utilizamos para representar el comportamiento de los request y response que se realizan durante la simulación.
+Se model&oacute; un comportamiento de agente con estados, en el cual también incluimos el concepto de percepciones, este concepto lo utilizamos para representar el comportamiento de los request y response que se realizan durante la simulación.
 
-Para comenzar se realizó una clase **Agent**  que es de la que van a heredar todos los servidores, entre estos se encuentra **Worker**, **InteractiveWorker**, **Distributor**. La clase **Agent** posee las principales propiedades de estos servidores, el ID de cada uno, un environment, un status y unas listas de funciones que son las que van a modelar de alguna manera el comportamiento de la funcion **next** que se le pasa un status, un perseption y devuelve un nuevo status.
+Para comenzar se realizó una clase **Agent**  que es de la que van a heredar todos los servidores, entre estos se encuentra **Worker**, **InteractiveWorker**, **Distributor**. La clase **Agent** posee las principales propiedades de estos servidores, el ID de cada uno, un environment, un status y unas listas de funciones que son las que van a modelar de alguna manera el comportamiento de la funci&oacute;n **next** que se le pasa un status, un perception y devuelve un nuevo status.
 Esta clase posee los funcionamientos de **HandleRequest**, **HandleResponse**, **HandleStatus**  que son los encargados de llevar a cabo el funcionamiento del servidor cuando llega un request, un response o el servidor necesita cambiar su estado interno basado en algo como el tiempo, esto se logra recorriendo cada una de las listas de funciones respectivas donde cada una hace un pequeño cambio en el estado del agente o del ambiente. En el caso del **HandleRequest**, antes de realizar lo anterior se verifica si el server está disponible para poder procesar el request.
 
 La clase **Distributor** posee una lista de workers y un protocolo representado como una función de selección,  la cual es encargada de seleccionar el worker o server al que le vamos a enviar el request. Esta clase tiene funcionalidades como  añadir los workers, enviar un request , que sería  añadir el request a la lista de procesamiento de request en el estado, con el protocolo de selección escogemos el server al cual le vamos a enviar el request y subscribimos el evento al estado. Otra de las funcionalidades es chequear el response, si ya el response  está disponible pues se envía el request original si no, se selecciona otro worker y se envía el request.
 
 
-La clase **InteractiveWorker** tiene un diccionario que posee las posibles necesidades del request y a cada una de estas se le asocia una lista de agentes que pueden dar response a este tipo de request, tiene otro diccionario que contiene todos los request que han llegado hasta el momento y a cada uno de estos se le asocia una lista de todos los request que fueron necesarios realizar para satisfacer sus necesidades y por último se tiene otro diccionario que contiene el id del request original contra el response que se irá conformando poco a poco. Aquí tenemos dos funcionalidades la primera es que si llegó un request revisamos si se encuentra en el diccionario de necesidades, si es asi enviamos un request a cada uno de los agentes que se encuntra en la lista de agentes asociada a la necesidad del request y la otra funcionalidad es a la hora en que llega un response, revisamos de cual request es y se verifica si  ya tenemos todos los responses necesarios para realizar el response del request original, si es así realizamos el proceso y si no continuamos hasta obtenerlo completo.
+La clase **InteractiveWorker** tiene un diccionario que posee las posibles necesidades del request y a cada una de estas se le asocia una lista de agentes que pueden dar response a este tipo de request, tiene otro diccionario que contiene todos los request que han llegado hasta el momento y a cada uno de estos se le asocia una lista de todos los request que fueron necesarios realizar para satisfacer sus necesidades y por último se tiene otro diccionario que contiene el id del request original contra el response que se irá conformando poco a poco. Aquí tenemos dos funcionalidades la primera es que si llegó un request revisamos si se encuentra en el diccionario de necesidades, si es asi enviamos un request a cada uno de los agentes que se encuentra en la lista de agentes asociada a la necesidad del request y la otra funcionalidad es a la hora en que llega un response, revisamos de cual request es y se verifica si  ya tenemos todos los responses necesarios para realizar el response del request original, si es así realizamos el proceso y si no continuamos hasta obtenerlo completo.
 
-La clase **Worker** posee varias funcionalidades como **GettingRequest** que revisa si el servidor puede atender el request, si no puede envía un response de servidor no disponible y si no subscribe el evento, Otra de las funcionalidades es el procesamiento el request que si el servidor esta disponible añade el request a la lista de procesamiento de request y en depencia de la cantidad de request que tenga el servidor a procesar cambia en estado a no disponible. El método **SendResponse** conforma el response de acuerdo al request original y lo envía y **SetAvailableAfterSendResponse** luego de enviar el response de un request se elimina este de la lista de request en procesamiento
+La clase **Worker** posee varias funcionalidades como **GettingRequest** que revisa si el servidor puede atender el request, si no puede envía un response de servidor no disponible y si no subscribe el evento. Otra de las funcionalidades es el procesamiento el request que si el servidor esta disponible añade el request a la lista de procesamiento de request y en dependencia de la cantidad de request que tenga el servidor a procesar cambia el estado a no disponible. El método **SendResponse** conforma el response de acuerdo al request original y lo envía y **SetAvailableAfterSendResponse** luego de enviar el response de un request se elimina este de la lista de request en procesamiento
 
 #### Status
 
-La clase **Status**, representa el estado interno de un Servidor por ahora, tiene como objetivo guardar valores necesarios en la ejecución de la simulación y también guardar estadisticas. Este es modificado en las funciones de manejo de Request, Response u Observer. Tiene referencias a su agente correspondiente, y permite la subscripción de eventos a la linea temporal.
+La clase **Status**, representa el estado interno de un Servidor por ahora, tiene como objetivo guardar valores necesarios en la ejecución de la simulación y también guardar estad&iacute;sticas. Este es modificado en las funciones de manejo de Request, Response u Observer. Tiene referencias a su agente correspondiente, y permite la suscripción de eventos a la l&iacute;nea temporal.
 
 
-#### Eventos de la linea temporal
+#### Eventos de la L&iacute;nea Temporal
 
 Estas 3 clases a continuación, representan cada vez que ocurre algo en la simulación, **Request** representa la llegada de un request, **Response** la llegada de un response y **Observer** el conocimiento de un cambio en el estado interno de un agente. Estos se agregan al Heap del ambiente a medida que van apareciendo y cuando es su turno de salir del ambiente, se "ejecutan" en su agente correspondiente variando el funcionamiento del mismo de acuerdo a sus valores internos. 
 
-La clase **Request** posee características como su ID que es único para cada request, la URL, el sender(quien lo envió) y el tiempo en que fue enviado. Son procesados por los agentes en el metodo que llama a HandleRequest para cambiar de estado y otro método para conformar el response y suscribirlo al ambiante. 
+La clase **Request** posee características como su ID que es único para cada request, la URL, el sender (quien lo envió) y el tiempo en que fue enviado. Son procesados por los agentes en el m&eacute;todo que llama a HandleRequest para cambiar de estado y otro método para conformar el response y suscribirlo al ambiente. 
 
-La clase **Response** posee  propiedades similares a la clase **Request** como su ID, el sender, el que lo recive, el tiempo, el cuerpo de la respuesta y dos booleanos para conocer si el response esta disponible o no. Son procesados por un agente al igual que en **Request**  en vez de ser HandleRequest es HandleResponse. 
+La clase **Response** posee  propiedades similares a la clase **Request** como su ID, el sender, el que lo recibe, el tiempo, el cuerpo de la respuesta y dos booleanos para conocer si el response est&aacute; disponible o no. Son procesados por un agente al igual que en **Request**  en vez de ser HandleRequest es HandleResponse. 
 
-La clase **Observer** tiene el agente el cual va (no necesariamente) a cambiar el estado, un objeto genérico (por ahora) el cual nos sirve para saber que tipo de cambio en el estado interno del agente se va llevar a cabo y como los anteriores tiene una referencia al ambiente correspondiente. Es procesado por su agente correspondiente al salir del Heap del ambiente en el método HandleStatus.
+La clase **Observer** tiene el agente el cual va (no necesariamente) a cambiar el estado, un objeto genérico (por ahora) el cual nos sirve para saber qu&eacute; tipo de cambio en el estado interno del agente se va llevar a cabo y como los anteriores tiene una referencia al ambiente correspondiente. Es procesado por su agente correspondiente al salir del Heap del ambiente en el método HandleStatus.
 
-<!-- @todo meterc + adentro d esto, hablar d co'mo encapsulamos los comportamientos en funciones. Creo q los comportamientos c dividen en 3 -->
 ### Sobre el Lenguaje
 El DSL se llama GoS y es un lenguaje de tipado din&aacute;mico desarrollado en C#. 
 
@@ -220,7 +224,7 @@ graph LR
 
 <stat-list> := <stat> ";"
              | <stat> ";" <stat-list>
-	         | <block-stat>
+             | <block-stat>
              | <block-stat> <stat-list>
              
 <block-stat> := <if>
@@ -242,11 +246,11 @@ graph LR
            | ID "," <id-list>
 
 <cond> := <math> "<" <math>
-		| <math> ">" <math>
+        | <math> ">" <math>
         | <math> "==" <math>
 
 <expr> := <cond>
-		| <math>
+        | <math>
         | "simplew"
         | "distw"
 
@@ -390,6 +394,9 @@ Item > @char,
 
 Range > @char - @char
 ```
+
+#### *Syntax Highlight* en el Code
+Es posible lograr *syntax highlight* de GoS en Visual Studio Code mediante la instalaci&oacute;n de la [extensi&oacute;n GoS](https://marketplace.visualstudio.com/items?itemName=TheGoSTeam.gos), desarrollada por el equipo.
 
 ### Ejecutando `gos`
 Ahora el ejecutable del proyecto interpreta un archivo con c&oacute;digo en GoS y ejecuta la simulaci&oacute;n que se configura. La salida del programa es una serie de l&iacute;neas con el tiempo y cuerpo de cada respuesta a los pedidos. Si el pedido no pudo ser procesado, el cuerpo es "Servidor no disponible", mientras que si fue procesado por el servidor $w_1$, entonces el cuerpo es "Cosas de servidor simple w1".
