@@ -199,5 +199,31 @@ namespace Compiler {
                 },
                 out _));
         }
+
+        //[TestMethod]  @todo aki' tienes el test pa cuan2 hagas q pinche el eps en las derivacionesb
+        public void EpsilonDerivation() {
+            using (var parser = new Lr1(new Grammar(
+                        E,
+                        E > (F, T),
+                        T > (plus, n),
+                        T > e,
+                        F > n
+                    ),
+                    this._log,
+                    this._dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new Token[] {
+                        Token.Number, Token.Plus, Token.Number,
+                        Token.Eof
+                    },
+                    out _));
+                Assert.IsTrue(parser.TryParse(
+                    new Token[] {
+                        Token.Number,
+                        Token.Eof
+                    },
+                    out _));
+            }
+        }
     }
 }
