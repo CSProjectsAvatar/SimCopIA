@@ -19,7 +19,7 @@ namespace Tests {
         public void Test1() {
             var rand = new Random();
             var env = new Agents.Environment();
-            var agent = new Agents.SimpleServer(env,"1");
+            var agent = new Agents.Worker(env,"1");
             
             for(var i = 0 ; i < 100 ; i++){
                 env.AddRequest("0","1",rand.Next(1000));
