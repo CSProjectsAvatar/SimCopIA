@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
-namespace Tests {
+namespace Core {
     [TestClass]
     public abstract class BaseTest {
         public ServiceCollection services;
@@ -37,6 +37,7 @@ namespace Tests {
                     .AddFilter("Microsoft", LogLevel.Warning)
                     .AddFilter("System", LogLevel.Warning)
                     .AddFilter("Core", LogLevel.Debug)
+                    .AddFilter("Compiler", LogLevel.Debug)
                     .AddConsole();
             });
         } // init

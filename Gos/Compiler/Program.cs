@@ -1,13 +1,13 @@
 ﻿using Core;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using Agents;
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
-
             //Probando los agentes con servidores simples.
             var env = new Agents.Environment(debug:true);
 
