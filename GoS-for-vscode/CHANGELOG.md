@@ -6,6 +6,10 @@ El formato se basa en [*Keep a Changelog*](https://keepachangelog.com/en/1.0.0/)
 ## 0.3.0
 ### Added
 - Palabras claves `else_if` y `else`.
+- Palabra clave `new`.
+
+### Changed
+- Color de los tipos `distw` y `simplew`: ahora es verde.
 
 ## 0.2.0
 ### Added

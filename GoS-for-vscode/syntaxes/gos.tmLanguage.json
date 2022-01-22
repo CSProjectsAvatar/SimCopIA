@@ -22,10 +22,13 @@
 					"match": "\\b(if|else_if|else|return)\\b"
 				}, {
 					"name": "keyword.other.gos",
-					"match": "\\b(fun|let|print|simplew|distw)\\b"
+					"match": "\\b(fun|let|print|new)\\b"
 				}, {
 					"name": "keyword.operator.gos",
 					"match": ">|<|\\=|==|\\+|\\->|\\-|\\*|\\/"
+				}, {
+					"name": "support.class.gos",
+					"match": "\\b(simplew|distw)\\b"
 				}]
 		},
 		"strings": {
