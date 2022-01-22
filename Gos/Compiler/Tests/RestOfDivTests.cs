@@ -48,5 +48,11 @@ namespace Compiler.Tests {
 
             Assert.IsFalse(success);
         }
+
+        [TestCleanup]
+        public void Clean() {
+            _lex.Dispose();
+            _parser.Dispose();
+        }
     }
 }

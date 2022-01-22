@@ -31,11 +31,5 @@ namespace Compiler.Tests {
                 let w = new simplew
                 d -> w";
         }
-
-        [TestCleanup]
-        public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
-        }
     }
 }
