@@ -6,6 +6,7 @@ using System.Linq;
 using Agents;
 using Compiler;
 using Compiler.AstHierarchy;
+using Compiler.AstHierarchy.Operands;
 using Microsoft.Extensions.Logging;
 
 namespace DataClassHierarchy
@@ -16,7 +17,7 @@ namespace DataClassHierarchy
     public class EvalVisitor:Visitor<(bool, object)>
     {
         private Stack<Context> stackC;
-        private readonly ILogger<EvalVisitor> log;
+        private readonly ILogger<EvalVisitor> _log;
         private readonly TextWriter _writer;
         private (bool Found, object Value) _returnFlag;
 
@@ -26,7 +27,7 @@ namespace DataClassHierarchy
         {
             this.stackC = new Stack<Context>();
             Context = global;
-            this.log = logger;
+            this._log = logger;
             _writer = textWriter;
         }
         
@@ -42,14 +43,14 @@ namespace DataClassHierarchy
 
             switch (tResults) {  // @audit SEGURAMENT NECESITAREMOS UN DICCIONARIO PA SABER Q TIPOS ADMITE CADA OPERADOR EN SUS OPERANDOS
                 case (double lNum, double rNum):
-                    var (succ, result) = node.TryCompute(lNum, rNum);
+                    var (succ, result) = VisitBinExpr(node, lNum, rNum);
                     if(!succ){
                         return (false, null);
                     }
                     return (true, result);
                 
                 default:
-                    log.LogError(
+                    _log.LogError(
                         "Line {line}, column {col}: only numbers can be computed by this operator. Left operand is {ltype} " +
                             "and right operand is {rtype}.",
                         node.Token.Line,
@@ -59,7 +60,49 @@ namespace DataClassHierarchy
                     return (false, null);
             }
         }
-        
+
+        private (bool Success, object Result) VisitBinExpr(BinaryExpr node, double lNum, double rNum) {
+            return ((dynamic)this).Visiting((dynamic)node, lNum, rNum);
+        }
+
+        public (bool Success, object Result) Visiting(AddOp node, double lNum, double rNum) {
+            return node.TryCompute(lNum, rNum);
+        }
+
+        public (bool Success, object Result) Visiting(DivOp node, double lNum, double rNum) {
+            return node.TryCompute(lNum, rNum);
+        }
+
+        public (bool Success, object Result) Visiting(MultOp node, double lNum, double rNum) {
+            return node.TryCompute(lNum, rNum);
+        }
+
+        public (bool Success, object Result) Visiting(SubOp node, double lNum, double rNum) {
+            return node.TryCompute(lNum, rNum);
+        }
+
+        public (bool Success, object Result) Visiting(GreaterThanOp node, double lNum, double rNum) {
+            return node.TryCompute(lNum, rNum);
+        }
+
+        public (bool Success, object Result) Visiting(LessThanOp node, double lNum, double rNum) {
+            return node.TryCompute(lNum, rNum);
+        }
+
+        public (bool Success, object Result) Visiting(EqEqOp node, double lNum, double rNum) {
+            return node.TryCompute(lNum, rNum);
+        }
+
+        public (bool Success, object Result) Visiting(RestOfDivOp node, double lNum, double rNum) {
+            if (rNum == 0) {
+                _log.LogError(
+                    "Line {l}, column {c}: right operand can't be zero.",
+                    node.Token.Line,
+                    node.Token.Column);
+                return (false, null);
+            }
+            return (true, lNum % rNum);
+        }
 
         public (bool, object) Visiting(Connection node) {  
             var eval = CheckConnection(node, out var left, out var rightList);
@@ -86,7 +129,7 @@ namespace DataClassHierarchy
                 var varType = Helper.GetType(varInstance);
 
                 if (varType is not GosType.Server) {
-                    log?.LogError(
+                    _log?.LogError(
                         "Line {line}, column {col}: variable '{serv}' has to be of type Server but it's of type {type}.",
                         node.Token.Line,
                         node.Token.Column,
@@ -182,7 +225,7 @@ namespace DataClassHierarchy
                 Context.Simulation.AddSomeRequests();
                 Context.Simulation.Run();
 
-                log.LogInformation(
+                _log.LogInformation(
                     Context.Simulation.solutionResponses.Aggregate(
                         $"Responses to environment:{System.Environment.NewLine}",
                         (accum, r) => accum + $"time:{r.responseTime} body:{r.body}{System.Environment.NewLine}"));
@@ -197,7 +240,7 @@ namespace DataClassHierarchy
                 var (success, result) = Visit(cond);
 
                 if (result is not bool itsTrue) {  // @note ESTE CHEKEO NO HAC FALTA XQ LA SINTAXIS ASEGURA Q ESO SEA BOOLEANO. PERO CUAN2 SOPORTEMOS LLAMADOS D FUNC EN UNA COND HAY Q HACERLO OBLIGAO
-                    log.LogError(
+                    _log.LogError(
                         "Line {line}, column {col}: the condition #{idx} can't be a non-boolean expression.", 
                         node.Token.Line,
                         node.Token.Column,

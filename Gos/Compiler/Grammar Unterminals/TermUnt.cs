@@ -1,4 +1,5 @@
-﻿using DataClassHierarchy;
+﻿using Compiler.AstHierarchy.Operands;
+using DataClassHierarchy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Compiler.Grammar_Unterminals {
             /*
              <term> := <term> "*" <factor>
                      | <term> "/" <factor>
+                     | <term> "%" <factor>
                      | <factor>
             */
             return derivation[0] switch {
@@ -25,6 +27,12 @@ namespace Compiler.Grammar_Unterminals {
                             left: t.Ast as Expression,
                             right: (derivation[2] as FactorUnt).Ast as Expression,
                             logger: Helper.Logger<DivOp>()) {
+                        Token = tok
+                    },
+                TermUnt t when derivation[1] is Token { Type: Token.TypeEnum.Percent } tok
+                    => new RestOfDivOp(
+                            left: t.Ast as Expression,
+                            right: (derivation[2] as FactorUnt).Ast as Expression) {
                         Token = tok
                     },
                 FactorUnt f => f.Ast,

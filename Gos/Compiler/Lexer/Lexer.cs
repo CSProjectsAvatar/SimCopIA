@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Compiler.Lexer {
-    class Lexer : IDisposable {
+    public class Lexer : IDisposable {
         private readonly DFA _dfa;
         private readonly ILogger<Lexer> _log;
 

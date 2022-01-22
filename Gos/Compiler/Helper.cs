@@ -31,10 +31,11 @@ namespace Compiler {
             ("=", Token.TypeEnum.Eq),
             ("==", Token.TypeEnum.EqEq),
             (@"\-", Token.TypeEnum.Minus),
+            (@"\*", Token.TypeEnum.Times),
             ("/", Token.TypeEnum.Div),
+            ("%", Token.TypeEnum.Percent),
             (@"\(", Token.TypeEnum.LPar),
             (@"\)", Token.TypeEnum.RPar),
-            (@"\*", Token.TypeEnum.Times),
             (@"\->", Token.TypeEnum.RightArrow),
             (",", Token.TypeEnum.Comma)
         };

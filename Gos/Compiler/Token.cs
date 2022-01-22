@@ -133,6 +133,7 @@ namespace Compiler {
                 TypeEnum.Scape => "\\",
                 TypeEnum.Times => "*",
                 TypeEnum.RightArrow => "->",
+                TypeEnum.Percent => "%",
                 _ => token.ToString()
             };
         }
@@ -362,7 +363,12 @@ namespace Compiler {
             /// <summary>
             /// \
             /// </summary>
-            Scape
+            Scape,
+
+            /// <summary>
+            /// %
+            /// </summary>
+            Percent
         }
 
         public override string ToString() {

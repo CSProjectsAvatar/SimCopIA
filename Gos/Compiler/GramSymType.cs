@@ -29,6 +29,10 @@ namespace Compiler {
             return (@this, TokenType.Div, other);
         }
 
+        public static (GramSymType, TokenType, GramSymType) operator %(GramSymType @this, GramSymType other) {
+            return (@this, new TokenType(Token.TypeEnum.Percent), other);
+        }
+
         public static (GramSymType, TokenType, GramSymType) operator >(GramSymType @this, GramSymType other) {
             return (@this, new TokenType(Token.TypeEnum.GreaterThan), other);
         }

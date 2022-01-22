@@ -264,6 +264,7 @@ graph LR
 
 <term> := <term> "*" <factor>
         | <term> "/" <factor>
+        | <term> "%" <factor>
         | <factor>
 
 <factor> := <atom>

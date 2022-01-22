@@ -112,6 +112,7 @@ namespace Compiler {
 
             Term > Term * Factor,
             Term > Term / Factor,
+            Term > Term % Factor,
             Term > Factor,
 
             Factor > Atom,
