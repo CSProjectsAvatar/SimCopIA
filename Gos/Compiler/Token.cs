@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Compiler {
     public class Token : GramSymbol {
@@ -228,7 +228,7 @@ namespace Compiler {
             DistWorker,
 
             RightArrow,
-            
+
             /// <summary>
             /// Fin de archivo.
             /// </summary>
@@ -307,6 +307,8 @@ namespace Compiler {
             Div,
 
             If,
+            Else,
+            ElseIf,
             Return,
 
             /// <summary>

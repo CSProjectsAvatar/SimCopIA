@@ -275,8 +275,22 @@ graph LR
 
 <expr-list> := <expr>
              | <expr> "," <expr-list>
+
+<if-atom> := "if" <cond> "{" <stat-list> "}"
+
+<else> := "else" "{" <stat-list> "}"
              
-<if> := "if" <cond> "{" <stat-list> "}"
+<if> := <if-atom>
+      | <if-atom> <after-if>
+
+<after-if> := <else-if>
+            | <else>
+            | <else-if> <else>
+
+<else-if> := <else-if-atom>
+           | <else-if-atom> <else-if>
+
+<else-if-atom> := "else if" <cond> "{" <stat-list> "}"
 
 <return> := "return" <expr>
 ```

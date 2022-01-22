@@ -19,6 +19,11 @@ namespace Compiler {
         private static readonly UntType FuncCall = new UntType(typeof(FunCallUnt));
         private static readonly UntType ExprList = new UntType(typeof(ExprListUnt));
         private static readonly UntType If = new UntType(typeof(IfUnt));
+        private static readonly UntType IfAtom = new UntType(typeof(IfAtomUnt));
+        private static readonly UntType Else = new UntType(typeof(ElseUnt));
+        private static readonly UntType ElseIfAtom = new UntType(typeof(ElseIfAtomUnt));
+        private static readonly UntType ElseIf = new UntType(typeof(ElseIfUnt));
+        private static readonly UntType AfterIf = new UntType(typeof(AfterIfUnt));
         private static readonly UntType Return = new UntType(typeof(ReturnUnt));
         private static readonly UntType Condition = new UntType(typeof(ConditionUnt));
         private static readonly UntType RightConn = new UntType(typeof(RightConnUnt));
@@ -43,6 +48,8 @@ namespace Compiler {
         private static readonly TokenType let = Token.TypeEnum.Let;
         private static readonly TokenType fun = Token.TypeEnum.Fun;
         private static readonly TokenType @if = Token.TypeEnum.If;
+        private static readonly TokenType @else = Token.TypeEnum.Else;
+        private static readonly TokenType elseIf = Token.TypeEnum.ElseIf;
         private static readonly TokenType @return = Token.TypeEnum.Return;
         private static readonly TokenType pipe = Token.TypeEnum.Pipe;
         private static readonly TokenType quest = Token.TypeEnum.Quest;
@@ -115,7 +122,23 @@ namespace Compiler {
             ExprList > Expr,
             ExprList > (Expr, comma, ExprList),
 
-            If > (@if, Condition, lbrace, StatList, rbrace),
+        #region if-else
+            IfAtom > (@if, Condition, lbrace, StatList, rbrace),
+
+            Else > (@else, lbrace, StatList, rbrace),
+
+            If > IfAtom,
+            If > (IfAtom, AfterIf),
+
+            AfterIf > ElseIf,
+            AfterIf > Else,
+            AfterIf > (ElseIf, Else),
+
+            ElseIfAtom > (elseIf, Condition, lbrace, StatList, rbrace),
+
+            ElseIf > ElseIfAtom,
+            ElseIf > (ElseIfAtom, ElseIf),
+        #endregion
 
             Return > (@return, Expr)) {
         }

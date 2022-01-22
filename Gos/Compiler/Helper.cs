@@ -13,6 +13,8 @@ namespace Compiler {
         internal static IEnumerable<(string Regex, Token.TypeEnum Token)> TokenWithRegexs = new[] {
             ("print", Token.TypeEnum.Print),
             ("if", Token.TypeEnum.If),
+            ("else", Token.TypeEnum.Else),
+            ("else_if", Token.TypeEnum.ElseIf),
             ("let", Token.TypeEnum.Let),
             ("fun", Token.TypeEnum.Fun),
             ("return", Token.TypeEnum.Return),

@@ -191,20 +191,30 @@ namespace DataClassHierarchy
         }
         
         public (bool, object) Visiting(IfStmt node){
-            var (success, result) = Visit(node.Condition);
-            if(!success) {
-                if (result is not bool) {  // @note ESTE CHEKEO NO HAC FALTA XQ LA SINTAXIS ASEGURA Q ESO SEA BOOLEANO. PERO CUAN2 SOPORTEMOS LLAMADOS D FUNC EN UNA COND HAY Q HACERLO OBLIGAO
-                    log.LogError(
-                        "Line {line}, column {col}: the conditional can't be a non-boolean expression.", 
-                        node.Token.Line,
-                        node.Token.Column);
-                }
-                return (false, null);
-            }
-            if(result is bool r && r == true){
-                Visit(node.Then);
-            }
+            int idx = 0;  // el i'ndic de la 1ra cond q es true
 
+            foreach (var cond in node.Conditions) {
+                var (success, result) = Visit(cond);
+
+                if (result is not bool itsTrue) {  // @note ESTE CHEKEO NO HAC FALTA XQ LA SINTAXIS ASEGURA Q ESO SEA BOOLEANO. PERO CUAN2 SOPORTEMOS LLAMADOS D FUNC EN UNA COND HAY Q HACERLO OBLIGAO
+                    log.LogError(
+                        "Line {line}, column {col}: the condition #{idx} can't be a non-boolean expression.", 
+                        node.Token.Line,
+                        node.Token.Column,
+                        idx+1);
+                    return (false, null);
+                }
+                if (!success) {
+                    return (false, null);
+                }
+                if (itsTrue) {
+                    break;
+                }
+                idx++;
+            }
+            if (idx < node.Thens.Count) {  // hay un bloke q ejecutar. Se tiene en cuenta el bloke del else tambie'n
+                Visit(node.Thens[idx]);
+            }
             return (true, null); 
         }
         
