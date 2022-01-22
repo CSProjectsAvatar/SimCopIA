@@ -19,10 +19,10 @@ namespace ServersWithLayers
             turn = new();
             solutionResponses = new();
         }
-        private Utils.Heap<Perseption> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
+        private Utils.Heap<Perception> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
         public IEnumerable<Action> EnumerateActions(){
             while (turn.Count != 0){
-                (int time, Perseption exe ) = this.turn.RemoveMin();
+                (int time, Perception exe ) = this.turn.RemoveMin();
                 this.currentTime = time;
                 yield return exe.ExecuteInTime;
             }
@@ -35,7 +35,7 @@ namespace ServersWithLayers
         }
 
         //Suscribe un evento en el environment.
-        public void SubsribeEvent(int time, Perseption e){
+        public void SubsribeEvent(int time, Perception e){
             if(e is Request) 
                 turn.Add(time + REQUEST_TIME,e);
             else if(e is Response) 
