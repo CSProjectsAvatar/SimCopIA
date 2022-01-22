@@ -251,8 +251,10 @@ graph LR
 
 <expr> := <cond>
         | <math>
-        | "simplew"
-        | "distw"
+        | "new" <class>
+        
+<class> := "simplew"
+         | "distw"
 
 <right-conn> := "->" <id-list>
 

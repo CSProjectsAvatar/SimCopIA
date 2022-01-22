@@ -212,11 +212,18 @@ namespace Compiler {
         /// </summary>
         internal static Token Connection => new Token(TypeEnum.RightArrow, 1, ++colHelper, "->");
 
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (->).
+        /// </summary>
+        internal static Token New => new Token(TypeEnum.New, 1, ++colHelper, "new");
+
         internal static Token NumberFor(double x) {
             return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());
         }
 
         public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
+            New,
+
             /// <summary>
             /// simplew
             /// </summary>

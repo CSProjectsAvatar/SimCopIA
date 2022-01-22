@@ -18,6 +18,7 @@ namespace Compiler {
             ("let", Token.TypeEnum.Let),
             ("fun", Token.TypeEnum.Fun),
             ("return", Token.TypeEnum.Return),
+            ("new", Token.TypeEnum.New),
             ("simplew", Token.TypeEnum.SimpleWorker),
             ("distw", Token.TypeEnum.DistWorker),
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),

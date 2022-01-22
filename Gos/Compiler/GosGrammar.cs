@@ -27,6 +27,7 @@ namespace Compiler {
         private static readonly UntType Return = new UntType(typeof(ReturnUnt));
         private static readonly UntType Condition = new UntType(typeof(ConditionUnt));
         private static readonly UntType RightConn = new UntType(typeof(RightConnUnt));
+        private static readonly UntType Class = new UntType(typeof(ClassUnt));
 
 
         #region terminales
@@ -56,6 +57,7 @@ namespace Compiler {
         private static readonly TokenType rbrak = Token.TypeEnum.RBracket;
         private static readonly TokenType lbrak = Token.TypeEnum.LBracket;
         private static readonly TokenType times = Token.TypeEnum.Times;
+        private static readonly TokenType @new = Token.TypeEnum.New;
         private static readonly TokenType simplew = Token.TypeEnum.SimpleWorker;
         private static readonly TokenType distw = Token.TypeEnum.DistWorker;
         private static readonly TokenType rightArrow = Token.TypeEnum.RightArrow;
@@ -97,8 +99,10 @@ namespace Compiler {
 
             Expr > Condition,
             Expr > Math, 
-            Expr > simplew,
-            Expr > distw,
+            Expr > (@new, Class),
+            
+            Class > simplew,
+            Class > distw,
 
             RightConn > (rightArrow, IdList),
 

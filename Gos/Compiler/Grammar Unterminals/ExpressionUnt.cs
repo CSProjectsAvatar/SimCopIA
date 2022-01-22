@@ -12,17 +12,20 @@ namespace Compiler {
         {
             // <expr> := <cond>
             //         | <math>
-            //         | "simplew"
-            //         | "distw"
+            //         | "new" <class>
             return derivation[0] switch{
                 ConditionUnt c => c.Ast,
                 MathUnt m => m.Ast,
-                Token { Type: Token.TypeEnum.SimpleWorker } sw => new SimpleW() {
-                    Token = sw
-                },
-                Token { Type: Token.TypeEnum.DistWorker } dw => new DistW() {
-                    Token = dw
-                },
+                Token { Type: Token.TypeEnum.New } nw when derivation[1] is ClassUnt cu => 
+                    cu.Class switch {
+                        ClassUnt.ClassEnum.Simplew => new SimpleW() {
+                            Token = nw
+                        },
+                        ClassUnt.ClassEnum.Distw => new DistW() {
+                            Token = nw
+                        },
+                        _ => throw new NotImplementedException()
+                    },
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }
