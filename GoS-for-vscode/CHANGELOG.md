@@ -3,6 +3,10 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato se basa en [*Keep a Changelog*](https://keepachangelog.com/en/1.0.0/), y este proyecto se adhiere a [*Semantic Versioning*](https://semver.org/spec/v2.0.0.html).
 <!-- Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file. -->
 
+## 0.3.0
+### Added
+- Palabras claves `else_if` y `else`.
+
 ## 0.2.0
 ### Added
 - Palabras claves `simplew` y `distw`.
