@@ -17,7 +17,7 @@ namespace ServersWithLayers
             this._layers = new();
         }
 
-        public void HandlePerseption(Perseption p){
+        public void HandlePerception(Perception p){
 
             foreach(var l in _layers) 
                 l.Execute(p);

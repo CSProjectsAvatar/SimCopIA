@@ -9,9 +9,9 @@ namespace ServersWithLayers{
             this.server = server;
         } 
         
-        //Aqui la capa hace todo lo referente a modificar el estado de 'server'  o suscribir al environment Perseptions.
-        //Esto basado en un una Perseption 'p' y el estado interno de 'server'
-        public void Execute(Perseption p){
+        //Aqui la capa hace todo lo referente a modificar el estado de 'server'  o suscribir al environment Perceptions.
+        //Esto basado en un una Perception 'p' y el estado interno de 'server'
+        public void Execute(Perception p){
             throw new NotImplementedException("Layer Class not Implemented!");
         }
     }
