@@ -12,6 +12,7 @@ namespace Compiler.Grammar_Unterminals {
              <stat> := <let-var>
                      | <print-stat>
                      | <return>
+                     | <func-call>
                      | ID <right-conn>
             */
             return derivation[0] switch {
@@ -24,6 +25,7 @@ namespace Compiler.Grammar_Unterminals {
                 LetVarUnt u => u.Ast,
                 PrintUnt u => u.Ast,
                 ReturnUnt u => u.Ast,
+                FunCallUnt u => u.Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

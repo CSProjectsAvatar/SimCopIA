@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Compiler {
     public class Token : GramSymbol {
@@ -132,6 +132,7 @@ namespace Compiler {
                 TypeEnum.RPar => ")",
                 TypeEnum.Scape => "\\",
                 TypeEnum.Times => "*",
+                TypeEnum.RightArrow => "->",
                 _ => token.ToString()
             };
         }
@@ -195,6 +196,21 @@ namespace Compiler {
         /// Propiedad helper para debuguear y testear (/).
         /// </summary>
         internal static Token Div => new Token(TypeEnum.Div, 1, ++colHelper, "/");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Simplew => new Token(TypeEnum.SimpleWorker, 1, ++colHelper, "simplew");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear.
+        /// </summary>
+        internal static Token Distw => new Token(TypeEnum.DistWorker, 1, ++colHelper, "distw");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (->).
+        /// </summary>
+        internal static Token Connection => new Token(TypeEnum.RightArrow, 1, ++colHelper, "->");
 
         internal static Token NumberFor(double x) {
             return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());

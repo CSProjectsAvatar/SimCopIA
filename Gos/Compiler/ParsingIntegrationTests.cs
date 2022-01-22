@@ -48,8 +48,13 @@ namespace Compiler {
         private Token @if => Token.If;
         private Token @return => Token.Return;
         private Token eqeq => Token.EqEq;
+        private Token d => Token.IdFor("d");
+        private Token w => Token.IdFor("w");
+        private Token simplew => Token.Simplew;
+        private Token distw => Token.Distw;
+        private Token conn => Token.Connection;
         #endregion
-        
+
         [TestInitialize]
         public void Init() {
             this.log = LoggerFact.CreateLogger<Lr1>();
@@ -64,7 +69,11 @@ namespace Compiler {
                 Assert.IsTrue(parser.TryParse(
                     new[] {
                         let, x, eq, five, endl,  // let x = 5;
-                        print, x, endl, eof      // print x;
+                        print, x, endl,          // print x;
+                        let, d, eq, distw, endl,
+                        let, w, eq, simplew, endl,
+                        d, conn, w, endl,
+                        eof
                     },
                     out var root));
                 AssertIntegration(root, "5");
@@ -105,6 +114,9 @@ namespace Compiler {
                         print, y, endl,                                                 // print y;
                         let, z, eq, five, minus, three, minus, eight, endl,             // let z = 5 - 3 - 8;
                         print, z, endl,                                                 // print z;
+                        let, d, eq, distw, endl,
+                        let, w, eq, simplew, endl,
+                        d, conn, w, endl,
                         eof
                     },
                     out var root));
@@ -119,6 +131,9 @@ namespace Compiler {
                 Assert.IsTrue(parser.TryParse(
                     new[] {
                         let, x, eq, five, plus, Token.IdFor("a"), endl,  // let x = 5 + a; 
+                        let, d, eq, distw, endl,
+                        let, w, eq, simplew, endl,
+                        d, conn, w, endl,
                         eof
                     },
                     out var root));
@@ -141,6 +156,9 @@ namespace Compiler {
                             print, n, endl,                  //     print n;
                         rbrace,                              // }
                         f, lpar, five, rpar, endl,           // f(5);
+                        let, d, eq, distw, endl,
+                        let, w, eq, simplew, endl,
+                        d, conn, w, endl,
                         eof
                     },
                     out var root));
@@ -159,6 +177,9 @@ namespace Compiler {
                         @if, five, gt, eight, lbrace,   // if 5 > 8 {
                             print, zero, endl,          //  print 0;
                         rbrace,                         // }
+                        let, d, eq, distw, endl,
+                        let, w, eq, simplew, endl,
+                        d, conn, w, endl,
                         eof
                     },
                     out var root));
@@ -181,6 +202,9 @@ namespace Compiler {
                             rbrace,                                                    //     }
                         rbrace,                                                        // }
                         print, f, lpar, five, rpar, endl,                              // print f(5);
+                        let, d, eq, distw, endl,
+                        let, w, eq, simplew, endl,
+                        d, conn, w, endl,
                         eof
                     },
                     out var root));
@@ -210,6 +234,9 @@ namespace Compiler {
 
                         let, x, eq, eight, endl,                                       // let x = 8;
                         print, f, lpar, x, rpar, endl,                                 // print f(x);
+                        let, d, eq, distw, endl,
+                        let, w, eq, simplew, endl,
+                        d, conn, w, endl,
                         eof
                     },
                     out var root));
