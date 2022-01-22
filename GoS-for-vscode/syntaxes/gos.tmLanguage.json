@@ -25,7 +25,7 @@
 					"match": "\\b(fun|let|print|new)\\b"
 				}, {
 					"name": "keyword.operator.gos",
-					"match": ">|<|\\=|==|\\+|\\->|\\-|\\*|\\/"
+					"match": ">|<|\\=|==|\\+|\\->|\\-|\\*|\\/|%"
 				}, {
 					"name": "support.class.gos",
 					"match": "\\b(simplew|distw)\\b"
