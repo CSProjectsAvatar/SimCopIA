@@ -20,6 +20,7 @@ namespace Agents
             this.agent = e.GetAgent(ID);
             environment = e;
             this.sender = sender;
+            this.URL = "";
         }
         public Request(string sender, string ID, Environment e, bool forKnowAvailibity) : this(sender,ID,e)
             => this.ToKnowAvailibility = forKnowAvailibity;
