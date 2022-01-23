@@ -14,6 +14,7 @@ namespace Compiler.Tests {
         protected Lexer.Lexer _lex;
         protected Lr1 _parser;
         protected string _dslSuf;
+        protected string _endl;
 
         [TestInitialize]
         public void Init() {
@@ -30,6 +31,7 @@ namespace Compiler.Tests {
                 let d = new distw
                 let w = new simplew
                 d -> w";
+            _endl = Environment.NewLine;
         }
     }
 }

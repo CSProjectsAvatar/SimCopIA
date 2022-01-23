@@ -7,6 +7,7 @@ using Agents;
 using Compiler;
 using Compiler.AstHierarchy;
 using Compiler.AstHierarchy.Operands;
+using Compiler.AstHierarchy.Statements;
 using Microsoft.Extensions.Logging;
 
 namespace DataClassHierarchy
@@ -188,7 +189,28 @@ namespace DataClassHierarchy
             Context.SetVar(node.Identifier, result);
             return (true, result);  
         }
-        
+
+        public (bool, object) Visiting(Assign node) {
+            var (succ, value) = Visit(node.NewValueExpr);
+            if (!succ) {
+                return (false, null);
+            }
+            var type = Helper.GetType(Context.GetVar(node.Variable));
+            var newType = Helper.GetType(value);
+
+            if (type != newType) {
+                _log.LogError(
+                    "Line {l}, column {c}: types mismatch. Type {type} was expected but {valType} is given.",
+                    node.Token.Line,
+                    node.Token.Column,
+                    type,
+                    newType);
+                return (false, null);
+            }
+            Context.SetVar(node.Variable, value);
+            return (true, null);
+        }
+
         public (bool, object) Visiting(DefFun node){
             Context.SetFunc(node.Identifier, node.Arguments.Count, node);
             return (true, null);  

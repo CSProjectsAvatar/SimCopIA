@@ -81,6 +81,7 @@ namespace Compiler {
             Stat > Return,
             Stat > FuncCall,
             Stat > (id, RightConn),
+            Stat > (id, eq, Expr),  // asignacio'n
 
             LetVar > (let, id, eq, Expr),
 

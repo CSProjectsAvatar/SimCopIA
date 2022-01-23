@@ -235,6 +235,7 @@ graph LR
         | <return>
         | <func-call>
         | ID <right-conn>
+        | ID "=" <expr>
 
 <let-var> := "let" ID "=" <expr>
 
@@ -311,9 +312,13 @@ El lenguaje tiene 3 tipos:
 - `Bool`: para valores de verdad (*true* o *false*)
 - `Server`: para los servidores
 
-Los operadores `+`, `-`, `*`, `/` solo est&aacute;n permitidos para el tipo `Number`. 
+Los operadores `+`, `-`, `*`, `/`, `%` solo est&aacute;n permitidos para el tipo `Number`. 
 
 En el caso del operador de conexi&oacute;n de servidores (`->`), solo est&aacute; permitido para el tipo `Server`, y el operando de la izquierda debe ser un distribuidor de carga (lo que se espera es que pueda ser de cualquier tipo de servidor; ser&aacute; rectificado en una entrega posterior).
+
+Una variable no puede cambiar su tipo: una vez se ha inicializado mediante `let`, los pr&oacute;ximos valores a asignar deben
+ser del mismo tipo que el valor inicial. <!--@todo poner co'digo d ejemplo-->
+
 #### Reglas Sem&aacute;nticas
 - Una variable solo puede ser definida una vez en todo el
 programa.
