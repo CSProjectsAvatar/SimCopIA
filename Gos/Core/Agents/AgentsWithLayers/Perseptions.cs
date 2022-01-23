@@ -54,7 +54,7 @@ namespace ServersWithLayers
         // Crea un reponse a partir del request,
         // esta dirigido a el que envio el request y lo manda el que recibio el request,
         // se le agregan los datos que supuestamente pide el request en cuestion.
-        public Response MakeResponse(Dictionary<string, string> data){
+        public Response MakeResponse(Dictionary<string, object> data){
             return new Response(
                 this.ID,
                 this.Receiber,
@@ -71,8 +71,8 @@ namespace ServersWithLayers
     //  - Los datos que contiene el response asociados a lo solicitado por el request. ( por ahora es un diccionario de strings )
     public class Response : Message{
         public int RequestID {get;}
-        public Dictionary<string,string> Data {get;}
-        public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, string> data, Environment env) : base(sender, receiber, type, env){
+        public Dictionary<string,object> Data {get;}
+        public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, object> data, Environment env) : base(sender, receiber, type, env){
             this.RequestID = requestID;
             this.Data = data;
         }

@@ -27,9 +27,17 @@ namespace ServersWithLayers
         }
         public void SetLayers(IEnumerable<Layer> layers){
             _layers = new List<Layer>(layers);
+            foreach(var l in _layers)
+                l.SetServer(this);
         }
         public void AddLayers(IEnumerable<Layer> layers){
+            foreach(var l in layers)
+                l.SetServer(this);
             _layers.AddRange(layers);
+        }
+        public void AddLayer(Layer layer){
+            layer.SetServer(this);
+            _layers.Add(layer);
         }
         
     }

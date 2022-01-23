@@ -14,6 +14,9 @@ namespace ServersWithLayers{
         public void Execute(Perception p){
             throw new NotImplementedException("Layer Class not Implemented!");
         }
+        public void SetServer(Server serv){
+            this.server = serv ;
+        } 
     }
 
 }
