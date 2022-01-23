@@ -20,7 +20,7 @@ namespace ServersWithLayers
         public void HandlePerception(Perception p){
 
             foreach(var l in _layers) 
-                l.Execute(p);
+                l.Process(p);
                         
             foreach(var e in this.Stats.EnumerateAndClear())
                 Env.SubsribeEvent(e.Item1,e.Item2);
