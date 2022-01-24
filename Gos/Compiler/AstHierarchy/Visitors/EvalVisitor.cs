@@ -398,7 +398,9 @@ namespace DataClassHierarchy
                 idx++;
             }
             if (idx < node.Thens.Count) {  // hay un bloke q ejecutar. Se tiene en cuenta el bloke del else tambie'n
-                Visit(node.Thens[idx]);
+                if (!Visit(node.Thens[idx]).Item1) {  // evaluacio'n no exitosa
+                    return (false, null);
+                }
             }
             return (true, null); 
         }
