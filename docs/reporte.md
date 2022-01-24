@@ -334,8 +334,7 @@ Una variable no puede cambiar su tipo: una vez se ha inicializado mediante `let`
 ser del mismo tipo que el valor inicial. <!--@todo poner co'digo d ejemplo-->
 
 #### Reglas Sem&aacute;nticas
-- Una variable solo puede ser definida una vez en todo el
-programa.
+- Una variable solo puede ser definida una vez en un mismo ámbito.
 - Los nombres de variables y funciones no comparten el mismo
 ámbito (pueden existir una variable y una función llamadas
 igual).
@@ -350,7 +349,9 @@ variables definidas globalmente o a argumentos definidos en
 otras funciones.
 - En el cuerpo de una función, los nombres de los argumentos
 ocultan los nombres de variables iguales.
-- En el cuerpo de un *statement* de bloque o una función, los nombres de las variables ocultan los nombres de variables en &aacute;mbitos superiores.
+- En el cuerpo de un *statement* de bloque o una función, los nombres de las variables definidas ocultan los 
+nombres de variables en &aacute;mbitos superiores.
+
 
 #### Gram&aacute;tica de REGEX 
 El lenguaje de REGEX utilizado es el definido en la correspondiente conferencia de la asignatura.

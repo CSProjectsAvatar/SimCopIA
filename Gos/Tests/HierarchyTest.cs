@@ -143,7 +143,7 @@ namespace Tests {
             };
         #endregion
 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -202,7 +202,7 @@ namespace Tests {
             
         #endregion
 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -261,7 +261,7 @@ namespace Tests {
             };
         #endregion
 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -336,7 +336,7 @@ namespace Tests {
             };
         #endregion
 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -420,7 +420,7 @@ namespace Tests {
             };
         #endregion
                 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -474,7 +474,7 @@ namespace Tests {
             };
             #endregion
                     
-                var valid = prog.Validate(global);
+                var valid = prog.Validate(new Context());
                 Assert.IsTrue(valid);
     
                 var (success, result) = evalVisitor.Visit(prog);

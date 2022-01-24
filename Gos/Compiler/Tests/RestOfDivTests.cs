@@ -23,11 +23,10 @@ namespace Compiler.Tests {
             var tokens = _lex.Tokenize($"print {lft} % {rgt} == {ans}" + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
 
-            var ctx = new Context();
-            Assert.IsTrue(ast.Validate(ctx));
+            Assert.IsTrue(ast.Validate(new Context()));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);

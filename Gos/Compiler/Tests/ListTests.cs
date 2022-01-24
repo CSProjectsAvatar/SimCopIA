@@ -27,7 +27,7 @@ print l" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -50,7 +50,7 @@ print l" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -91,7 +91,7 @@ print l[4]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -117,7 +117,7 @@ print l[4]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -139,7 +139,7 @@ print f(3)[2]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -163,7 +163,7 @@ print l" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -190,7 +190,7 @@ print l" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -214,7 +214,7 @@ print l" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -238,7 +238,7 @@ print l[" + idx + "]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -262,7 +262,7 @@ l[" + idx + "] = 10" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -284,7 +284,7 @@ l[a] = 10" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -306,7 +306,7 @@ print l[a]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -327,7 +327,7 @@ print l[f(5)]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -348,7 +348,7 @@ print l[f(5)]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -369,7 +369,7 @@ print l[f(5)]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -391,7 +391,7 @@ print 3 + 2*5 + l[f(5)] - 23" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -410,7 +410,7 @@ print a[1]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -428,7 +428,7 @@ a[1] = 5" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -446,7 +446,7 @@ print a[2][1]" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);
@@ -464,7 +464,7 @@ a[2][1] = 12" + _dslSuf);
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);

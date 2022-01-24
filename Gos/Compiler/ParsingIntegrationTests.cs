@@ -91,11 +91,10 @@ namespace Compiler {
             var prog = root as ProgramNode;
             Assert.IsNotNull(prog);
 
-            var global = new Context();
-            Assert.IsTrue(prog.Validate(global));
+            Assert.IsTrue(prog.Validate(new Context()));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(global, this.evalLog, @out);
+            var vis = new EvalVisitor(new Context(), this.evalLog, @out);
             var (success, _) = vis.Visit(prog);
             Assert.IsTrue(success);
 

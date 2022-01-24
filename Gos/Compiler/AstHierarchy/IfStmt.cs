@@ -13,7 +13,8 @@ namespace DataClassHierarchy {
                 return false;
             }
             foreach (var block in Thens) {
-                if (!block.All(st => st.Validate(context)))
+                var child = context.CreateChildContext();
+                if (!block.All(st => st.Validate(child)))  // @audit esto ta mal, hay q crear un contexto distinto pa kda validacio'n
                     return false;
             }
             return true;

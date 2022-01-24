@@ -54,7 +54,7 @@ namespace Compiler.Tests {
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -77,7 +77,7 @@ namespace Compiler.Tests {
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -102,7 +102,7 @@ namespace Compiler.Tests {
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -127,7 +127,7 @@ namespace Compiler.Tests {
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -150,7 +150,7 @@ namespace Compiler.Tests {
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -239,6 +239,93 @@ namespace Compiler.Tests {
 
             var ctx = new Context();
             Assert.IsFalse(ast.Validate(ctx));
+        }
+
+        [TestMethod]
+        public void LetInManyBlocks() {
+            var tokens = _lex.Tokenize(@"
+                if 3 > 5 {
+                    let a = [1, 2, 3]
+                    print a
+                } else_if 3 < 5 {
+                    let a = 3
+                    print a
+                } else_if 3 == 5 {
+                    let a = [12]
+                    print a
+                }" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"3{Environment.NewLine}", @out.ToString());
+        }
+
+        [TestMethod]
+        public void OutOfContext() {
+            var tokens = _lex.Tokenize(@"
+                if 3 < 5 {
+                    let a = [1, 2, 3]
+                }
+                print a" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsFalse(ast.Validate(ctx));
+        }
+
+        [TestMethod]
+        public void RedefinitionInNestedContext() {
+            var tokens = _lex.Tokenize(@"
+                let a = [5, 6]
+                if 3 < 5 {
+                    let a = [1, 2, 3]
+
+                    if 2 < 3 {
+                        let a = [10, 11]
+                        a[1] = 7
+                    }
+                    print a
+                }
+                print a" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"[1, 2, 3]{Environment.NewLine}[5, 6]{Environment.NewLine}", @out.ToString());  // no c kmbia el valor del contexto padre
+        }
+
+        [TestMethod]
+        public void AssignmentInNestedContext() {
+            var tokens = _lex.Tokenize(@"
+                let a = [5, 6]
+                if 3 < 5 {
+                    a = [1, 2, 3]
+                }
+                print a" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"[1, 2, 3]{Environment.NewLine}", @out.ToString());  // no c kmbia el valor del contexto padre
         }
     }
 }

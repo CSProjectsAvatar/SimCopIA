@@ -22,13 +22,17 @@ namespace DataClassHierarchy
             {
                 return false;
             }
-            SetVar(name, value);
+            _variables[name] = value;
             return true;
         }
 
-        public void SetVar(string name, object value)
-        {
-            _variables[name] = value;
+        public void SetVar(string name, object value) {
+            for (var ctx = this; ctx != null; ctx = ctx.parent) {
+                if (ctx._variables.ContainsKey(name)) {
+                    ctx._variables[name] = value;
+                    break;
+                }
+            }
         }
 
         public bool DefFunc(string name, int funArity, DefFun fun = null){

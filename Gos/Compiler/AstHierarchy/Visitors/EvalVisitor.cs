@@ -186,7 +186,7 @@ namespace DataClassHierarchy
             if (result is Agent serv) {
                 serv.ID = node.Identifier;
             }
-            Context.SetVar(node.Identifier, result);
+            Context.DefVariable(node.Identifier, result);
             return (true, result);  
         }
 
@@ -398,7 +398,13 @@ namespace DataClassHierarchy
                 idx++;
             }
             if (idx < node.Thens.Count) {  // hay un bloke q ejecutar. Se tiene en cuenta el bloke del else tambie'n
-                if (!Visit(node.Thens[idx]).Item1) {  // evaluacio'n no exitosa
+                Context = Context.CreateChildContext(); // cambiando el contexto
+
+                var succ = Visit(node.Thens[idx]).Item1;
+
+                stackC.Pop(); // retornan2 al contexto previo
+
+                if (!succ) {  // evaluacio'n no exitosa
                     return (false, null);
                 }
             }
@@ -465,7 +471,7 @@ namespace DataClassHierarchy
         }
 
         // Auxiliars
-        public (bool, object) Visiting(IList<IStatement> statements){
+        public (bool, object) Visiting(IEnumerable<IStatement> statements){
             object lastR = null;
 
             foreach (var st in statements){

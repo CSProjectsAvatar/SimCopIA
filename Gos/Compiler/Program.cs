@@ -29,10 +29,8 @@ namespace Compiler {
             var parser = new Lr1(new GosGrammar(), logLr1, logLr1Dfa);
 
             if (parser.TryParse(tokens, out var ast)) {
-                var ctx = new Context();
-
-                if (ast.Validate(ctx)) {
-                    var vis = new EvalVisitor(ctx, loggerFactory.CreateLogger<EvalVisitor>(), Console.Out);
+                if (ast.Validate(new Context())) {
+                    var vis = new EvalVisitor(new Context(), loggerFactory.CreateLogger<EvalVisitor>(), Console.Out);
                     vis.Visit(ast);
                 }
             }

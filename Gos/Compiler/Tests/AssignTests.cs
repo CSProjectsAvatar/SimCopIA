@@ -25,7 +25,7 @@ namespace Compiler.Tests {
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsTrue(success);
@@ -75,7 +75,7 @@ namespace Compiler.Tests {
             Assert.IsTrue(ast.Validate(ctx));
 
             var @out = new StringWriter();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
             var (success, _) = vis.Visit(ast);
 
             Assert.IsFalse(success);

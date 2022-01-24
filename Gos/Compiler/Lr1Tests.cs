@@ -182,7 +182,7 @@ namespace Compiler {
                 out var ast));
             Assert.IsTrue(ast.Validate(ctx));
 
-            var eval = new EvalVisitor(ctx, _logEval, Console.Out);
+            var eval = new EvalVisitor(new Context(), _logEval, Console.Out);
             Assert.IsFalse(eval.Visit(ast).Item1);
         }
 
