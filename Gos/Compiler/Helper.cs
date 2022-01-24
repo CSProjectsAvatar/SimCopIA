@@ -37,7 +37,9 @@ namespace Compiler {
             (@"\(", Token.TypeEnum.LPar),
             (@"\)", Token.TypeEnum.RPar),
             (@"\->", Token.TypeEnum.RightArrow),
-            (",", Token.TypeEnum.Comma)
+            (",", Token.TypeEnum.Comma),
+            (@"\[", Token.TypeEnum.LBracket),
+            (@"\]", Token.TypeEnum.RBracket)
         };
 
         /// <summary>
@@ -70,6 +72,7 @@ namespace Compiler {
                 double => GosType.Number,
                 bool => GosType.Bool,
                 Agent => GosType.Server,
+                List<object> => GosType.List,
                 _ => throw new NotImplementedException()
             };
         }

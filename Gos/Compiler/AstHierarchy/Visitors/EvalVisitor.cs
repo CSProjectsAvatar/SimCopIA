@@ -190,7 +190,7 @@ namespace DataClassHierarchy
             return (true, result);  
         }
 
-        public (bool, object) Visiting(Assign node) {
+        public (bool, object) Visiting(VarAssign node) {
             var (succ, value) = Visit(node.NewValueExpr);
             if (!succ) {
                 return (false, null);
@@ -209,6 +209,120 @@ namespace DataClassHierarchy
             }
             Context.SetVar(node.Variable, value);
             return (true, null);
+        }
+
+        public (bool, object) Visiting(ListIdxSetAst node) {
+            List<object> list = null;
+            int idxToUse = -1;
+            var newListObj = Context.GetVar(node.RootListName); ;
+
+            foreach (var idxExpr in node.Idxs) {
+                // chekean2 tipo de la lista
+                var newListType = Helper.GetType(newListObj);
+
+                if (newListType != GosType.List) {
+                    _log.LogError(
+                        "Line {l}, column {c}: '{id}' must be a list but it's a {idType} instead.",
+                        node.Token.Line,
+                        node.Token.Column,
+                        node.RootListName,
+                        newListType);
+                    return (false, null);
+                }
+                list = newListObj as List<object>;
+
+                var (idxSucc, idxObj) = Visit(idxExpr);
+
+                if (!idxSucc) {
+                    return (false, null);
+                }
+                if (!IdxValid(idxObj, list.Count, node.Token.Line, node.Token.Column)) {
+                    return (false, null);
+                }
+                idxToUse = (int)(double)idxObj - 1;
+                newListObj = list[idxToUse];
+            }
+            var (succ, value) = Visit(node.NewValueExpr);
+
+            if (!succ) {
+                return (false, null);
+            }
+            var valType = Helper.GetType(value);
+            var expectedType = Helper.GetType(list[0]);
+
+            if (valType != expectedType) {
+                _log.LogError(
+                    "Line {l}, column {c}: new value must be of type {expect} but it's of type {act} instead.",
+                    node.NewValueExpr.Token.Line,
+                    node.NewValueExpr.Token.Column,
+                    expectedType,
+                    valType);
+                return (false, null);
+            }
+            list[idxToUse] = value;
+
+            return (true, null);
+        }
+
+        private bool IdxValid(object idxObj, int listCount, uint line, uint column) {
+            // checkean2 q el i'ndic sea un #
+            var idxType = Helper.GetType(idxObj);
+
+            if (idxType != GosType.Number) {
+                _log.LogError(
+                    "Line {l}, column {c}: index must be a number, but it's of type {type} instead.",
+                    line,
+                    column,
+                    idxType);
+                return false;
+            }
+            // chekean2 q el i'ndic sea entero
+            var idxDouble = (double)idxObj;
+            var idxInt = (int)idxDouble;
+
+            if (idxDouble - idxInt > double.Epsilon) {
+                _log.LogError(
+                    "Line {l}, column {c}: index can't be a fractional number.",
+                    line,
+                    column);
+                return false;
+            }
+            if (idxInt <= 0 || idxInt > listCount) {
+                _log.LogError(
+                    "Line {l}, column {c}: index must be greater than 0 and less or equal than the list size.",
+                    line,
+                    column);
+                return false;
+            }
+            return true;
+        }
+
+        public (bool, object) Visiting(ListIdxGetAst node) {
+            var (succ, val) = Visit(node.Left);
+
+            if (!succ) {
+                return (false, null);
+            }
+            var type = Helper.GetType(val);
+
+            if (type != GosType.List) {
+                _log.LogError(
+                    "Line {l}, column {c}: expression must be a list but it's a {idType} instead.",
+                    node.Token.Line,
+                    node.Token.Column,
+                    type);
+                return (false, null);
+            }
+            var list = val as List<object>;
+            var (idxSucc, idxObj) = Visit(node.Index);
+
+            if (!idxSucc) {
+                return (false, null);
+            }
+            if (!IdxValid(idxObj, list.Count, node.Token.Line, node.Token.Column)) {
+                return (false, null);
+            }
+            return (true, list[(int)(double)idxObj - 1]);
         }
 
         public (bool, object) Visiting(DefFun node){
@@ -233,8 +347,14 @@ namespace DataClassHierarchy
             if(!success){
                 return (false, null);
             }
-            _writer.WriteLine(result?.ToString());
+            _writer.WriteLine(GosObjToString(result));
             return (true, null); // @todo No tenemos soportado null(por eso el ? de arriba), hay q ver eso
+        }
+
+        private string GosObjToString(object obj) {
+            return Helper.GetType(obj) is GosType.List
+                ? $"[{string.Join(", ", (obj as List<object>).Select(elem => GosObjToString(elem)))}]"
+                : obj?.ToString();
         }
 
         public (bool, object) Visiting(ProgramNode node){
@@ -306,6 +426,40 @@ namespace DataClassHierarchy
             var ss = new SimpleServer(Context.Simulation, null);
             Context.Simulation.AddAgent(ss);
             return (true, ss);
+        }
+
+        public (bool, object) Visiting(GosListAst node) {
+            var first = node.Elements.First();
+            var (succ, val) = Visit(first);
+
+            if (!succ) {
+                return (false, null);
+            }
+            var fstType = Helper.GetType(val);  // el 1er tipo
+
+            var ans = new List<object>();
+            ans.Add(val);
+
+            foreach (var elem in node.Elements.Skip(1)) {
+                (succ, val) = Visit(elem);
+
+                if (!succ) {
+                    return (false, null);
+                }
+                var type = Helper.GetType(val);
+
+                if (type != fstType) {  // todos los tipos deben ser iguales al 1ro
+                    _log.LogError(
+                        "Line {l}, column {c}: all elements in list must have the same type. Expected: {fstType}, actual: {type}.",
+                        elem.Token.Line,
+                        elem.Token.Column,
+                        fstType,
+                        type);
+                    return (false, null);
+                }
+                ans.Add(val);
+            }
+            return (true, ans);
         }
 
         // Auxiliars

@@ -28,7 +28,10 @@ namespace Compiler {
         private static readonly UntType Condition = new UntType(typeof(ConditionUnt));
         private static readonly UntType RightConn = new UntType(typeof(RightConnUnt));
         private static readonly UntType Class = new UntType(typeof(ClassUnt));
-
+        private static readonly UntType GosList = new UntType(typeof(GosListUnt));
+        private static readonly UntType ListIdx = new UntType(typeof(ListIdxUnt));
+        private static readonly UntType LeftVal = new UntType(typeof(LeftValUnt));
+        private static readonly UntType ToIdx = new UntType(typeof(ToIdxUnt));
 
         #region terminales
         private static readonly TokenType n = TokenType.Number;
@@ -81,7 +84,10 @@ namespace Compiler {
             Stat > Return,
             Stat > FuncCall,
             Stat > (id, RightConn),
-            Stat > (id, eq, Expr),  // asignacio'n
+            Stat > (LeftVal, eq, Expr),  // asignacio'n
+
+            LeftVal > id,  // l-values
+            LeftVal > LeftVal[Math],
 
             LetVar > (let, id, eq, Expr),
 
@@ -101,7 +107,16 @@ namespace Compiler {
             Expr > Condition,
             Expr > Math, 
             Expr > (@new, Class),
-            
+            Expr > GosList,
+
+            ListIdx > ToIdx[Math],
+
+            ToIdx > id,
+            ToIdx > FuncCall,
+            ToIdx > ListIdx,
+
+            GosList > (lbrak, ExprList, rbrak),
+
             Class > simplew,
             Class > distw,
 
@@ -122,6 +137,7 @@ namespace Compiler {
             Atom > n,
             Atom > id,
             Atom > FuncCall,
+            Atom > ListIdx,
 
             FuncCall > (id, lpar, ExprList, rpar),
 

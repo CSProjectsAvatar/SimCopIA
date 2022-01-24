@@ -90,9 +90,11 @@ namespace Compiler {
                 }
                 _log.LogError(
                     $"One of these expected:{Environment.NewLine}{{token}}",
-                    string.Join(Environment.NewLine, from k in _dfa.action.Keys
-                        where k.Item1 == state
-                        select Token.GetDefaultLexeme(k.Item2)));
+                    string.Join(
+                        Environment.NewLine, 
+                        from k in _dfa.action.Keys
+                            where k.Item1 == state
+                            select Token.GetDefaultLexeme(k.Item2)));
 
                 action = default;
                 actionData = default;

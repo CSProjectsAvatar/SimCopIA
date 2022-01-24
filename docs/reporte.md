@@ -235,7 +235,10 @@ graph LR
         | <return>
         | <func-call>
         | ID <right-conn>
-        | ID "=" <expr>
+        | <left-val> "=" <expr>
+
+<left-val> := ID
+            | <left-val> "[" <math> "]"
 
 <let-var> := "let" ID "=" <expr>
 
@@ -253,6 +256,16 @@ graph LR
 <expr> := <cond>
         | <math>
         | "new" <class>
+        | <gos-list>
+
+<list-idx> := <to-idx> "[" <math> "]"
+
+<to-idx> := ID
+          | <func-call>
+          | <gos-list>
+          | <list-idx>
+
+<gos-list> := "[" <expr-list> "]"
         
 <class> := "simplew"
          | "distw"
@@ -274,6 +287,7 @@ graph LR
 <atom> := NUMBER
         | ID
         | <func-call>
+        | <list-idx>
 
 <func-call> := ID "(" <expr-list> ")"
 

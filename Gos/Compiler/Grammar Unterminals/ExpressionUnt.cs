@@ -13,6 +13,7 @@ namespace Compiler {
             // <expr> := <cond>
             //         | <math>
             //         | "new" <class>
+            //         | <gos-list>
             return derivation[0] switch{
                 ConditionUnt c => c.Ast,
                 MathUnt m => m.Ast,
@@ -26,6 +27,7 @@ namespace Compiler {
                         },
                         _ => throw new NotImplementedException()
                     },
+                GosListUnt gl => gl.Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

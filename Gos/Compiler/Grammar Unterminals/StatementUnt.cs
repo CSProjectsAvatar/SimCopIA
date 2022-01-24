@@ -1,4 +1,5 @@
-﻿using Compiler.AstHierarchy.Statements;
+﻿using Compiler.AstHierarchy;
+using Compiler.AstHierarchy.Statements;
 using DataClassHierarchy;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Compiler.Grammar_Unterminals {
                      | <return>
                      | <func-call>
                      | ID <right-conn>
-                     | ID "=" <expr>
+                     | <left-val> "=" <expr>
             */
             return derivation[0] switch {
                 Token { Type: Token.TypeEnum.Id } id when derivation[1] is RightConnUnt rc
@@ -24,12 +25,19 @@ namespace Compiler.Grammar_Unterminals {
                         LeftAgent = id.Lexem,
                         Token = id
                     },
-                Token { Type: Token.TypeEnum.Id } id when derivation[2] is ExpressionUnt e
-                    => new Assign(Helper.Logger<Assign>()) {
-                        Variable = id.Lexem,
-                        NewValueExpr = e.Ast as Expression,
-                        Token = derivation[1] as Token
-                    },
+                LeftValUnt lv when derivation[2] is ExpressionUnt e
+                    => lv.IsListIdx
+                        ? new ListIdxSetAst(Helper.Logger<VarAssign>()) {
+                            RootListName = lv.Id,
+                            Idxs = lv.Idxs,
+                            NewValueExpr = e.Ast as Expression,
+                            Token = new Token(Token.TypeEnum.Id, lv.Line, lv.Column, lv.Id)
+                        }
+                        : new VarAssign(Helper.Logger<VarAssign>()) {
+                            Variable = lv.Id,
+                            NewValueExpr = e.Ast as Expression,
+                            Token = derivation[1] as Token
+                        },
                 LetVarUnt u => u.Ast,
                 PrintUnt u => u.Ast,
                 ReturnUnt u => u.Ast,

@@ -5,6 +5,7 @@
     internal enum GosType {
         Number,
         Bool,
-        Server
+        Server,
+        List
     }
 }
