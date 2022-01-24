@@ -10,7 +10,7 @@ namespace Compiler.Grammar_Unterminals {
     class LeftValUnt : Unterminal {
         public IEnumerable<Expression> Idxs { get; private set; }
         public string Id { get; private set; }
-        public bool IsListIdx => Idxs != default;
+        public bool IsListIdx => Idxs.Any();
 
         public uint Line { get; private set; }
         public uint Column { get; private set; }
