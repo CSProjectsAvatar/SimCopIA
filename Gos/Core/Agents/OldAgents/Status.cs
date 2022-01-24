@@ -10,6 +10,9 @@ namespace Agents
         void AddEvent(int time,IExecutable e);
         Request DeleteRequest(Request r);
         Request DeleteRequestAt(int index);
+        //Environment env {get;}
+        Agent agent {get;}
+        Environment environment {get;}
     }
     public interface IRequestable: IStatus{
         void SaveRequest(Request r);
@@ -28,11 +31,16 @@ namespace Agents
         public List<Request> requests  {get; private set;}
         public List<Response> responses  {get; private set;}
         public List<Request> requestToProcessed { get; private set; }
-        public Status(){
+
+        public Environment environment => this.agent.environment;
+        public Agent agent {get;}
+        public Status(Agent agent){
             IsAvailable = true;
             toExecute = new();
             requests = new();
             requestToProcessed = new();
+            //this.env = env;
+            this.agent = agent;
         }
 
         public List<Request> GetListRequest()
