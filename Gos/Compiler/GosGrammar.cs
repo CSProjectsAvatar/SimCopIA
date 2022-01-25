@@ -33,6 +33,7 @@ namespace Compiler {
         private static readonly UntType ListIdx = new UntType(typeof(ListIdxUnt));
         private static readonly UntType LeftVal = new UntType(typeof(LeftValUnt));
         private static readonly UntType ToIdx = new UntType(typeof(ToIdxUnt));
+        private static readonly UntType InfLoop = new UntType(typeof(InfLoopUnt));
 
         #region terminales
         private static readonly TokenType n = TokenType.Number;
@@ -65,6 +66,8 @@ namespace Compiler {
         private static readonly TokenType simplew = Token.TypeEnum.SimpleWorker;
         private static readonly TokenType distw = Token.TypeEnum.DistWorker;
         private static readonly TokenType rightArrow = Token.TypeEnum.RightArrow;
+        private static readonly TokenType forever = Token.TypeEnum.Forever;
+        private static readonly TokenType @break = Token.TypeEnum.Break;
 
         #endregion
         public GosGrammar() : base(
@@ -79,6 +82,9 @@ namespace Compiler {
 
             BlockStat > If,
             BlockStat > DefFunc,
+            BlockStat > InfLoop,
+
+            InfLoop > (forever, lbrace, StatList, rbrace),
 
             Stat > LetVar,
             Stat > Print,
@@ -86,6 +92,7 @@ namespace Compiler {
             Stat > FuncCall,
             Stat > (id, RightConn),
             Stat > (LeftVal, eq, Expr),  // asignacio'n
+            Stat > @break,
 
             LeftVal > id,  // l-values
             LeftVal > LeftVal[Math],

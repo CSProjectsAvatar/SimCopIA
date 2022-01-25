@@ -21,6 +21,9 @@ namespace Compiler {
             ("new", Token.TypeEnum.New),
             ("simplew", Token.TypeEnum.SimpleWorker),
             ("distw", Token.TypeEnum.DistWorker),
+            ("forever", Token.TypeEnum.Forever),
+            ("break", Token.TypeEnum.Break),
+
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("{", Token.TypeEnum.LBrace),
             ("}", Token.TypeEnum.RBrace),

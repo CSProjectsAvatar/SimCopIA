@@ -18,6 +18,11 @@ namespace DataClassHierarchy
         /// </summary>
         internal bool OpenFunction { get; set; }
 
+        /// <summary>
+        /// Whether a loop declaration has been started in the validation process but it' hasn't been closed yet.
+        /// </summary>
+        internal bool OpenLoop { get; set; }
+
         public Context(){
             _variables = new Dictionary<string, object>();
             _functions = new Dictionary<(string, int), DefFun>();

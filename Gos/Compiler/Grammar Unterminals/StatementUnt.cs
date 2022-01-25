@@ -17,6 +17,7 @@ namespace Compiler.Grammar_Unterminals {
                      | <func-call>
                      | ID <right-conn>
                      | <left-val> "=" <expr>
+                     | "break"
             */
             return derivation[0] switch {
                 Token { Type: Token.TypeEnum.Id } id when derivation[1] is RightConnUnt rc
@@ -42,6 +43,9 @@ namespace Compiler.Grammar_Unterminals {
                 PrintUnt u => u.Ast,
                 ReturnUnt u => u.Ast,
                 FunCallUnt u => u.Ast,
+                Token { Type: Token.TypeEnum.Break } b => new BreakAst(Helper.Logger<BreakAst>()) {
+                    Token = b
+                },
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

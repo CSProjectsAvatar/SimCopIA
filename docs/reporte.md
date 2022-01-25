@@ -229,6 +229,9 @@ graph LR
              
 <block-stat> := <if>
               | <def-func>
+              | <inf-loop>
+
+<inf-loop> := "forever" "{" <stat-list> "}"
 
 <stat> := <let-var>
         | <print-stat>
@@ -236,6 +239,7 @@ graph LR
         | <func-call>
         | ID <right-conn>
         | <left-val> "=" <expr>
+        | "break"
 
 <left-val> := ID
             | <left-val> "[" <math> "]"

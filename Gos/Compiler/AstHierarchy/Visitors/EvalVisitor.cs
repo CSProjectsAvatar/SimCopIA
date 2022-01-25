@@ -21,6 +21,7 @@ namespace DataClassHierarchy
         private readonly ILogger<EvalVisitor> _log;
         private readonly TextWriter _writer;
         private (bool Found, object Value) _returnFlag;
+        private bool _breakFlag;
 
         public Context Context { get => stackC.Peek(); set => stackC.Push(value); }
 
@@ -374,7 +375,62 @@ namespace DataClassHierarchy
             }
             return vis;
         }
-        
+
+        public (bool, object) Visiting(InfLoopAst node) {
+            return (
+                Loop(default, default, InfLoop(), node.Statements), 
+                null);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="idxName">Name of the index variable.</param>
+        /// <param name="itemName">Name of the item variable.</param>
+        /// <param name="target"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        private bool Loop(string idxName, string itemName, IEnumerable<object> target, IEnumerable<IStatement> code) {
+            int i = 1;  // es uno porque las listas indexan en base-1
+            
+            foreach (var item in target) {
+                Context = Context.CreateChildContext();
+
+                if (idxName != default) {
+                    Context.DefVariable(idxName, i++);
+                }
+                if (itemName != default) {
+                    Context.DefVariable(itemName, item);
+                }
+                var succ = Visit(code).Item1;
+                stackC.Pop();
+
+                if (!succ) {
+                    return false;
+                }
+                if (_breakFlag) {
+                    _breakFlag = false;
+                    break;
+                }
+            }
+            return true;
+        }
+
+        public (bool, object) Visiting(BreakAst _) {
+            _breakFlag = true;
+            return (true, null);
+        }
+
+        /// <summary>
+        /// Infinite loop.
+        /// </summary>
+        /// <returns></returns>
+        private static IEnumerable<object> InfLoop() {
+            while (true) {
+                yield return 1;
+            }
+        }
+
         public (bool, object) Visiting(IfStmt node){
             int idx = 0;  // el i'ndic de la 1ra cond q es true
 
@@ -472,8 +528,7 @@ namespace DataClassHierarchy
             return (true, ans);
         }
 
-        // Auxiliars
-        public (bool, object) Visiting(IEnumerable<IStatement> statements){
+        public (bool, object) Visiting(IEnumerable<IStatement> statements){  // @remind debe ser llama2 100pre q c kiera ejecutar un bloke d co'digo
             object lastR = null;
 
             foreach (var st in statements){
@@ -483,7 +538,7 @@ namespace DataClassHierarchy
                 }
                 lastR = result;
 
-                if(_returnFlag.Found) 
+                if(_returnFlag.Found || _breakFlag) 
                     break;
             }
             return (true, null);
