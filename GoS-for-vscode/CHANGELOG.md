@@ -8,6 +8,7 @@ El formato se basa en [*Keep a Changelog*](https://keepachangelog.com/en/1.0.0/)
 - Palabras claves `else_if` y `else`.
 - Palabra clave `new`.
 - Operador resto `%`.
+- Palabras claves `forever` y `break`.
 
 ### Changed
 - Color de los tipos `distw` y `simplew`: ahora es verde.
