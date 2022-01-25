@@ -1,21 +1,29 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Agents;
 namespace DataClassHierarchy
 {
     public class Context
     {
         public static Agents.Environment Simulation {get; internal set;}
-        Context parent;
+        internal Context parent;
         
         Dictionary<string, object> _variables;
         Dictionary<(string, int), DefFun> _functions; // (nombre, aridad) 
+
+        /// <summary>
+        /// Whether a function declaration has been started in the validation process but it' hasn't been closed yet.
+        /// </summary>
+        internal bool OpenFunction { get; set; }
+
         public Context(){
             _variables = new Dictionary<string, object>();
             _functions = new Dictionary<(string, int), DefFun>();
 
         }
+
         public bool DefVariable(string name, object value = null)
         {
             if (_variables.ContainsKey(name))

@@ -26,16 +26,18 @@ namespace DataClassHierarchy
                     Identifier);
                 return false;
             }
-
             var innerContext = context.CreateChildContext();
 
             foreach (var arg in Arguments) {
                 innerContext.DefVariable(arg);
             }
+            innerContext.OpenFunction = true;
+
             foreach (var st in Body) {
                 if(!st.Validate(innerContext))
                     return false;
             }
+            innerContext.OpenFunction = false;
 
             return true;
         }
