@@ -16,6 +16,7 @@ namespace Compiler {
         private static readonly UntType Term = new UntType(typeof(TermUnt));
         private static readonly UntType Factor = new UntType(typeof(FactorUnt));
         private static readonly UntType Atom = new UntType(typeof(AtomUnt));
+        private static readonly UntType AtomAny = new UntType(typeof(AtomAnyUnt));
         private static readonly UntType FuncCall = new UntType(typeof(FunCallUnt));
         private static readonly UntType ExprList = new UntType(typeof(ExprListUnt));
         private static readonly UntType If = new UntType(typeof(IfUnt));
@@ -25,7 +26,7 @@ namespace Compiler {
         private static readonly UntType ElseIf = new UntType(typeof(ElseIfUnt));
         private static readonly UntType AfterIf = new UntType(typeof(AfterIfUnt));
         private static readonly UntType Return = new UntType(typeof(ReturnUnt));
-        private static readonly UntType Condition = new UntType(typeof(ConditionUnt));
+        private static readonly UntType Cond = new UntType(typeof(ConditionUnt));
         private static readonly UntType RightConn = new UntType(typeof(RightConnUnt));
         private static readonly UntType Class = new UntType(typeof(ClassUnt));
         private static readonly UntType GosList = new UntType(typeof(GosListUnt));
@@ -100,12 +101,12 @@ namespace Compiler {
             IdList > (id, comma, IdList),
 
 #pragma warning disable CS1718 // Comparison made to same variable
-            Condition > (Math_ < Math_),
-            Condition > (Math_ > Math_),
-            Condition > (Math == Math),
+            Cond > (Math_ < Math_),
+            Cond > (Math_ > Math_),
+            Cond > (Math == Math),
 #pragma warning restore CS1718 // Comparison made to same variable
 
-            Expr > Condition,
+            Expr > Cond,
             Expr > Math, 
             Expr > (@new, Class),
             Expr > GosList,
@@ -136,9 +137,11 @@ namespace Compiler {
             Factor > (lpar, Math, rpar),
 
             Atom > n,
-            Atom > id,
-            Atom > FuncCall,
-            Atom > ListIdx,
+            Atom > AtomAny,
+
+            AtomAny > id,
+            AtomAny > FuncCall,
+            AtomAny > ListIdx,
 
             FuncCall > (id, lpar, ExprList, rpar),
             FuncCall > (id, lpar, rpar),
@@ -147,7 +150,7 @@ namespace Compiler {
             ExprList > (Expr, comma, ExprList),
 
         #region if-else
-            IfAtom > (@if, Condition, lbrace, StatList, rbrace),
+            IfAtom > (@if, Expr, lbrace, StatList, rbrace),
 
             Else > (@else, lbrace, StatList, rbrace),
 
@@ -158,7 +161,7 @@ namespace Compiler {
             AfterIf > Else,
             AfterIf > (ElseIf, Else),
 
-            ElseIfAtom > (elseIf, Condition, lbrace, StatList, rbrace),
+            ElseIfAtom > (elseIf, Expr, lbrace, StatList, rbrace),
 
             ElseIf > ElseIfAtom,
             ElseIf > (ElseIfAtom, ElseIf),

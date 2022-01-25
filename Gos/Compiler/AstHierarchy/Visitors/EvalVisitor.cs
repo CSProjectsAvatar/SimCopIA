@@ -380,19 +380,21 @@ namespace DataClassHierarchy
 
             foreach (var cond in node.Conditions) {
                 var (success, result) = Visit(cond);
+                var type = Helper.GetType(result);
 
-                if (result is not bool itsTrue) {  // @note ESTE CHEKEO NO HAC FALTA XQ LA SINTAXIS ASEGURA Q ESO SEA BOOLEANO. PERO CUAN2 SOPORTEMOS LLAMADOS D FUNC EN UNA COND HAY Q HACERLO OBLIGAO
+                if (type != GosType.Bool) {
                     _log.LogError(
-                        "Line {line}, column {col}: the condition #{idx} can't be a non-boolean expression.", 
+                        "Line {line}, column {col}: Bool expression expected in condition #{idx} but {type} given instead.", 
                         node.Token.Line,
                         node.Token.Column,
-                        idx+1);
+                        idx+1,
+                        type);
                     return (false, null);
                 }
                 if (!success) {
                     return (false, null);
                 }
-                if (itsTrue) {
+                if ((bool)result) {
                     break;
                 }
                 idx++;

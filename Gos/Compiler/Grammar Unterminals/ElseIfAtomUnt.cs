@@ -11,8 +11,8 @@ namespace Compiler.Grammar_Unterminals {
         public IEnumerable<IStatement> Statements { get; private set; }
 
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation) {
-            // <else-if-atom> := "else if" <cond> "{" <stat-list> "}"
-            Condition = (derivation[1] as ConditionUnt).Ast as Expression;
+            // <else-if-atom> := "else if" <expr> "{" <stat-list> "}"
+            Condition = (derivation[1] as ExpressionUnt).Ast as Expression;
             Statements = (derivation[^2] as StatListUnt).Statements;
 
             return null;

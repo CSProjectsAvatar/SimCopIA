@@ -286,9 +286,11 @@ graph LR
           | "(" <math> ")"
 
 <atom> := NUMBER
-        | ID
-        | <func-call>
-        | <list-idx>
+        | <atom-any>
+
+<atom-any> := ID
+            | <func-call>
+            | <list-idx>
 
 <func-call> := ID "(" <expr-list> ")"
              | ID "(" ")"
@@ -296,7 +298,7 @@ graph LR
 <expr-list> := <expr>
              | <expr> "," <expr-list>
 
-<if-atom> := "if" <cond> "{" <stat-list> "}"
+<if-atom> := "if" <expr> "{" <stat-list> "}"
 
 <else> := "else" "{" <stat-list> "}"
              
@@ -310,17 +312,13 @@ graph LR
 <else-if> := <else-if-atom>
            | <else-if-atom> <else-if>
 
-<else-if-atom> := "else if" <cond> "{" <stat-list> "}"
+<else-if-atom> := "else_if" <expr> "{" <stat-list> "}"
 
 <return> := "return" <expr>
 ```
 **El `;` lo pone el *lexer***, no es necesario que el usuario lo haga. Este puede emplear `\` para definir *statements* de m&aacute;s de una l&iacute;nea.
 
-N&oacute;tese que bajo esta gram&aacute;tica no se soporta el llamado a funciones en la condici&oacute;n del `if`:
 
-![if func](if-with-func.jpg)
-
-Esto el equipo lo tiene en cuenta y ser&aacute; rectificado en entregas posteriores.
 
 #### Tipos
 El lenguaje tiene 4 tipos:

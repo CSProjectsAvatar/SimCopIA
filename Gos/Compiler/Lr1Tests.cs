@@ -186,20 +186,6 @@ namespace Compiler {
             Assert.IsFalse(eval.Visit(ast).Item1);
         }
 
-        [TestMethod]
-        public void NonBooleanCondition() {
-            using var parser = new Lr1(Grammar, _log, _dfaLog);
-
-            Assert.IsFalse(parser.TryParse(
-                new[] {
-                    Token.If, Token.NumberFor(5), Token.Plus, Token.NumberFor(3), Token.LBrace,
-                        Token.Print, Token.NumberFor(0), Token.Endl,
-                    Token.RBrace,
-                    Token.Eof
-                },
-                out _));
-        }
-
         //[TestMethod]  @todo aki' tienes el test pa cuan2 hagas q pinche el eps en las derivacionesb
         public void EpsilonDerivation() {
             using (var parser = new Lr1(new Grammar(

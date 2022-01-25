@@ -27,7 +27,7 @@ namespace Compiler {
             return new IfStmt(){
                 Conditions = conditions,
                 Thens = blocks,
-                Token = derivation[0] as Token
+                Token = ifAtom.Token
             };
         }
     }

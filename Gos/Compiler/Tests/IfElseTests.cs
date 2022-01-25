@@ -327,5 +327,99 @@ namespace Compiler.Tests {
             Assert.IsTrue(success);
             Assert.AreEqual($"[1, 2, 3]{Environment.NewLine}", @out.ToString());  // no c kmbia el valor del contexto padre
         }
+
+        [TestMethod]
+        public void FunCallInCondition() {
+            var tokens = _lex.Tokenize(@"
+                fun even(x) {
+                    return x%2 == 0
+                }
+                if even(3) {
+                    print 0
+                } else {
+                    print 1
+                }" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"1{Environment.NewLine}", @out.ToString());  // no c kmbia el valor del contexto padre
+        }
+
+        [TestMethod]
+        public void VariableInCondition() {
+            var tokens = _lex.Tokenize(@"
+                fun even(x) {
+                    return x%2 == 0
+                }
+                let a = even(3)
+                if a {
+                    print 0
+                } else {
+                    print 1
+                }" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"1{Environment.NewLine}", @out.ToString());  // no c kmbia el valor del contexto padre
+        }
+
+        [TestMethod]
+        public void ListGetInCondition() {
+            var tokens = _lex.Tokenize(@"
+                fun even(x) {
+                    return x%2 == 0
+                }
+                let a = [[3==2, even(3), 2 < 5], [3+1==4]]
+                if a[1][2] {
+                    print 0
+                } else {
+                    print 1
+                }" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"1{Environment.NewLine}", @out.ToString());  // no c kmbia el valor del contexto padre
+        }
+
+        [TestMethod]
+        public void NumInsteadOfBool() {
+            var tokens = _lex.Tokenize(@"
+                if 3 > 5 {
+                    print 0
+                } else_if 3 + 5 {
+                    print 1
+                }" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
     }
 }
