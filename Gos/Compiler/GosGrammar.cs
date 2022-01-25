@@ -92,6 +92,7 @@ namespace Compiler {
             LetVar > (let, id, eq, Expr),
 
             DefFunc > (fun, id, lpar, IdList, rpar, lbrace, StatList, rbrace),
+            DefFunc > (fun, id, lpar, rpar, lbrace, StatList, rbrace),
 
             Print > (print, Expr),
 
@@ -140,6 +141,7 @@ namespace Compiler {
             Atom > ListIdx,
 
             FuncCall > (id, lpar, ExprList, rpar),
+            FuncCall > (id, lpar, rpar),
 
             ExprList > Expr,
             ExprList > (Expr, comma, ExprList),

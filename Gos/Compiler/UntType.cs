@@ -58,6 +58,18 @@ namespace Compiler {
         }
 
         public static Production operator >(
+                UntType @this,
+                (GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
+            return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3, symbols.Item4, symbols.Item5, symbols.Item6, symbols.Item7);
+        }
+
+        public static Production operator <(
+                UntType @this,
+                (GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
+            throw new NotImplementedException();
+        }
+
+        public static Production operator >(
                 UntType @this, 
                 (GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType, GramSymType) symbols) {
             return new Production(@this, symbols.Item1, symbols.Item2, symbols.Item3, symbols.Item4, symbols.Item5, symbols.Item6, symbols.Item7, symbols.Item8);

@@ -243,6 +243,7 @@ graph LR
 <let-var> := "let" ID "=" <expr>
 
 <def-func> := "fun" ID "(" <id-list> ")" "{" <stat-list> "}"
+            | "fun" ID "(" ")" "{" <stat-list> "}"
 
 <print-stat> := "print" <expr>
 
@@ -290,6 +291,7 @@ graph LR
         | <list-idx>
 
 <func-call> := ID "(" <expr-list> ")"
+             | ID "(" ")"
 
 <expr-list> := <expr>
              | <expr> "," <expr-list>
@@ -321,10 +323,11 @@ N&oacute;tese que bajo esta gram&aacute;tica no se soporta el llamado a funcione
 Esto el equipo lo tiene en cuenta y ser&aacute; rectificado en entregas posteriores.
 
 #### Tipos
-El lenguaje tiene 3 tipos:
+El lenguaje tiene 4 tipos:
 - `Number`: para todo tipo de n&uacute;meros
 - `Bool`: para valores de verdad (*true* o *false*)
 - `Server`: para los servidores
+- `List`: para las listas.
 
 Los operadores `+`, `-`, `*`, `/`, `%` solo est&aacute;n permitidos para el tipo `Number`. 
 
@@ -333,7 +336,9 @@ En el caso del operador de conexi&oacute;n de servidores (`->`), solo est&aacute
 Una variable no puede cambiar su tipo: una vez se ha inicializado mediante `let`, los pr&oacute;ximos valores a asignar deben
 ser del mismo tipo que el valor inicial. <!--@todo poner co'digo d ejemplo-->
 
-#### Reglas Sem&aacute;nticas
+El indexado sobre las listas es en base 1.
+
+#### Otras Reglas Sem&aacute;nticas
 - Una variable solo puede ser definida una vez en un mismo ámbito.
 - Los nombres de variables y funciones no comparten el mismo
 ámbito (pueden existir una variable y una función llamadas
