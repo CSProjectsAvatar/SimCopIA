@@ -28,7 +28,7 @@ namespace Tests {
         }
 
         [DataTestMethod]
-        [DataRow(20u)]
+        [DataRow(13u)]
         public void FinishedRun(uint times) {
             for (int i = 0; i < times; i++) {
                 var simtor = new OneServerSimulator(_log);

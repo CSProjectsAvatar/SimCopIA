@@ -1,0 +1,22 @@
+fun fibo(n) {
+	if n == 1 {
+		return 1
+	}
+	if n == 2 {
+		return 1
+	}
+	return fibo(n-1) + fibo(n-2)
+}
+
+let d1 = distw
+let d2 = distw
+let w1 = simplew
+let w2 = simplew
+let w3 = simplew
+
+if fibo(4) == 3 {
+	d1 -> w1, w2
+}
+if fibo(4) > 3 {
+	d2 -> w3
+}

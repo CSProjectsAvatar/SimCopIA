@@ -1,55 +1,41 @@
-﻿using Core;
+﻿using Compiler.Lexer;
+using Core;
+using DataClassHierarchy;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using Agents;
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
-           /* using var loggerFactory = LoggerFactory.Create(builder => {
+            using var loggerFactory = LoggerFactory.Create(builder => { // configurando niveles de logueo
                 builder
                     .AddFilter("Microsoft", LogLevel.Warning)
                     .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("Core", LogLevel.Debug)
+                    .AddFilter("Core", LogLevel.Information)
+                    .AddFilter("Compiler", LogLevel.Information)
                     .AddConsole();
             });
-            var simtor = new OneServerSimulator(loggerFactory.CreateLogger<OneServerSimulator>());
-            simtor.Run(10);
+            Helper.LogFact = loggerFactory;
 
-            Console.WriteLine(string.Join('\n', simtor.Arrivals));
-            Console.WriteLine();
-            Console.WriteLine(string.Join('\n', simtor.Departures));
-            */
-             
+            ILogger<ReLexer> logReLex = loggerFactory.CreateLogger<ReLexer>();
+            ILogger<Lr1> logLr1 = loggerFactory.CreateLogger<Lr1>();
+            ILogger<Lr1Dfa> logLr1Dfa = loggerFactory.CreateLogger<Lr1Dfa>();
+            ILogger<Lexer.Lexer> logLex = loggerFactory.CreateLogger<Lexer.Lexer>();
+            var lex = new Lexer.Lexer(Helper.TokenWithRegexs, new ReGrammar(), logReLex, logLr1, logLr1Dfa, logLex);
+            var tokens = lex.Tokenize(File.ReadAllText(args[0]));
+            var parser = new Lr1(new GosGrammar(), logLr1, logLr1Dfa);
 
+            if (parser.TryParse(tokens, out var ast)) {
+                var ctx = new Context();
 
-            //Probando los agentes con servidores simples.
-            var env = new Agents.Environment(debug:true);
-            
-
-            env.AddAgent(new SimpleServer(env, "2"));
-            env.AddAgent(new SimpleServer(env, "3"));
-            env.AddAgent(new SimpleServer(env, "4"));
-            env.AddAgent(new SimpleServer(env, "5"));
-            env.AddAgent(new SimpleServer(env, "6"));
-            env.AddAgent(new SimpleServer(env, "7"));
-
-            var a1 = env.Build.DistributionRequestServer();
-
-            env.AddRequest("0","1", "youtube.com", 10);
-            env.AddRequest("0","1", "amazon.com", 15);
-            env.AddRequest("0","1", "facebook.com", 22);
-            env.AddRequest("0", "1", "claudia.com", 24);
-
-
-            env.Run();
-
-            System.Console.WriteLine("Responses To Env:");
-            foreach(var r in env.solutionResponses) 
-                System.Console.WriteLine($"time:{r.responseTime} body:{r.body}");
-
-
-
+                if (ast.Validate(ctx)) {
+                    var vis = new EvalVisitor(ctx, loggerFactory.CreateLogger<EvalVisitor>(), Console.Out);
+                    vis.Visit(ast);
+                }
+            }
         }
     }
 }

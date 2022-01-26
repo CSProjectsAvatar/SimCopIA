@@ -23,11 +23,11 @@ namespace Tests {
             simtor.Run(100);
 
             Assert.IsTrue(simtor.Arrivals.Keys
-                .All(k => simtor.Arrivals[k] < simtor.Deapertures[k]));
+                .All(k => simtor.Arrivals[k] < simtor.Departures[k]));
         }
 
         [DataTestMethod]
-        [DataRow(20u, 5u)]
+        [DataRow(13u, 5u)]
         public void FinishedRun(uint times, uint followers) {
             for (int i = 0; i < times; i++) {
                 var simtor = new ParallelServerSimulator(followers, _log);

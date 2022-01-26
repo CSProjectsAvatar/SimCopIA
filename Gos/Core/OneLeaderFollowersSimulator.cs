@@ -27,20 +27,44 @@ namespace Core {
         private readonly IEnumerable<Action> _events; // los eventos ordenados en el tiempo
         private readonly Random _rand;
         private readonly ILogger<OneLeaderFollowersSimulator> _log;
+        private readonly double _lambda;
 
         public Dictionary<uint, double> Arrivals => _arrTimes;
 
-        public OneLeaderFollowersSimulator() : this(5, null) {
+        public OneLeaderFollowersSimulator() : this(5, 1.5, null) {
 
         }
 
+        public OneLeaderFollowersSimulator(uint followers, double lambda) : this(followers, lambda, null) {
+
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="followers">Cantidad de seguidores (doers).</param>
+        /// <param name="logger"></param>
+        public OneLeaderFollowersSimulator(uint followers, ILogger<OneLeaderFollowersSimulator> logger) :
+                this(followers, 1.5, logger) {
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="followers">Cantidad de seguidores (doers).</param>
+        /// <param name="lambda">Parámetro lambda de la distribución exponencial para determinar tiempos de 
+        /// ocurrencia de los eventos.</param>
+        /// <param name="logger"></param>
         public OneLeaderFollowersSimulator(
                 uint followers,
+                double lambda,
                 ILogger<OneLeaderFollowersSimulator> logger) {
             _events = new EventGiver(this);
             _rand = new();
             _log = logger;
             _follows = followers;
+            _lambda = lambda;
         }
 
         public Dictionary<uint, double> GetDepartures() {
@@ -49,6 +73,10 @@ namespace Core {
                 .ToDictionary(d => d.Key, d => d.Value);
         }
 
+        /// <summary>
+        /// Tiempo de cierre del sistema (T). Cuando se arribe a este tiempo, no se recibirán más pedidos.
+        /// </summary>
+        /// <param name="closeTime"></param>
         public void Run(double closeTime) {
             Initialize(closeTime);
 
@@ -111,8 +139,8 @@ namespace Core {
         /// <summary>
         /// Evento de arribo a los seguidores.
         /// </summary>
-        private void ArrivalToFollowers() {
-            _log?.LogDebug("Ejecutando arribo a los seguidores");
+        private void ArrivalToFollowers(bool late) {
+            _log?.LogDebug("Ejecutando arribo " + (late ? "fuera de tiempo " : "") + "a los seguidores");
 
             _time = _tFArriv;
             _n1--;
@@ -122,25 +150,18 @@ namespace Core {
             } else {
                 _tFArriv = double.MaxValue;
             }
+            var client = _arrivs - _n1; // ID del cliente = N_A - n1
 
             if (_freeServers.Count == 0) {
                 _inQueue++;
+
+                _log?.LogDebug($"Cliente {client} hace cola.");
             } else {
                 var serv = _freeServers.Dequeue();
-                var client = _arrivs - _n1; // ID del cliente = N_A - n1
                 _tDepsData.Add(
                     _time + GenDepartureOffset(),
                     (serv, client));
             }
-        }
-
-        /// <summary>
-        /// Arribo fuera de tiempo para los seguidores.
-        /// </summary>
-        private void TimeOutArrivalToFollowers() {
-            _log?.LogDebug("Ejecutando arribo fuera de tiempo a los seguidores");
-
-            _tFArriv = double.MaxValue;
         }
 
         /// <summary>
@@ -159,7 +180,7 @@ namespace Core {
             if (_inQueue != 0) {
 
                 _inQueue--;
-                var inClient = _arrivs - _inQueue;  // primer cliente de la cola que entra al servidor s
+                var inClient = _arrivs - _n1 - _inQueue;  // primer cliente de la cola que entra al servidor s
 
                 _tDepsData.Add(
                     depTime + GenDepartureOffset(),
@@ -195,9 +216,8 @@ namespace Core {
         }
 
         private double GenTimeOffset() {
-            var lambda = 1.5;
 
-            return -1 / lambda * Math.Log(_rand.NextDouble()); // distribución exponencial
+            return -1 / _lambda * Math.Log(_rand.NextDouble()); // distribución exponencial
         }
 
         private double GenArrivalToFollowersOffset() {
@@ -271,12 +291,12 @@ namespace Core {
                     } else if (
                             _s._tFArriv.Eq(minTime) && // t_A_2 <= to los demás tiempos
                             _s._tFArriv.Leq(_s._maxTime)) { // t_A_2 <= T
-                        yield return _s.ArrivalToFollowers;
+                        yield return () => _s.ArrivalToFollowers(false);
                     } else if (
                             _s._tFArriv.Neq(double.MaxValue) && // no ha llegado un evento d este tipo antes (ver https://github.com/CSProjectsAvatar/SimCopIA/issues/4)
                             _s._tFArriv.Eq(minTime) && // t_A_2 <= to los demás tiempos
                             _s._tFArriv > _s._maxTime) { // t_A_2 > T
-                        yield return _s.TimeOutArrivalToFollowers;
+                        yield return () => _s.ArrivalToFollowers(true);
                     } else if (
                             minDep.Eq(minTime) && // t_D_i <= to los demás tiempos
                             minDep.Leq(_s._maxTime)) { // t_D_i <= T
