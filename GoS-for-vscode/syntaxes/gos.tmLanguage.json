@@ -19,7 +19,7 @@
 		"keywords": {
 			"patterns": [{
 					"name": "keyword.control.gos",
-					"match": "\\b(if|else_if|else|return|forever|break)\\b"
+					"match": "\\b(if|else_if|else|return|forever|break|for|in)\\b"
 				}, {
 					"name": "keyword.other.gos",
 					"match": "\\b(fun|let|print|new)\\b"
