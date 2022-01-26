@@ -66,5 +66,7 @@ Event:
 Resource:
 - Unidad principal pedida y transferida entre agentes. (i.e una pagina web, un archivo, una imagen, etc)
 
+IA
+Como repartir los recursos
 
 */

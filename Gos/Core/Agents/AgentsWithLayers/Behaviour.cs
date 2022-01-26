@@ -1,21 +1,29 @@
 using System;
 using System.Collections.Generic;
 
-namespace ServersWithLayers{
+namespace ServersWithLayers
+{
 
-    public class Behavior  {
+    public class Behavior
+    {
         Dictionary<string, object> variables;
-        Action<Status, Perception, Dictionary<string,object>> action;
-        public Behavior() {
+        Action<Status, Perception, Dictionary<string, object>> action;
+        public Behavior()
+        {
             variables = new Dictionary<string, object>();
         }
 
-        public void SetVar(string name, object value) {
+        public void SetVar(string name, object value)
+        {
             variables[name] = value;
         }
-      
-        public void Run(Status status, Perception perception) {
-            action(status, perception, variables);
+
+        public void Run(Status status, Perception perception) { }
+
+        public Behavior Clone()
+        {
+            var copy = new Behavior();  //@todo review dict var
+            return copy;
         }
     }
 } 
