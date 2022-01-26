@@ -14,10 +14,6 @@ namespace ServersWithLayers{
         public void Process(Perception p){
             throw new NotImplementedException("Layer Class not Implemented!");
         }
-        public void SetServer(Server serv){
-            this.server = serv ;
-            // @todo ver si poner un Clone() cuando se asigna el servidor.
-        } 
     }
 
 }
