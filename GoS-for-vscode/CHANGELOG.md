@@ -9,6 +9,7 @@ El formato se basa en [*Keep a Changelog*](https://keepachangelog.com/en/1.0.0/)
 - Palabra clave `new`.
 - Operador resto `%`.
 - Palabras claves `forever`, `break`, `for` e `in`.
+- Palabras claves `and` y `or`.
 
 ### Changed
 - Color de los tipos `distw` y `simplew`: ahora es verde.
