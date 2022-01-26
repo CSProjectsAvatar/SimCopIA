@@ -10,13 +10,11 @@ namespace Compiler {
     {
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
-            // <expr> := <cond>
-            //         | <math>
+            // <expr> := <disj>
             //         | "new" <class>
             //         | <gos-list>
             return derivation[0] switch{
-                ConditionUnt c => c.Ast,
-                MathUnt m => m.Ast,
+                DisjUnt c => c.Ast,
                 Token { Type: Token.TypeEnum.New } nw when derivation[1] is ClassUnt cu => 
                     cu.Class switch {
                         ClassUnt.ClassEnum.Simplew => new SimpleW() {

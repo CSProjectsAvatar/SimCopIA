@@ -7,6 +7,7 @@ using Agents;
 using Compiler;
 using Compiler.AstHierarchy;
 using Compiler.AstHierarchy.Operands;
+using Compiler.AstHierarchy.Operands.BooleanOperands;
 using Compiler.AstHierarchy.Statements;
 using Microsoft.Extensions.Logging;
 
@@ -93,6 +94,72 @@ namespace DataClassHierarchy
 
         public (bool Success, object Result) Visiting(EqEqOp node, double lNum, double rNum) {
             return node.TryCompute(lNum, rNum);
+        }
+
+        public (bool, object) Visiting(ConjtionAst node) {
+            var (succ, res) = Visit(node.Left);
+            if (!succ) {
+                return (false, null);
+            }
+            var type = Helper.GetType(res);
+            if (type != GosType.Bool) {
+                _log.LogError(
+                    "Line {l}, column {c}: left operand must be a Bool but it's {type} instead.",
+                    node.Token.Line,
+                    node.Token.Column,
+                    type);
+                return default;
+            }
+            if (!(bool)res) {  // corto circuito
+                return (true, false);
+            }
+            (succ, res) = Visit(node.Right);
+            if (!succ) {
+                return (false, null);
+            }
+            type = Helper.GetType(res);
+            if (type != GosType.Bool) {
+                _log.LogError(
+                    "Line {l}, column {c}: right operand must be a Bool but its type is {type} instead.",
+                    node.Token.Line,
+                    node.Token.Column,
+                    type);
+                return default;
+            }
+            return (true, (bool)res);
+        }
+
+        public (bool, object) Visiting(DisjAst node) {
+            var (succ, res) = Visit(node.Left);
+            if (!succ) {
+                return (false, null);
+            }
+            var type = Helper.GetType(res);
+            if (type != GosType.Bool) {
+                _log.LogError(
+                    "Line {l}, column {c}: left operand must be a Bool but it's {type} instead.",
+                    node.Token.Line,
+                    node.Token.Column,
+                    type);
+                return default;
+            }
+            if ((bool)res) {  // corto circuito
+                return (true, true);
+            }
+            (succ, res) = Visit(node.Right);
+            if (!succ) {
+                return (false, null);
+            }
+            type = Helper.GetType(res);
+            if (type != GosType.Bool) {
+                _log.LogError(
+                    "Line {l}, column {c}: right operand must be a Bool but its type is {type} instead.",
+                    node.Token.Line,
+                    node.Token.Column,
+                    type);
+                return default;
+            }
+            return (true, (bool)res);
         }
 
         public (bool Success, object Result) Visiting(RestOfDivOp node, double lNum, double rNum) {

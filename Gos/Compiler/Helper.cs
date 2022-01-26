@@ -25,6 +25,8 @@ namespace Compiler {
             ("break", Token.TypeEnum.Break),
             ("for", Token.TypeEnum.For),
             ("in", Token.TypeEnum.In),
+            ("and", Token.TypeEnum.And),
+            ("or", Token.TypeEnum.Or),
 
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("{", Token.TypeEnum.LBrace),

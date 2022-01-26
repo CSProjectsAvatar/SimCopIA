@@ -260,12 +260,18 @@ graph LR
 <id-list> := ID
            | ID "," <id-list>
 
+<disj> := <disj> "or" <conjtion>
+        | <conjtion>
+
+<conjtion> := <conjtion> "and" <cond>
+            | <cond>
+
 <cond> := <math> "<" <math>
         | <math> ">" <math>
         | <math> "==" <math>
-
-<expr> := <cond>
         | <math>
+
+<expr> := <disj>
         | "new" <class>
         | <gos-list>
 

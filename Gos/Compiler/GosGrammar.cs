@@ -36,6 +36,8 @@ namespace Compiler {
         private static readonly UntType InfLoop = new UntType(typeof(InfLoopUnt));
         private static readonly UntType ForEach = new UntType(typeof(ForEachUnt));
         private static readonly UntType ForEachVars = new UntType(typeof(ForEachVarsUnt));
+        private static readonly UntType Conjtion = new UntType(typeof(ConjtionUnt));
+        private static readonly UntType Disj = new UntType(typeof(DisjUnt));
 
         #region terminales
         private static readonly TokenType n = TokenType.Number;
@@ -72,6 +74,8 @@ namespace Compiler {
         private static readonly TokenType @break = Token.TypeEnum.Break;
         private static readonly TokenType @for = Token.TypeEnum.For;
         private static readonly TokenType @in = Token.TypeEnum.In;
+        private static readonly TokenType and = Token.TypeEnum.And;
+        private static readonly TokenType or = Token.TypeEnum.Or;
 
         #endregion
         public GosGrammar() : base(
@@ -117,14 +121,20 @@ namespace Compiler {
             IdList > id,
             IdList > (id, comma, IdList),
 
+            Disj > (Disj, or, Conjtion),
+            Disj > Conjtion,
+
+            Conjtion > (Conjtion, and, Cond),
+            Conjtion > Cond,
+
 #pragma warning disable CS1718 // Comparison made to same variable
             Cond > (Math_ < Math_),
             Cond > (Math_ > Math_),
             Cond > (Math == Math),
+            Cond > Math,
 #pragma warning restore CS1718 // Comparison made to same variable
 
-            Expr > Cond,
-            Expr > Math, 
+            Expr > Disj, 
             Expr > (@new, Class),
             Expr > GosList,
 
