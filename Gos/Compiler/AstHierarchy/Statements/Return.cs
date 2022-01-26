@@ -12,7 +12,7 @@ namespace DataClassHierarchy {
         }
 
         public override bool Validate(Context context) {
-            if (!Expr.Validate(context)) {
+            if (Expr != null && !Expr.Validate(context)) {
                 return false;
             }
             bool insideFun = false;

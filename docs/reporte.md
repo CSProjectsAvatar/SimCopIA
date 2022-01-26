@@ -325,6 +325,7 @@ graph LR
 <else-if-atom> := "else_if" <expr> "{" <stat-list> "}"
 
 <return> := "return" <expr>
+          | "return"
 ```
 **El `;` lo pone el *lexer***, no es necesario que el usuario lo haga. Este puede emplear `\` para definir *statements* de m&aacute;s de una l&iacute;nea.
 

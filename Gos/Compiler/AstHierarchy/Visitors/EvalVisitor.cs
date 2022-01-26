@@ -497,9 +497,14 @@ namespace DataClassHierarchy
         /// Evalua una lista de statements y devuelve el resultado de la ultima
         /// </summary>
        public (bool, object) Visiting(Return node){
-            var (success, result) = Visit(node.Expr);
-            if(!success){
-                return (false, null);
+            object result = null;
+
+            if (node.Expr != null) {
+                bool success;
+                (success, result) = Visit(node.Expr);
+                if(!success){
+                    return (false, null);
+                }
             }
             _returnFlag = (true, result);
             return (true, result);    

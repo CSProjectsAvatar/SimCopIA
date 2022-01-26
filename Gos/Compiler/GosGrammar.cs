@@ -184,7 +184,8 @@ namespace Compiler {
             ElseIf > (ElseIfAtom, ElseIf),
         #endregion
 
-            Return > (@return, Expr)) {
+            Return > (@return, Expr),
+            Return > @return) {
         }
     }
 }

@@ -51,6 +51,31 @@ print f()" + _dslSuf);
             Assert.AreEqual($"1{_endl}", @out.ToString());
         }
 
+        [TestMethod]
+        public void EmptyReturn() {
+            var tokens = _lex.Tokenize(
+                @"
+fun f(x) {
+    if x % 2 == 0 {
+        print 0
+        return
+    }
+    print 1
+}
+f(2)
+f(5)" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"0{_endl}1{_endl}", @out.ToString());
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();
