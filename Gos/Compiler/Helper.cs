@@ -29,9 +29,11 @@ namespace Compiler {
             ("or", Token.TypeEnum.Or),
 
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
+            ("_?[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
+            ("true|false", Token.TypeEnum.Bool),
+
             ("{", Token.TypeEnum.LBrace),
             ("}", Token.TypeEnum.RBrace),
-            ("_?[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
             ("<", Token.TypeEnum.LowerThan),
             (">", Token.TypeEnum.GreaterThan),
             (@"\+", Token.TypeEnum.Plus),

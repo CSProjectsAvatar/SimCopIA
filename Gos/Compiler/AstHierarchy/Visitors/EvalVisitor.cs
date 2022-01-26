@@ -96,6 +96,10 @@ namespace DataClassHierarchy
             return node.TryCompute(lNum, rNum);
         }
 
+        public (bool, object) Visiting(BoolAst node) {
+            return (true, bool.Parse(node.Value));
+        }
+
         public (bool, object) Visiting(ConjtionAst node) {
             var (succ, res) = Visit(node.Left);
             if (!succ) {

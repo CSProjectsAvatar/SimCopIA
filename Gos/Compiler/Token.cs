@@ -223,6 +223,10 @@ namespace Compiler {
         }
 
         public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
+            /// <summary>
+            /// True or false.
+            /// </summary>
+            Bool,
             And,
             Or,
             For,

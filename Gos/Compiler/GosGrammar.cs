@@ -76,6 +76,7 @@ namespace Compiler {
         private static readonly TokenType @in = Token.TypeEnum.In;
         private static readonly TokenType and = Token.TypeEnum.And;
         private static readonly TokenType or = Token.TypeEnum.Or;
+        private static readonly TokenType @bool = Token.TypeEnum.Bool;
 
         #endregion
         public GosGrammar() : base(
@@ -165,6 +166,7 @@ namespace Compiler {
 
             Atom > n,
             Atom > AtomAny,
+            Atom > @bool,
 
             AtomAny > id,
             AtomAny > FuncCall,

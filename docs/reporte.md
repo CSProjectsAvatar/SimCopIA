@@ -303,6 +303,7 @@ graph LR
 
 <atom> := NUMBER
         | <atom-any>
+        | BOOL
 
 <atom-any> := ID
             | <func-call>
