@@ -25,11 +25,19 @@ namespace ServersWithLayers
             foreach(var e in this.Stats.EnumerateAndClear())
                 Env.SubsribeEvent(e.Item1,e.Item2);
         }
+
+        
         public void SetLayers(IEnumerable<Layer> layers){
-            _layers = new List<Layer>(layers);
+            _layers = new List<Layer>();
+            AddLayers(layers);
         }
         public void AddLayers(IEnumerable<Layer> layers){
-            _layers.AddRange(layers);
+            foreach(var l in layers)
+                AddLayer(l);
+        }
+        public void AddLayer(Layer layer){
+            layer.SetServer(this);
+            _layers.Add(layer);
         }
         
     }

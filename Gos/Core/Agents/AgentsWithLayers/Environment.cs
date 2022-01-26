@@ -7,7 +7,7 @@ namespace ServersWithLayers
         const int RESPONSE_TIME = 2; //tiempo de demora de llegada de un response
         const int REQUEST_TIME = 1;  //tiempo de demora de llegada de un request 
 
-        List<Server> servers; //todos los servidores registrados en este enviroment.
+        Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
         public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
         public int currentTime {get; set;} // El tiempo actual en la simulacion
 
@@ -46,10 +46,25 @@ namespace ServersWithLayers
         }
         //Retorna un servidor con el identificador 'ID' si esta en el environment.
         public Server GetServerByID(string ID){
-            foreach(var s in servers)
-                if (s.ID == ID)
-                    return s;
+            if (this.servers.ContainsKey(ID))
+                return this.servers[ID];
             return null;
         }
     }
 }
+/*
+Environment:
+- Guardar los objetos del ambiente
+- correr los eventos
+
+EventCreator:
+- Crear eventos
+
+Event:
+- Realizar una accion sobre uno o mas objetos del environment.
+
+Resource:
+- Unidad principal pedida y transferida entre agentes. (i.e una pagina web, un archivo, una imagen, etc)
+
+
+*/

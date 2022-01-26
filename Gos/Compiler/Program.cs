@@ -10,42 +10,32 @@ using Agents;
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
-            //Probando los agentes con servidores simples.
-            var env = new Agents.Environment(debug:true);
+            using var loggerFactory = LoggerFactory.Create(builder => { // configurando niveles de logueo
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("Core", LogLevel.Information)
+                    .AddFilter("Compiler", LogLevel.Information)
+                    .AddConsole();
+            });
+            Helper.LogFact = loggerFactory;
 
-            //workers
-            env.AddAgent(new Worker(env, "2"));
-            env.AddAgent(new Worker(env, "6"));
-            
-            // Distribuidor de carga con 2 workers
-            env.AddAgent(new Worker(env, "4"));
-            env.AddAgent(new Worker(env, "5"));
-            env.AddAgent(new Distributor(env, "dist1", new List<string>{"4","5"}));
-            
+            ILogger<ReLexer> logReLex = loggerFactory.CreateLogger<ReLexer>();
+            ILogger<Lr1> logLr1 = loggerFactory.CreateLogger<Lr1>();
+            ILogger<Lr1Dfa> logLr1Dfa = loggerFactory.CreateLogger<Lr1Dfa>();
+            ILogger<Lexer.Lexer> logLex = loggerFactory.CreateLogger<Lexer.Lexer>();
+            var lex = new Lexer.Lexer(Helper.TokenWithRegexs, new ReGrammar(), logReLex, logLr1, logLr1Dfa, logLex);
+            var tokens = lex.Tokenize(File.ReadAllText(args[0]));
+            var parser = new Lr1(new GosGrammar(), logLr1, logLr1Dfa);
 
-            // interactive worker con 3 workers enlazados
-            var a1 = env.Build.InteractiveWorker("facebook.com");
-            a1.AddToRequirmentsDic("/",new List<string>{"2","dist1","6"});
-            a1.AddToRequirmentsDic("/other",new List<string>{"4,5"});
-            a1.AddToRequirmentsDic("/about",new List<string>{"6"});
+            if (parser.TryParse(tokens, out var ast)) {
+                var ctx = new Context();
 
-            
-
-            // request del lado del cliente (desde el environment, su identificador es 0)
-            env.AddRequest("0","facebook.com", "/", 10);
-            env.AddRequest("0","facebook.com", 15);
-            
-            // corre la simulación
-            env.Run();
-
-
-            // Imprime los responses que llegaron al cliente (environment)
-            System.Console.WriteLine("Responses To Env:");
-            foreach(var r in env.solutionResponses) 
-                System.Console.WriteLine($"time:{r.responseTime} body:{r.body}");
-
-
-
+                if (ast.Validate(ctx)) {
+                    var vis = new EvalVisitor(ctx, loggerFactory.CreateLogger<EvalVisitor>(), Console.Out);
+                    vis.Visit(ast);
+                }
+            }
         }
     }
 }
