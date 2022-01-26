@@ -36,8 +36,8 @@ namespace ServersWithLayers
                 AddLayer(l);
         }
         public void AddLayer(Layer layer){
-            layer.SetServer(this);
-            _layers.Add(layer);
+            var clonedLayer = layer.CloneInServer(this);
+            _layers.Add(clonedLayer);
         }
         
     }
