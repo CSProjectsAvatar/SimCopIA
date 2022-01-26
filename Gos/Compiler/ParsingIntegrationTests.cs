@@ -18,6 +18,8 @@ namespace Compiler {
         private ILogger<Lr1> log;
         private ILogger<Lr1Dfa> dfaLog;
         private ILogger<EvalVisitor> evalLog;
+        private Token[] _dslSuff;
+
         private Token let => Token.Let;
         private Token x => Token.VarX;
         private Token eq => Token.Eq;
@@ -51,8 +53,6 @@ namespace Compiler {
         private Token d => Token.IdFor("d");
         private Token w => Token.IdFor("w");
         private Token @new => Token.New;
-        private Token simplew => Token.Simplew;
-        private Token distw => Token.Distw;
         private Token conn => Token.Connection;
         #endregion
 
@@ -62,6 +62,9 @@ namespace Compiler {
             this.dfaLog = LoggerFact.CreateLogger<Lr1Dfa>();
             this.evalLog = LoggerFact.CreateLogger<EvalVisitor>();
             Helper.LogFact = LoggerFact;
+            _dslSuff = new Token[] {
+                eof
+            };
         }
 
         [TestMethod]
@@ -70,12 +73,8 @@ namespace Compiler {
                 Assert.IsTrue(parser.TryParse(
                     new[] {
                         let, x, eq, five, endl,  // let x = 5;
-                        print, x, endl,          // print x;
-                        let, d, eq, @new, distw, endl,
-                        let, w, eq, @new, simplew, endl,
-                        d, conn, w, endl,
-                        eof
-                    },
+                        print, x, endl          // print x;
+                    }.Concat(_dslSuff),
                     out var root));
                 AssertIntegration(root, "5");
             }
@@ -113,12 +112,8 @@ namespace Compiler {
                         let, y, eq, lpar, five, plus, three, rpar, times, eight, endl,  // let y = (5+3) * 8;
                         print, y, endl,                                                 // print y;
                         let, z, eq, five, minus, three, minus, eight, endl,             // let z = 5 - 3 - 8;
-                        print, z, endl,                                                 // print z;
-                        let, d, eq, @new, distw, endl,
-                        let, w, eq, @new, simplew, endl,
-                        d, conn, w, endl,
-                        eof
-                    },
+                        print, z, endl                                                 // print z;
+                    }.Concat(_dslSuff),
                     out var root));
                 AssertIntegration(root, "29", "64", "-6");
             }
@@ -130,12 +125,8 @@ namespace Compiler {
             using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
                 Assert.IsTrue(parser.TryParse(
                     new[] {
-                        let, x, eq, five, plus, Token.IdFor("a"), endl,  // let x = 5 + a; 
-                        let, d, eq, @new, distw, endl,
-                        let, w, eq, @new, simplew, endl,
-                        d, conn, w, endl,
-                        eof
-                    },
+                        let, x, eq, five, plus, Token.IdFor("a"), endl  // let x = 5 + a; 
+                    }.Concat(_dslSuff),
                     out var root));
                 
                 var prog = root as ProgramNode;
@@ -155,12 +146,8 @@ namespace Compiler {
                         fun, f, lpar, n, rpar, lbrace,       // fun f(n) {
                             print, n, endl,                  //     print n;
                         rbrace,                              // }
-                        f, lpar, five, rpar, endl,           // f(5);
-                        let, d, eq, @new, distw, endl,
-                        let, w, eq, @new, simplew, endl,
-                        d, conn, w, endl,
-                        eof
-                    },
+                        f, lpar, five, rpar, endl           // f(5);
+                    }.Concat(_dslSuff),
                     out var root));
                 AssertIntegration(root, "5");
             }
@@ -176,12 +163,8 @@ namespace Compiler {
                         rbrace,                         // }
                         @if, five, gt, eight, lbrace,   // if 5 > 8 {
                             print, zero, endl,          //  print 0;
-                        rbrace,                         // }
-                        let, d, eq, @new, distw, endl,
-                        let, w, eq, @new, simplew, endl,
-                        d, conn, w, endl,
-                        eof
-                    },
+                        rbrace                         // }
+                    }.Concat(_dslSuff),
                     out var root));
                 AssertIntegration(root, "1");
             }
@@ -201,12 +184,8 @@ namespace Compiler {
                                 @return, n, times, f, lpar, n, minus, one, rpar, endl, //        return n * f(n-1);
                             rbrace,                                                    //     }
                         rbrace,                                                        // }
-                        print, f, lpar, five, rpar, endl,                              // print f(5);
-                        let, d, eq, @new, distw, endl,
-                        let, w, eq, @new, simplew, endl,
-                        d, conn, w, endl,
-                        eof
-                    },
+                        print, f, lpar, five, rpar, endl                              // print f(5);
+                    }.Concat(_dslSuff),
                     out var root));
                 AssertIntegration(root, "120");
             }
@@ -233,12 +212,8 @@ namespace Compiler {
                         print, f, lpar, five, rpar, endl,                              // print f(5);
 
                         let, x, eq, eight, endl,                                       // let x = 8;
-                        print, f, lpar, x, rpar, endl,                                 // print f(x);
-                        let, d, eq, @new, distw, endl,
-                        let, w, eq, @new, simplew, endl,
-                        d, conn, w, endl,
-                        eof
-                    },
+                        print, f, lpar, x, rpar, endl                                 // print f(x);
+                    }.Concat(_dslSuff),
                     out var root));
                 AssertIntegration(root, "5", "21");
             }

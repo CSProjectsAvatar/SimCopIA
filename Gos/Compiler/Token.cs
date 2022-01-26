@@ -199,16 +199,6 @@ namespace Compiler {
         internal static Token Div => new Token(TypeEnum.Div, 1, ++colHelper, "/");
 
         /// <summary>
-        /// Propiedad helper para debuguear y testear.
-        /// </summary>
-        internal static Token Simplew => new Token(TypeEnum.SimpleWorker, 1, ++colHelper, "simplew");
-
-        /// <summary>
-        /// Propiedad helper para debuguear y testear.
-        /// </summary>
-        internal static Token Distw => new Token(TypeEnum.DistWorker, 1, ++colHelper, "distw");
-
-        /// <summary>
         /// Propiedad helper para debuguear y testear (->).
         /// </summary>
         internal static Token Connection => new Token(TypeEnum.RightArrow, 1, ++colHelper, "->");
@@ -224,7 +214,12 @@ namespace Compiler {
 
         public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
             /// <summary>
-            /// True or false.
+            /// Representa a un tipo relacionado con la simulación. No es la palabra clave "class".
+            /// </summary>
+            Class,
+
+            /// <summary>
+            /// True o false.
             /// </summary>
             Bool,
             And,
@@ -234,16 +229,6 @@ namespace Compiler {
             Break,
             Forever,
             New,
-
-            /// <summary>
-            /// simplew
-            /// </summary>
-            SimpleWorker,
-
-            /// <summary>
-            /// distw
-            /// </summary>
-            DistWorker,
 
             RightArrow,
 

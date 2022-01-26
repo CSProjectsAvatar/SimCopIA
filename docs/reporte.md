@@ -272,7 +272,7 @@ graph LR
         | <math>
 
 <expr> := <disj>
-        | "new" <class>
+        | "new" CLASS
         | <gos-list>
 
 <list-idx> := <to-idx> "[" <math> "]"
@@ -283,9 +283,6 @@ graph LR
           | <list-idx>
 
 <gos-list> := "[" <expr-list> "]"
-        
-<class> := "simplew"
-         | "distw"
 
 <right-conn> := "->" <id-list>
 

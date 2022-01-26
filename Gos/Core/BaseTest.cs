@@ -37,7 +37,7 @@ namespace Core {
                     .AddFilter("Microsoft", LogLevel.Warning)
                     .AddFilter("System", LogLevel.Warning)
                     .AddFilter("Core", LogLevel.Debug)
-                    .AddFilter("Compiler", LogLevel.Debug)
+                    .AddFilter("Compiler", LogLevel.Information)
                     .AddConsole();
             });
         } // init

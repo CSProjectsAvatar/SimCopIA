@@ -182,13 +182,21 @@ namespace DataClassHierarchy
             if(!eval){
                 return (false, null);
             }
-            var (succ, result) = node.TryCompute(left, rightList);
+            var (succ, result) = VisitConnection(node, left, rightList);
 
             if(!succ){
                 return (false, null);
             }
 
             return (true, null);
+        }
+
+        private (bool, object) VisitConnection(Connection node, Agent left, List<Agent> rightList) {
+            return ((dynamic)this).Visiting(node, left, rightList);
+        }
+
+        public (bool, object) Visiting(RightConn node, Agent left, List<Agent> rightList) {
+            throw new NotImplementedException();
         }
 
         private bool CheckConnection(Connection node, out Agent left, out List<Agent> agList)
@@ -434,16 +442,16 @@ namespace DataClassHierarchy
 
             var vis = Visit(node.Statements);
             
-            if (vis.Item1) {  // evaluacio'n exitosa
-                // @audit DE JUGUETE
-                Context.Simulation.AddSomeRequests();
-                Context.Simulation.Run();
+            //if (vis.Item1) {  // evaluacio'n exitosa
+            //    // @audit DE JUGUETE
+            //    Context.Simulation.AddSomeRequests();
+            //    Context.Simulation.Run();
 
-                _log.LogInformation(
-                    Context.Simulation.solutionResponses.Aggregate(
-                        $"Responses to environment:{System.Environment.NewLine}",
-                        (accum, r) => accum + $"time:{r.responseTime} body:{r.body}{System.Environment.NewLine}"));
-            }
+            //    _log.LogInformation(
+            //        Context.Simulation.solutionResponses.Aggregate(
+            //            $"Responses to environment:{System.Environment.NewLine}",
+            //            (accum, r) => accum + $"time:{r.responseTime} body:{r.body}{System.Environment.NewLine}"));
+            //}
             return vis;
         }
 
@@ -581,16 +589,8 @@ namespace DataClassHierarchy
             return (true, result);    
         }
         
-        public (bool, object) Visiting(DistW node){
-            var ds = new DistributionServer(Context.Simulation, null, new List<string>());
-            Context.Simulation.AddAgent(ds);
-            return (true, ds);       
-        }
-
-        public (bool, object) Visiting(SimpleW simpleW) {
-            var ss = new SimpleServer(Context.Simulation, null);
-            Context.Simulation.AddAgent(ss);
-            return (true, ss);
+        public (bool, object) Visiting(ClassAst node){
+            throw new NotImplementedException();
         }
 
         public (bool, object) Visiting(GosListAst node) {

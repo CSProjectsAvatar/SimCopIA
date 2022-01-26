@@ -28,7 +28,6 @@ namespace Compiler {
         private static readonly UntType Return = new UntType(typeof(ReturnUnt));
         private static readonly UntType Cond = new UntType(typeof(ConditionUnt));
         private static readonly UntType RightConn = new UntType(typeof(RightConnUnt));
-        private static readonly UntType Class = new UntType(typeof(ClassUnt));
         private static readonly UntType GosList = new UntType(typeof(GosListUnt));
         private static readonly UntType ListIdx = new UntType(typeof(ListIdxUnt));
         private static readonly UntType LeftVal = new UntType(typeof(LeftValUnt));
@@ -67,8 +66,6 @@ namespace Compiler {
         private static readonly TokenType lbrak = Token.TypeEnum.LBracket;
         private static readonly TokenType times = Token.TypeEnum.Times;
         private static readonly TokenType @new = Token.TypeEnum.New;
-        private static readonly TokenType simplew = Token.TypeEnum.SimpleWorker;
-        private static readonly TokenType distw = Token.TypeEnum.DistWorker;
         private static readonly TokenType rightArrow = Token.TypeEnum.RightArrow;
         private static readonly TokenType forever = Token.TypeEnum.Forever;
         private static readonly TokenType @break = Token.TypeEnum.Break;
@@ -77,6 +74,7 @@ namespace Compiler {
         private static readonly TokenType and = Token.TypeEnum.And;
         private static readonly TokenType or = Token.TypeEnum.Or;
         private static readonly TokenType @bool = Token.TypeEnum.Bool;
+        private static readonly TokenType @class = Token.TypeEnum.Class;
 
         #endregion
         public GosGrammar() : base(
@@ -136,7 +134,7 @@ namespace Compiler {
 #pragma warning restore CS1718 // Comparison made to same variable
 
             Expr > Disj, 
-            Expr > (@new, Class),
+            Expr > (@new, @class),
             Expr > GosList,
 
             ListIdx > ToIdx[Math],
@@ -146,9 +144,6 @@ namespace Compiler {
             ToIdx > ListIdx,
 
             GosList > (lbrak, ExprList, rbrak),
-
-            Class > simplew,
-            Class > distw,
 
             RightConn > (rightArrow, IdList),
 

@@ -67,7 +67,7 @@ namespace Compiler.Tests {
             var tokens = _lex.Tokenize(
                 @"
                 let a = 5
-                a = new simplew
+                a = [1, 2]
                 print a" + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
 

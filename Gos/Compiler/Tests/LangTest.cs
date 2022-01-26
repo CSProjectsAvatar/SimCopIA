@@ -28,9 +28,7 @@ namespace Compiler.Tests {
             _lex = new Lexer.Lexer(Helper.TokenWithRegexs, new ReGrammar(), logReLex, logLr1, logLr1Dfa, logLex);
             _parser = new Lr1(new GosGrammar(), logLr1, logLr1Dfa);
             _dslSuf = @"
-                let d = new distw
-                let w = new simplew
-                d -> w";
+";
             _endl = Environment.NewLine;
         }
     }

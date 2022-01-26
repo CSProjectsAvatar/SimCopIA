@@ -39,7 +39,7 @@ print l" + _dslSuf);
             var tokens = _lex.Tokenize(
                 @"
 fun f(x) {
-    return new simplew
+    return false
 }
 
 let l = [1+3, 0, 3*2/6, f(5)]
@@ -206,7 +206,7 @@ fun f(x) {
 }
 let l = [1, 2, 3]
 
-l[f(1)] = new simplew
+l[f(1)] = true
 print l" + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
 
@@ -317,7 +317,7 @@ print l[a]" + _dslSuf);
             var tokens = _lex.Tokenize(
                 @"
 fun f(x) {
-    return new simplew
+    return true
 }
 let l = [1, 2, 3]
 print l[f(5)]" + _dslSuf);

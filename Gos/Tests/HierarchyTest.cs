@@ -21,9 +21,6 @@ namespace Tests {
         private ILogger<RightConn> _logRArrow;
         private Context global;
         private EvalVisitor evalVisitor;
-        private LetVar _letD;
-        private LetVar _letW;
-        private RightConn _conn;
 
         [TestInitialize]
         public void Init() {
@@ -33,19 +30,6 @@ namespace Tests {
             _logRArrow = LoggerFact.CreateLogger<RightConn>();
             var @out = new StringWriter();
             evalVisitor = new EvalVisitor(global, _evallog, @out);
-
-            _letD = new LetVar {
-                Identifier = "z",
-                Expr = new DistW()
-            };
-            _letW = new LetVar {
-                Identifier = "w",
-                Expr = new SimpleW()
-            };
-            _conn = new RightConn {
-                LeftAgent = "z",
-                Agents = new[] { "w" }
-            };
         }
 
         [TestMethod]
@@ -87,10 +71,7 @@ namespace Tests {
             var prog = new ProgramNode(){
                 Statements = new List<IStatement>(){
                     letA,
-                    letB,
-                    _letD,
-                    _letW,
-                    _conn
+                    letB
                 }
             };
             var (success, result) = evalVisitor.Visit(prog);
@@ -136,9 +117,6 @@ namespace Tests {
                     defDouble, // f x -> 2x
                     letA,      // a = 10
                     letB,      // b = Double a
-                    _letD,
-                    _letW,
-                    _conn
                 }
             };
         #endregion
@@ -194,9 +172,6 @@ namespace Tests {
                     letC,       // c = 11
                     letD,       // d = a == b (true)
                     letE,       // e = a == c (false)
-                    _letD,
-                    _letW,
-                    _conn
                 }
             };
             
@@ -254,9 +229,6 @@ namespace Tests {
                     defDoubleMinusOne, // f x -> { y = 1; return 2x - y }
                     letA,      // a = 10
                     letB,      // b = DoubleMinusOne a
-                    _letD,
-                    _letW,
-                    _conn
                 }
             };
         #endregion
@@ -329,9 +301,6 @@ namespace Tests {
                     defFactorial, // f x -> x * f (x-1)
                     letA,      // a = 5
                     letB,      // b = Fact a
-                    _letD,
-                    _letW,
-                    _conn
                 }
             };
         #endregion
@@ -412,10 +381,7 @@ namespace Tests {
                 Statements = new List<IStatement>(){
                     defFib, // f x -> if x < 2 then 1 else f(x-1) + f(x-2)
                     letA,      // a = 6
-                    letB,      // b = Fib a
-                    _letD,
-                    _letW,
-                    _conn
+                    letB,      // b = Fib 
                 }
             };
         #endregion
@@ -432,131 +398,5 @@ namespace Tests {
             var dB = global.GetVar(letB.Identifier);
             Assert.AreEqual((double)13, dB);
         }
-
-        // Test for the RightArrow Operand
-        [TestMethod]
-        public void EvalRightArrow(){
-            #region Program
-            var letA = new LetVar(){ // let a = distw
-                Identifier = "a",
-                Expr = new DistW()
-            };
-            var letB = new LetVar(){ // let b = distw
-                Identifier = "b",
-                Expr = new DistW()
-            };
-            var letC = new LetVar(){ // let c = distw
-                Identifier = "c",
-                Expr = new DistW()
-            };
-            var rightA = new RightConn(){ // a -> b, c
-                LeftAgent = "a",
-                Agents = new List<string>(){ "b", "c" }
-            };
-            var rightB = new RightConn() { // b -> w
-                LeftAgent = "b",
-                Agents = new List<string>() { "w" }
-            }; 
-            var rightC = new RightConn() { // c -> w
-                LeftAgent = "c",
-                Agents = new List<string>() { "w" }
-            };
-            var prog = new ProgramNode(){
-                Statements = new List<IStatement>(){
-                    letA,
-                    letB,
-                    letC,
-                    rightA,
-                    _letW,
-                    rightB,
-                    rightC
-                }
-            };
-            #endregion
-                    
-                var valid = prog.Validate(new Context());
-                Assert.IsTrue(valid);
-    
-                var (success, result) = evalVisitor.Visit(prog);
-                Assert.IsTrue(success);
-    
-                var dA = global.GetVar(letA.Identifier);
-                Assert.IsTrue(((DistributionServer)dA).workers.Contains("b"));
-                Assert.IsTrue(((DistributionServer)dA).workers.Contains("c"));
-        }
-    
-        // Test for the RightArrow Operand with errors
-        [TestMethod]
-        public void EvalRightArrowErros(){
-            #region Program
-            var letA = new LetVar(){ // let a = distw
-                Identifier = "a",
-                Expr = new DistW()
-            };
-            var letB = new LetVar(){ // let b = distw
-                Identifier = "b",
-                Expr = new DistW()
-            };
-            var letC = new LetVar(){ // let b = distw
-                Identifier = "c",
-                Expr = new DistW()
-            };
-            var rightA = new RightConn(_logRArrow){ // a -> b, c
-                LeftAgent = "a",
-                Agents = new List<string>(){ "b", "c", "d" },
-                Token = new Token(Token.TypeEnum.Id, 1, 1, "a")
-            };
-            var prog = new ProgramNode(){
-                Statements = new List<IStatement>(){
-                    letA,
-                    letB,
-                    letC,
-                    rightA
-                }
-            };
-            #endregion
-                    
-            var valid = prog.Validate(global);
-            Assert.IsFalse(valid);
-        }
-    
-        // Test for the RightArrow Operand with errors
-        [TestMethod]
-        public void EvalRightArrowError2(){
-            #region Program
-            var letA = new LetVar(){ // let a = distw
-                Identifier = "a",
-                Expr = new DistW()
-            };
-            var letB = new LetVar(){ // let b = 1
-                Identifier = "b",
-                Expr = new Number() {Value = "1"}
-            };
-            var letC = new LetVar(){ // let c = distw
-                Identifier = "c",
-                Expr = new DistW()
-            };
-            var rightA = new RightConn(_logRArrow){ // a -> b, c
-                LeftAgent = "a",
-                Agents = new List<string>(){ "b", "c" },
-                Token = new Token(Token.TypeEnum.Id, 1, 1, "a")
-            };
-            var prog = new ProgramNode(){
-                Statements = new List<IStatement>(){
-                    letA,
-                    letB,
-                    letC,
-                    rightA
-                }
-            };
-            #endregion
-                    
-            var valid = prog.Validate(new Context());
-            Assert.IsTrue(valid);
-
-            var (success, result) = evalVisitor.Visit(prog);
-            Assert.IsFalse(success);
-        }
-    
     }
 }
