@@ -344,6 +344,7 @@ El lenguaje tiene 4 tipos:
 - `Bool`: para valores de verdad (*true* o *false*)
 - `Server`: para los servidores
 - `List`: para las listas.
+- `Null`: para la no existencia de algo, por ejemplo, el tipo de retorno de las funciones que no devuelven nada.
 
 Los operadores `+`, `-`, `*`, `/`, `%` solo est&aacute;n permitidos para el tipo `Number`. 
 

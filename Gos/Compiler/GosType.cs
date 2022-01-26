@@ -6,6 +6,7 @@
         Number,
         Bool,
         Server,
-        List
+        List,
+        Null
     }
 }

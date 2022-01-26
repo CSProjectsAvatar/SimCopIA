@@ -82,6 +82,7 @@ namespace Compiler {
                 bool => GosType.Bool,
                 Agent => GosType.Server,
                 List<object> => GosType.List,
+                null => GosType.Null,
                 _ => throw new NotImplementedException()
             };
         }
