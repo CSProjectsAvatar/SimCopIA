@@ -28,7 +28,7 @@
 					"match": ">|<|\\=|==|\\+|\\->|\\-|\\*|\\/|%"
 				}, {
 					"name": "support.class.gos",
-					"match": "\\b(simplew|distw)\\b"
+					"match": "\\b(server)\\b"
 				}]
 		},
 		"strings": {

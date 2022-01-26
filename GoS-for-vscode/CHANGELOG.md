@@ -11,9 +11,10 @@ El formato se basa en [*Keep a Changelog*](https://keepachangelog.com/en/1.0.0/)
 - Palabras claves `forever`, `break`, `for` e `in`.
 - Palabras claves `and` y `or`.
 - Palabras claves `true` y `false`.
+- Palabra clave `server`.
 
-### Changed
-- Color de los tipos `distw` y `simplew`: ahora es verde.
+### Removed
+- Palabras claves `distw` y `simplew`.
 
 ## 0.2.0
 ### Added
