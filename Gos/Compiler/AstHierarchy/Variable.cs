@@ -1,4 +1,6 @@
 
+using Microsoft.Extensions.Logging;
+
 namespace DataClassHierarchy
 {
     ///<summary>
@@ -6,11 +8,25 @@ namespace DataClassHierarchy
     ///</summary>
     public class Variable:Expression
     {
+        private readonly ILogger<Variable> _log;
+
         public string Identifier { get; set; }
+
+        public Variable(ILogger<Variable> logger = null) {
+            _log = logger;
+        }
 
         public override bool Validate(Context context)
         {
-            return context.CheckVar(Identifier);
+            if (!context.CheckVar(Identifier)) {
+                _log?.LogError(
+                    "Line {line}, column {col}: variable '{id}' not defined.",
+                    Token.Line,
+                    Token.Column,
+                    Identifier);
+                return false;
+            }
+            return true;
         }
     }
 }

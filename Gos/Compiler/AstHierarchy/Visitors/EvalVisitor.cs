@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Agents;
+using Compiler;
 using Microsoft.Extensions.Logging;
 
 namespace DataClassHierarchy
@@ -28,84 +30,81 @@ namespace DataClassHierarchy
         }
         
         public (bool, object) Visiting(AstNode node) {
-            throw new Exception("Se llego por el visitor a la raiz, falta implementacion de Visiting"); // @audit esto es para probar, comentar dsp 
-            // Se llego por el visitor a la raiz, no hay implementacion de Visiting en la clase hijo
-            return (true, null);
+            throw new Exception("Se llego por el visitor a la raiz, falta implementacion de Visiting"); // @remind esto es para probar, comentar
         }  
-        
-        // public (bool, object) Visiting(NumOp node) {
-        //     var (lSuccess, lResult) = Visit(node.Left);
-        //     if(!lSuccess){
-        //         log.LogError("Left operand could not be Evalued");
-        //         return (false, null);
-        //     }
-
-        //     var (rSuccess, rResult) = Visit(node.Right);
-        //     if(!rSuccess){
-        //         log.LogError("Right operand could not be Evalued");
-        //         return (false, null);
-        //     }
-        //     var tResults = (lResult, rResult);
-
-        //     switch (tResults)
-        //     {
-        //         case (double lNum, double rNum):
-        //             var (succ, result) = node.TryCompute(lNum, rNum);
-        //             if(!succ){
-        //                 log.LogError("Could not compute {lNum} {this} {rNum}", lNum, this, rNum);
-        //                 return (false, null);
-        //             }
-        //             return (true, result);
-                
-        //         default:
-        //             log.LogError("Could not compute {lResult} {this} {rResult}", lResult, this, rResult);
-        //             return (false, null);
-        //     }
-        // }
     
-        public object CheckBinar(BinaryExpr node) {
-            var (lSuccess, lResult) = Visit(node.Left);
-            if(!lSuccess){
-                log.LogError("Left operand could not be Evalued");
-                return null;
-            }
-
-            var (rSuccess, rResult) = Visit(node.Right);
-            if(!rSuccess){
-                log.LogError("Right operand could not be Evalued");
-                return null;
-            }
-            return (lResult, rResult);
-        }
-        public (bool, object) Visiting(BinaryExpr node) {  
-            var tResults = CheckBinar(node);
-            if(tResults is null){
+         public (bool, object) Visiting(BinaryExpr node) {  
+            if(!CheckBinar(node, out var left, out var right)) {
                 return (false, null);
             }
+            var tResults = (left, right);
 
-            switch (tResults)
-            {
+            switch (tResults) {  // @audit SEGURAMENT NECESITAREMOS UN DICCIONARIO PA SABER Q TIPOS ADMITE CADA OPERADOR EN SUS OPERANDOS
                 case (double lNum, double rNum):
                     var (succ, result) = node.TryCompute(lNum, rNum);
                     if(!succ){
-                        log.LogError("Could not compute {lNum} {this} {rNum}", lNum, this, rNum);
                         return (false, null);
                     }
                     return (true, result);
                 
                 default:
-                    log.LogError("Could not compute {node}", node);
+                    log.LogError(
+                        "Line {line}, column {col}: only numbers can be computed by this operator. Left operand is {ltype} " +
+                            "and right operand is {rtype}.",
+                        node.Token.Line,
+                        node.Token.Column,
+                        Helper.GetType(left),
+                        Helper.GetType(right));
                     return (false, null);
             }
         }
         
+
+        public (bool, object) Visiting(Connection node) {  
+            var eval = CheckConnection(node, out var left, out var rightList);
+            if(!eval){
+                return (false, null);
+            }
+            var (succ, result) = node.TryCompute(left, rightList);
+
+            if(!succ){
+                return (false, null);
+            }
+
+            return (true, null);
+        }
+
+        private bool CheckConnection(Connection node, out Agent left, out List<Agent> agList)
+        {
+            left = null;
+            agList = new List<Agent>();
+            // Checking Types of Agents
+            foreach (var serv in node.Agents.Concat(new[] { node.LeftAgent }))
+            {
+                var varInstance = Context.GetVar(serv);
+                var varType = Helper.GetType(varInstance);
+
+                if (varType is not GosType.Server) {
+                    log?.LogError(
+                        "Line {line}, column {col}: variable '{serv}' has to be of type Server but it's of type {type}.",
+                        node.Token.Line,
+                        node.Token.Column,
+                        serv,
+                        varType);
+                    return false;
+                }
+                agList.Add(varInstance as Agent);
+            }
+            left = agList.Last();
+            agList.RemoveAt(agList.Count - 1);
+            return true;
+        }
 
         public (bool, object) Visiting(FunCall node){
             var exprValues = new List<object>();
             foreach(var expr in node.Args){
                 var (success, result) = Visit(expr);
                 if(!success){
-                    log.LogError("Could not Evaluate {expr}", expr);
                     return (false, null);
                 }
                 exprValues.Add(result);
@@ -129,7 +128,6 @@ namespace DataClassHierarchy
             stackC.Pop(); // destruyendo el ultimo contexto
 
             if(!f_success){
-                log.LogError("Could not Evaluate {defFun}", defFun);
                 return (false, null);
             }
             return (true, returnedValue);
@@ -138,8 +136,10 @@ namespace DataClassHierarchy
         public (bool, object) Visiting(LetVar node){
             var (success, result) = Visit(node.Expr);
             if(!success){
-                log.LogError("Could not Evaluate {node.Expr}", node.Expr);
                 return (false, null);
+            }
+            if (result is Agent serv) {
+                serv.ID = node.Identifier;
             }
             Context.SetVar(node.Identifier, result);
             return (true, result);  
@@ -165,21 +165,36 @@ namespace DataClassHierarchy
         public (bool, object) Visiting(Print node){
             var (success, result) = Visit(node.Expr);
             if(!success){
-                log.LogError("Could not Evaluate {node.Expr}", node.Expr);
                 return (false, null);
             }
             _writer.WriteLine(result?.ToString());
-            return (true, null); // @audit No tenemos soportado null creo, puede dar bateo
+            return (true, null); // @todo No tenemos soportado null(por eso el ? de arriba), hay q ver eso
         }
 
         public (bool, object) Visiting(ProgramNode node){
-            return Visit(node.Statements);
+            Context.Simulation = new Agents.Environment();
+
+            var vis = Visit(node.Statements);
+            // @audit DE JUGUETE
+            Context.Simulation.AddSomeRequests();
+            Context.Simulation.Run();
+
+            log.LogInformation(
+                Context.Simulation.solutionResponses.Aggregate(
+                    $"Responses to environment:{System.Environment.NewLine}",
+                    (accum, r) => accum + $"time:{r.responseTime} body:{r.body}{System.Environment.NewLine}"));
+            return vis;
         }
         
         public (bool, object) Visiting(IfStmt node){
             var (success, result) = Visit(node.Condition);
-            if(!success || result is not bool){ // Error
-                log.LogError("Could not Evaluate {st}", node.Condition);
+            if(!success) {
+                if (result is not bool) {  // @note ESTE CHEKEO NO HAC FALTA XQ LA SINTAXIS ASEGURA Q ESO SEA BOOLEANO. PERO CUAN2 SOPORTEMOS LLAMADOS D FUNC EN UNA COND HAY Q HACERLO OBLIGAO
+                    log.LogError(
+                        "Line {line}, column {col}: the conditional can't be a non-boolean expression.", 
+                        node.Token.Line,
+                        node.Token.Column);
+                }
                 return (false, null);
             }
             if(result is bool r && r == true){
@@ -193,13 +208,28 @@ namespace DataClassHierarchy
         /// <summary>
         /// Evalua una lista de statements y devuelve el resultado de la ultima
         /// </summary>
+       public (bool, object) Visiting(Return node){
+            var (success, result) = Visit(node.Expr);
+            if(!success){
+                return (false, null);
+            }
+            _returnFlag = (true, result);
+            return (true, result);    
+        }
+        
+        public (bool, object) Visiting(DistW node){
+            var ds = new DistributionServer(Context.Simulation, null, new List<string>());
+            Context.Simulation.AddAgent(ds);
+            return (true, ds);       
+        }
+
+        // Auxiliars
         public (bool, object) Visiting(IList<IStatement> statements){
             object lastR = null;
 
             foreach (var st in statements){
                 var (success, result) = Visit(st);
                 if(!success){
-                    log.LogError("Could not Evaluate {st}", st);
                     return (false, null);
                 }
                 lastR = result;
@@ -209,15 +239,32 @@ namespace DataClassHierarchy
             }
             return (true, null);
         }
-        public (bool, object) Visiting(Return node){
-            var (success, result) = Visit(node.Expr);
-            if(!success){
-                log.LogError("Could not Evaluate {node.Expr}", node.Expr);
-                return (false, null);
-            }
-            _returnFlag = (true, result);
-            return (true, result);    
-        }
         
+        private bool CheckBinar(BinaryExpr node, out object leftResult, out object rightResult) {
+            leftResult = rightResult = default;
+
+            bool lSuccess;
+            (lSuccess, leftResult) = Visit(node.Left);
+
+            if(!lSuccess){
+                //log.LogError(
+                //    "Line {line}, column {col}: left operand could not be evaluated.", 
+                //    node.Token.Line, 
+                //    node.Token.Column);  @note CREO Q ESTO NO HAC FALTA, CADA CUAL LOGUEA CUAN2 C PART ALGO
+                return false;
+            }
+            bool rSuccess;
+            (rSuccess, rightResult) = Visit(node.Right);
+
+            if(!rSuccess){
+                //log.LogError(
+                //    "Line {line}, column {col}: right operand could not be evaluated.", 
+                //    node.Token.Line, 
+                //    node.Token.Column);  @note CREO Q ESTO NO HAC FALTA, CADA CUAL LOGUEA CUAN2 C PART ALGO
+                return false;
+            }
+            return true;
+        }
+       
     }
 }

@@ -1,4 +1,6 @@
-﻿using Core;
+﻿using Compiler.Lexer;
+using Core;
+using DataClassHierarchy;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;

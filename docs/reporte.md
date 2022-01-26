@@ -9,6 +9,7 @@
 - [2da Entrega](#2da-entrega)
   - [Gram&aacute;tica](#gramática)
   - [Reglas Sem&aacute;nticas](#reglas-semánticas)
+  - [Gram&aacute;tica de REGEX](#gramática-de-regex)
 
 ## Propuesta
 
@@ -128,7 +129,7 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 
 <stat-list> := <stat> ";"
              | <stat> ";" <stat-list>
-	           | <block-stat>
+	         | <block-stat>
              | <block-stat> <stat-list>
              
 <block-stat> := <if>
@@ -138,15 +139,16 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
         | <print-stat>
         | <return>
         | <func-call>
+        | ID <right-conn>
 
 <let-var> := "let" ID "=" <expr>
 
-<def-func> := "fun" ID "(" <arg-list> ")" "{" <stat-list> "}"
+<def-func> := "fun" ID "(" <id-list> ")" "{" <stat-list> "}"
 
 <print-stat> := "print" <expr>
 
-<arg-list> := ID
-            | ID "," <arg-list>
+<id-list> := ID
+           | ID "," <id-list>
 
 <cond> := <math> "<" <math>
 		| <math> ">" <math>
@@ -154,6 +156,10 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 
 <expr> := <cond>
 		| <math>
+        | "simplew"
+        | "distw"
+
+<right-conn> := "->" <id-list>
 
 <math> := <math> "+" <term>
         | <math> "-" <term>
@@ -198,3 +204,37 @@ variables definidas globalmente o a argumentos definidos en
 otras funciones.
 - En el cuerpo de una función, los nombres de los argumentos
 ocultan los nombres de variables iguales.
+
+
+
+### Gram&aacute;tica de REGEX 
+```
+<regex> := <union>
+
+<union> := <union> "|" <concat>
+         | <concat>
+
+<concat> := <concat> <basic>
+          | <basic>
+
+<basic> := <atom> "*" 
+         | <atom> "+" 
+         | <atom> "?" 
+         | <atom>
+
+<atom> := <group> 
+        | CHAR 
+        | <set>
+
+<group> := "(" <regex> ")"
+
+<set> := "[" <item-list> "]"
+
+<item-list> := <item> 
+             | <item> <item-list>
+
+<item> := <range>
+        | CHAR
+
+<range> := CHAR "-" CHAR
+```
