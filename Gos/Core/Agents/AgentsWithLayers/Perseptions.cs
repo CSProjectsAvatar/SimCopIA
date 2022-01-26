@@ -3,18 +3,16 @@ using System.Collections.Generic;
 namespace ServersWithLayers
 {
     // Cualquier evento que le toque ejecutarse en algun punto de la simulacion.
-    public abstract class Perception{
+    public abstract class Perception : Event{
         string receiber;
-        protected Environment env;
 
-        public Perception( Environment env){
-            this.env = env;
+        public Perception() : base(){
         }
 
         // Se ejecuta al salir de la cola de prioridad en el Environment en su tiempo correspondiente.
         // Le hace conocer al servidor que tiene que manejar su llegada.
-        public void ExecuteInTime(){
-            var receiber=env.GetServerByID(this.receiber);
+        public override void ExecuteInTime(){
+            var receiber=Environment.CurrentEnv.GetServerByID(this.receiber);
             if(receiber != null)
                 receiber.HandlePerception(this);
             else{
@@ -31,7 +29,7 @@ namespace ServersWithLayers
         public string Sender {get;} 
         public string Receiber {get;}
         public RequestType Type {get;}
-        public Message(string sender, string receiber, RequestType type, Environment env): base(env){
+        public Message(string sender, string receiber, RequestType type): base(){
             this.Sender = sender;
             this.Receiber = receiber;
         }
@@ -46,7 +44,7 @@ namespace ServersWithLayers
         public int ID {get;}
 
         string URL;
-        public Request(string sender, string receiber, RequestType type, Environment env, string URL="/") : base(sender,receiber, type, env){
+        public Request(string sender, string receiber, RequestType type, string URL="/") : base(sender,receiber, type){
             this.ID = ++lastRequestID; 
             this.URL = URL;
         }
@@ -60,8 +58,7 @@ namespace ServersWithLayers
                 this.Receiber,
                 this.Sender,
                 this.Type,
-                data,
-                this.env
+                data
             );
         }
  
@@ -72,7 +69,7 @@ namespace ServersWithLayers
     public class Response : Message{
         public int RequestID {get;}
         public Dictionary<string,object> Data {get;}
-        public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, object> data, Environment env) : base(sender, receiber, type, env){
+        public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, object> data ) : base(sender, receiber, type){
             this.RequestID = requestID;
             this.Data = data;
         }
@@ -85,7 +82,7 @@ namespace ServersWithLayers
     public class Observer:Perception{
         public string Sender;
         public object Objetive {get;}
-        public Observer( string sender, object obj, Environment env) : base(env){
+        public Observer( string sender, object obj) : base(){
             this.Sender = sender;
             this.Objetive=  obj; 
         }

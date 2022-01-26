@@ -5,12 +5,10 @@ namespace ServersWithLayers
     public class Server{
         public string ID {get;}
         public Status Stats {get;}
-        public Environment Env {get;}
         private List<Layer> _layers; 
         public Server(Environment env, string ID){
             
             this.ID = ID;
-            this.Env = env;
 
             this.Stats = new();
             
@@ -23,7 +21,7 @@ namespace ServersWithLayers
                 l.Execute(p);
                         
             foreach(var e in this.Stats.EnumerateAndClear())
-                Env.SubsribeEvent(e.Item1,e.Item2);
+                Environment.CurrentEnv.SubsribeEvent(e.Item1,e.Item2);
         }
 
         
