@@ -223,6 +223,8 @@ namespace Compiler {
         }
 
         public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
+            For,
+            In,
             Break,
             Forever,
             New,

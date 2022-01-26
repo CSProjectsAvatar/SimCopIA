@@ -34,6 +34,8 @@ namespace Compiler {
         private static readonly UntType LeftVal = new UntType(typeof(LeftValUnt));
         private static readonly UntType ToIdx = new UntType(typeof(ToIdxUnt));
         private static readonly UntType InfLoop = new UntType(typeof(InfLoopUnt));
+        private static readonly UntType ForEach = new UntType(typeof(ForEachUnt));
+        private static readonly UntType ForEachVars = new UntType(typeof(ForEachVarsUnt));
 
         #region terminales
         private static readonly TokenType n = TokenType.Number;
@@ -68,6 +70,8 @@ namespace Compiler {
         private static readonly TokenType rightArrow = Token.TypeEnum.RightArrow;
         private static readonly TokenType forever = Token.TypeEnum.Forever;
         private static readonly TokenType @break = Token.TypeEnum.Break;
+        private static readonly TokenType @for = Token.TypeEnum.For;
+        private static readonly TokenType @in = Token.TypeEnum.In;
 
         #endregion
         public GosGrammar() : base(
@@ -83,6 +87,12 @@ namespace Compiler {
             BlockStat > If,
             BlockStat > DefFunc,
             BlockStat > InfLoop,
+            BlockStat > ForEach,
+
+            ForEach > (@for, ForEachVars, @in, Expr, lbrace, StatList, rbrace),
+
+            ForEachVars > id,
+            ForEachVars > (id, comma, id),
 
             InfLoop > (forever, lbrace, StatList, rbrace),
 

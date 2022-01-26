@@ -382,8 +382,31 @@ namespace DataClassHierarchy
                 null);
         }
 
+        public (bool, object) Visiting(ForEachAst node) {
+            var (iterSucc, iterable) = Visit(node.Iterable);
+
+            if (!iterSucc) {
+                return (false, null);
+            }
+            var type = Helper.GetType(iterable);
+            if (type != GosType.List) {
+                _log.LogError(
+                    "Line {l}, column {c}: for statement must iterate over a list, but {type} was given.",
+                    node.Token.Line,
+                    node.Token.Column,
+                    type);
+                return (false, null);
+            }
+            return (
+                Loop(node.Index, node.Item, iterable as List<object>, node.Code),
+                null);
+        }
+
         /// <summary>
-        /// 
+        /// Performs a loop over <paramref name="target"/> executing <paramref name="code"/>. The actual item is assigned to
+        /// a variable of name <paramref name="itemName"/> and the number of the actual iteration is assigned to a variable of 
+        /// name
+        /// <paramref name="idxName"/>.
         /// </summary>
         /// <param name="idxName">Name of the index variable.</param>
         /// <param name="itemName">Name of the item variable.</param>
@@ -391,7 +414,7 @@ namespace DataClassHierarchy
         /// <param name="code"></param>
         /// <returns></returns>
         private bool Loop(string idxName, string itemName, IEnumerable<object> target, IEnumerable<IStatement> code) {
-            int i = 1;  // es uno porque las listas indexan en base-1
+            double i = 1;  // es uno porque las listas indexan en base-1
             
             foreach (var item in target) {
                 Context = Context.CreateChildContext();

@@ -230,6 +230,12 @@ graph LR
 <block-stat> := <if>
               | <def-func>
               | <inf-loop>
+              | <foreach>
+
+<foreach> := "for" <foreach-vars> "in" <expr> "{" <stat-list> "}"
+
+<foreach-vars> := ID
+                | ID "," ID
 
 <inf-loop> := "forever" "{" <stat-list> "}"
 

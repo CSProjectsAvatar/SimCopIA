@@ -82,6 +82,91 @@ forever {
             Assert.AreEqual($"5{_endl}5{_endl}5{_endl}3{_endl}", @out.ToString());
         }
 
+        [TestMethod]
+        public void Foreach() {
+            var tokens = _lex.Tokenize(@"
+let item = 23
+
+for item in [1, 2, 3] {
+    print item
+}" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"1{_endl}2{_endl}3{_endl}", @out.ToString());
+        }
+
+        [TestMethod]
+        public void ForeachWithIdx() {
+            var tokens = _lex.Tokenize(@"
+let i = 30
+
+for i, item in [5, 4, 3] {
+    print i
+    print item
+}" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"1{_endl}5{_endl}2{_endl}4{_endl}3{_endl}3{_endl}", @out.ToString());
+        }
+
+        [TestMethod]
+        public void NoList() {
+            var tokens = _lex.Tokenize(@"
+fun f(x) {
+    return x+1
+}
+let l = [f(1), f(2)]
+
+for item in l[2] {
+    print item
+}" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void BreakInForeach() {
+            var tokens = _lex.Tokenize(@"
+for i, item in [5, 4, 3] {
+    if i == 3 {
+        break
+        print 0
+    }
+    print item
+}" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"5{_endl}4{_endl}", @out.ToString());
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();
