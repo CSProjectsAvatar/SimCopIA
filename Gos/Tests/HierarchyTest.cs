@@ -10,11 +10,14 @@ using DataClassHierarchy;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Agents;
+using Compiler;
 
 namespace Tests {
     [TestClass]
     public class HierarchyTest : BaseTest {
         private ILogger<HierarchyTest> _log;
+        private ILogger<RightConn> _logRArrow;
         private Context global;
         private EvalVisitor evalVisitor;
 
@@ -23,7 +26,9 @@ namespace Tests {
             global = new Context();
             _log = LoggerFact.CreateLogger<HierarchyTest>();
             var _evallog = LoggerFact.CreateLogger<EvalVisitor>();
-            evalVisitor = new EvalVisitor(global, _evallog, new StringWriter());
+            _logRArrow = LoggerFact.CreateLogger<RightConn>();
+            var @out = new StringWriter();
+            evalVisitor = new EvalVisitor(global, _evallog, @out);
         }
 
         [TestMethod]
@@ -385,6 +390,119 @@ namespace Tests {
             Assert.AreEqual((double)13, dB);
         }
 
+        // Test for the RightArrow Operand
+        [TestMethod]
+        public void EvalRightArrow(){
+            #region Program
+            var letA = new LetVar(){ // let a = distw
+                Identifier = "a",
+                Expr = new DistW()
+            };
+            var letB = new LetVar(){ // let b = distw
+                Identifier = "b",
+                Expr = new DistW()
+            };
+            var letC = new LetVar(){ // let b = distw
+                Identifier = "c",
+                Expr = new DistW()
+            };
+            var rightA = new RightConn(){ // a -> b, c
+                LeftAgent = "a",
+                Agents = new List<string>(){ "b", "c" }
+            };
+            var prog = new ProgramNode(){
+                Statements = new List<IStatement>(){
+                    letA,
+                    letB,
+                    letC,
+                    rightA
+                }
+            };
+            #endregion
+                    
+                var valid = prog.Validate(global);
+                Assert.IsTrue(valid);
+    
+                var (success, result) = evalVisitor.Visit(prog);
+                Assert.IsTrue(success);
+    
+                var dA = global.GetVar(letA.Identifier);
+                Assert.IsTrue(((DistributionServer)dA).workers.Contains("b"));
+                Assert.IsTrue(((DistributionServer)dA).workers.Contains("c"));
+        }
+    
+        // Test for the RightArrow Operand with errors
+        [TestMethod]
+        public void EvalRightArrowErros(){
+            #region Program
+            var letA = new LetVar(){ // let a = distw
+                Identifier = "a",
+                Expr = new DistW()
+            };
+            var letB = new LetVar(){ // let b = distw
+                Identifier = "b",
+                Expr = new DistW()
+            };
+            var letC = new LetVar(){ // let b = distw
+                Identifier = "c",
+                Expr = new DistW()
+            };
+            var rightA = new RightConn(_logRArrow){ // a -> b, c
+                LeftAgent = "a",
+                Agents = new List<string>(){ "b", "c", "d" },
+                Token = new Token(Token.TypeEnum.Id, 1, 1, "a")
+            };
+            var prog = new ProgramNode(){
+                Statements = new List<IStatement>(){
+                    letA,
+                    letB,
+                    letC,
+                    rightA
+                }
+            };
+            #endregion
+                    
+            var valid = prog.Validate(global);
+            Assert.IsFalse(valid);
+        }
+    
+        // Test for the RightArrow Operand with errors
+        [TestMethod]
+        public void EvalRightArrowError2(){
+            #region Program
+            var letA = new LetVar(){ // let a = distw
+                Identifier = "a",
+                Expr = new DistW()
+            };
+            var letB = new LetVar(){ // let b = 1
+                Identifier = "b",
+                Expr = new Number() {Value = "1"}
+            };
+            var letC = new LetVar(){ // let c = distw
+                Identifier = "c",
+                Expr = new DistW()
+            };
+            var rightA = new RightConn(_logRArrow){ // a -> b, c
+                LeftAgent = "a",
+                Agents = new List<string>(){ "b", "c" },
+                Token = new Token(Token.TypeEnum.Id, 1, 1, "a")
+            };
+            var prog = new ProgramNode(){
+                Statements = new List<IStatement>(){
+                    letA,
+                    letB,
+                    letC,
+                    rightA
+                }
+            };
+            #endregion
+                    
+            var valid = prog.Validate(global);
+            Assert.IsTrue(valid);
+
+            var (success, result) = evalVisitor.Visit(prog);
+            Assert.IsFalse(success);
+        }
     
     }
 }

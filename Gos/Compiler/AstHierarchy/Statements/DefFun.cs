@@ -10,16 +10,20 @@ namespace DataClassHierarchy
         public string Identifier { get; set; }
         public List<string> Arguments { get; set; }
         public List<IStatement> Body { get; set; }
-        public ILogger Log { get; }
+        private ILogger<DefFun> _log;
 
         public DefFun(){}
-        public DefFun(ILogger logger){
-            this.Log = logger;
+        public DefFun(ILogger<DefFun> logger){
+            _log = logger;
         }
         public override bool Validate(Context context)
         {
             if(!context.DefFunc(Identifier, Arguments.Count)){
-                Log.LogError("Function '" + Identifier + "' is already defined.");
+                _log.LogError(
+                    "Line {line}, column {col}: function '{id}' is already defined.",
+                    Token.Line,
+                    Token.Column,
+                    Identifier);
                 return false;
             }
 

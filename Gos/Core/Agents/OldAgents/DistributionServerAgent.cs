@@ -18,7 +18,14 @@ namespace Agents
             this.functionsToHandleResponses.Add(AvailibityCheckerResponse);
 
         }
-         
+
+        public void SetWorkers(IEnumerable<string> workers) {
+            if (this.workers == null || this.workers.Count != 0) {
+                throw new InvalidOperationException("Null or non-empty list.");  // no puede ser null pa q la clausura d selectionProtocol en el constructor no c parta
+            }
+            this.workers.AddRange(workers);
+        }
+
         private void AskToWorkers(IRequestable status, Request r){
             status.AddRequestToProcessed(r);
             

@@ -56,3 +56,21 @@ namespace ServersWithLayers
         }
     }
 }
+/*
+Environment:
+- Guardar los objetos del ambiente
+- correr los eventos
+
+EventCreator:
+- Crear eventos
+
+Event:
+- Realizar una accion sobre uno o mas objetos del environment.
+
+Resource:
+- Unidad principal pedida y transferida entre agentes. (i.e una pagina web, un archivo, una imagen, etc)
+
+IA
+Como repartir los recursos
+
+*/

@@ -43,10 +43,9 @@ namespace ServersWithLayers
         static int lastRequestID = 0; 
         public int ID {get;}
 
-        string URL;
-        public Request(string sender, string receiber, RequestType type, string URL="/") : base(sender,receiber, type){
+        public List<Resource> Asking { get; set; }
+        public Request(string sender, string receiber, RequestType type) : base(sender,receiber, type){
             this.ID = ++lastRequestID; 
-            this.URL = URL;
         }
 
         // Crea un reponse a partir del request,

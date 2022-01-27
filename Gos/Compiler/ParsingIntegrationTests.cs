@@ -14,6 +14,7 @@ namespace Compiler {
     /// Testea la integración del parseo con la creación de los nodos AST, su validación y ejecución.
     /// </summary>
     public class ParsingIntegrationTests : CompilerTests {
+        #region private fields
         private ILogger<Lr1> log;
         private ILogger<Lr1Dfa> dfaLog;
         private ILogger<EvalVisitor> evalLog;
@@ -21,6 +22,7 @@ namespace Compiler {
         private Token x => Token.VarX;
         private Token eq => Token.Eq;
         private Token five => Token.Number;
+        private Token one => Token.NumberFor(1);
         private Token plus => Token.Plus;
         private Token three => Token.NumberFor(3);
         private Token times => Token.Times;
@@ -41,13 +43,13 @@ namespace Compiler {
         private Token lt => Token.Lt;
         private Token geq => Token.Geq;
         private Token gt => Token.Gt;
-        private Token one => Token.NumberFor(1);
         private Token two => Token.NumberFor(2);
         private Token zero => Token.NumberFor(0);
         private Token @if => Token.If;
         private Token @return => Token.Return;
         private Token eqeq => Token.EqEq;
-
+        #endregion
+        
         [TestInitialize]
         public void Init() {
             this.log = LoggerFact.CreateLogger<Lr1>();
@@ -108,6 +110,26 @@ namespace Compiler {
                     out var root));
                 AssertIntegration(root, "29", "64", "-6");
             }
+        }
+
+
+        [TestMethod]
+        public void UnrecognizedToken() {
+            using (var parser = new Lr1(Grammar, this.log, this.dfaLog)) {
+                Assert.IsTrue(parser.TryParse(
+                    new[] {
+                        let, x, eq, five, plus, Token.IdFor("a"), endl,  // let x = 5 + a; 
+                        eof
+                    },
+                    out var root));
+                
+                var prog = root as ProgramNode;
+                Assert.IsNotNull(prog);
+
+                var global = new Context();
+                Assert.IsFalse(prog.Validate(global)); // Comilation Error
+            }
+
         }
 
         [TestMethod]

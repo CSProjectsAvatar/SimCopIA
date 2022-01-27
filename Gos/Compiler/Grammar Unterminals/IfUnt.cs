@@ -11,7 +11,8 @@ namespace Compiler {
         {
             return new IfStmt(){
                 Condition = (derivation[1] as ConditionUnt).Ast as Expression,
-                Then = (derivation[3] as StatListUnt).Statements.ToList()
+                Then = (derivation[3] as StatListUnt).Statements.ToList(),
+                Token = derivation[0] as Token
             };
         }
     }

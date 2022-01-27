@@ -18,7 +18,7 @@ namespace ServersWithLayers
         public void HandlePerception(Perception p){
 
             foreach(var l in _layers) 
-                l.Execute(p);
+                l.Process(p);
                         
             foreach(var e in this.Stats.EnumerateAndClear())
                 Environment.CurrentEnv.SubsribeEvent(e.Item1,e.Item2);
@@ -34,8 +34,8 @@ namespace ServersWithLayers
                 AddLayer(l);
         }
         public void AddLayer(Layer layer){
-            layer.SetServer(this);
-            _layers.Add(layer);
+            var clonedLayer = layer.CloneInServer(this);
+            _layers.Add(clonedLayer);
         }
         
     }

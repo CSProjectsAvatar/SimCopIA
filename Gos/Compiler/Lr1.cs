@@ -11,14 +11,14 @@ namespace Compiler {
     /// Parser LR(1).
     /// </summary>
     public class Lr1 : IDisposable {
-        private readonly Lr1Dfa dfa;
+        private readonly Lr1Dfa _dfa;
         private readonly Grammar gram;
-        private readonly ILogger<Lr1> log;
+        private readonly ILogger<Lr1> _log;
 
         public Lr1(Grammar grammar, ILogger<Lr1> logger, ILogger<Lr1Dfa> dfaLogger) {
-            this.dfa = new Lr1Dfa(grammar, dfaLogger);
+            this._dfa = new Lr1Dfa(grammar, dfaLogger);
             this.gram = grammar;
-            this.log = logger;
+            this._log = logger;
         }
 
         /// <summary>
@@ -35,7 +35,6 @@ namespace Compiler {
             toksTor.MoveNext();
 
             if (!TryGetAction(state, toksTor.Current, out var action, out var actData)) {
-                SyntaxError(toksTor.Current);
                 return false;
             }
             while (action != Lr1Dfa.ActionEnum.Ok) {
@@ -61,7 +60,6 @@ namespace Compiler {
                         throw new NotImplementedException();
                 }
                 if (!TryGetAction(state, toksTor.Current, out action, out actData)) {
-                    SyntaxError(toksTor.Current);
                     return false;
                 }
             }
@@ -81,13 +79,21 @@ namespace Compiler {
         /// <returns></returns>
         private bool TryGetAction(uint state, Token current, out Lr1Dfa.ActionEnum action, out uint actionData) {
             try {
-                (action, actionData) = this.dfa.Action(state, current.Type);
+                (action, actionData) = _dfa.Action(state, current.Type);
                 return true;
 
             } catch (KeyNotFoundException) {
+                SyntaxError(current);
+
                 if (current.Type == Token.TypeEnum.Eof) {
-                    this.log?.LogError("Unexpected end of file.");
+                    _log?.LogError("Unexpected end of file.");
                 }
+                _log.LogError(
+                    $"One of these expected:{Environment.NewLine}{{token}}",
+                    string.Join(Environment.NewLine, from k in _dfa.action.Keys
+                        where k.Item1 == state
+                        select Token.GetDefaultLexeme(k.Item2)));
+
                 action = default;
                 actionData = default;
                 return false;
@@ -95,9 +101,14 @@ namespace Compiler {
         }
 
         private void SyntaxError(Token token) {
-            this.log?.LogError("Syntax error in line {line}, column {col}.",  // @todo MEJORA ESTE MENSAG 
+            _log?.LogError("Syntax error in line {line}, column {col} at {lexem}.",
                 token.Line,
-                token.Column);
+                token.Column,
+                token.Type switch {
+                    Token.TypeEnum.EndOfLine => "end of line",
+                    Token.TypeEnum.Eof => "end of file",
+                    _ => token.Lexem
+                });
         }
 
         /// <summary>
@@ -113,7 +124,7 @@ namespace Compiler {
             Unterminal unterminal = Unterminal.FromReduction(prod.Unterminal, derivants);
 
             try {
-                newState = this.dfa.Goto(topState, unterminal.GetType());
+                newState = this._dfa.Goto(topState, unterminal.GetType());  // @todo ESTO NO CREO Q HAYA Q METERLO DENTRO D UN TRY, CREO Q SI ESO LANZA EXCEPCIO'N ES CULPA D NOSOTROS, NO DEL USUARIO DEL LENGUAG
 
             } catch (KeyNotFoundException) {
                 newState = default;

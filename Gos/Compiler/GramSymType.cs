@@ -11,6 +11,10 @@ namespace Compiler {
     public abstract class GramSymType {
         public abstract string Name { get; }
 
+        public static (GramSymType, TokenType, GramSymType) operator |(GramSymType @this, GramSymType other) {
+            return (@this, new TokenType(Token.TypeEnum.Pipe), other);
+        }
+
         public static (GramSymType, TokenType, GramSymType) operator +(GramSymType @this, GramSymType other) {
             return (@this, TokenType.Plus, other);
         }

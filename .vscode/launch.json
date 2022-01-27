@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Gos/Core/bin/Debug/net5.0/Core.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/Gos/Core",
+            "program": "${workspaceFolder}/Gos/Compiler/bin/Debug/net5.0/gos.dll",
+            "args": ["Sources/distrb.gos", ">", "distrb_out.txt"],
+            "cwd": "${workspaceFolder}/Gos/Compiler",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

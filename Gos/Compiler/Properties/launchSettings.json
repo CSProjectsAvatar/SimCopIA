@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Compiler": {
+      "commandName": "Project",
+      "commandLineArgs": "Sources/distrb.gos > out.txt"
+    }
+  }
+}

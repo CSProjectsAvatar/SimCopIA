@@ -14,16 +14,18 @@ namespace Compiler.Grammar_Unterminals {
                      | <term>
              */
             return derivation[0] switch {
-                MathUnt m when derivation[1] is Token { Type: Token.TypeEnum.Plus }
+                MathUnt m when derivation[1] is Token { Type: Token.TypeEnum.Plus } t
                     => new AddOp(
-                        left: m.Ast as Expression,
-                        right: (derivation[2] as TermUnt).Ast as Expression
-                    ),
-                MathUnt m when derivation[1] is Token { Type: Token.TypeEnum.Minus }
+                            left: m.Ast as Expression,
+                            right: (derivation[2] as TermUnt).Ast as Expression) {
+                        Token = t 
+                    },
+                MathUnt m when derivation[1] is Token { Type: Token.TypeEnum.Minus } t
                     => new SubOp(
-                        left: m.Ast as Expression,
-                        right: (derivation[2] as TermUnt).Ast as Expression
-                    ),
+                            left: m.Ast as Expression,
+                            right: (derivation[2] as TermUnt).Ast as Expression) {
+                        Token = t 
+                    },
                 TermUnt t => t.Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };

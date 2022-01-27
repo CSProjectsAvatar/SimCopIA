@@ -1,5 +1,7 @@
 <h1> Game of Servers </h1>
 
+<!-- @audit cambiar a 3ra persona ("se logro'", en lugar de "logramos") -->
+
 - [Propuesta](#propuesta)
 - [1ra Entrega](#1ra-entrega)
   - [Ejecutando `gos`](#ejecutando-gos)
@@ -7,14 +9,26 @@
     - [Variables](#variables)
     - [Eventos](#eventos)
 - [2da Entrega](#2da-entrega)
-  - [Gram&aacute;tica](#gramática)
-  - [Reglas Sem&aacute;nticas](#reglas-semánticas)
+  - [Sobre la Simulaci&oacute;n](#sobre-la-simulación)
+    - [Ambiente](#ambiente)
+    - [Agentes](#agentes)
+    - [Status](#status)
+    - [Eventos de la L&iacute;nea Temporal](#eventos-de-la-línea-temporal)
+  - [Sobre el Lenguaje](#sobre-el-lenguaje)
+    - [Caracter&iacute;sticas](#características)
+    - [Gram&aacute;tica de GoS](#gramática-de-gos)
+    - [Tipos](#tipos)
+    - [Reglas Sem&aacute;nticas](#reglas-semánticas)
+    - [Gram&aacute;tica de REGEX](#gramática-de-regex)
+    - [DSL para las Gram&aacute;ticas](#dsl-para-las-gramáticas)
+    - [*Syntax Highlight* en el Code](#syntax-highlight-en-el-code)
+  - [Ejecutando `gos`](#ejecutando-gos-1)
 
 ## Propuesta
 
 Somos
 
-* Claudia Puentes Hernández ([@ClauP99](https://github.com/ClauP99)) :bee:,
+* Claudia Puentes Hernández ([@ClauP99](https://github.com/ClauP99)) :honeybee:,
 * Omar Alejandro Hernández Ramírez ([@OmarHernandez99](https://github.com/OmarHernandez99)) :tiger:,
 * Andy Ledesma García ([@MakeMake23](https://github.com/MakeMake23)) :wolf: y
 * Mauricio Mahmud Sánchez ([@maux96](https://github.com/maux96)) :fox_face:
@@ -122,13 +136,95 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
   El evento de cierre es análogo al evento de partida.
 
 ## 2da Entrega
-### Gram&aacute;tica
+### Sobre la Simulaci&oacute;n
+Se dej&oacute; de utilizar el modelo de eventos discretos y se emplea ahora un modelo de agentes.
+
+
+#### Ambiente
+
+El ambiente tiene variables configurables (por ahora constantes) del tiempo de llegada de Request y Response, una lista de todos los agentes en la escena, el tiempo actual de la simulación, los responses (una vez haya acabado la simulación) a los request del cliente que se hacen en un inicio y una estructura de datos Heap (de m&iacute;nimos) encargado de llevar acabo el funcionamiento de la l&iacute;nea de tiempo correctamente haciendo que transcurra este.
+
+#### Agentes
+Los agentes son los servidores y estos se dividen en 3 tipos:
+- *workers* simples
+- *workers* interactivos
+- distribuidores de carga
+
+Se model&oacute; un comportamiento de agente con estados, en el cual también incluimos el concepto de percepciones, este concepto lo utilizamos para representar el comportamiento de los request y response que se realizan durante la simulación.
+
+Para comenzar se realizó una clase **Agent**  que es de la que van a heredar todos los servidores, entre estos se encuentra **Worker**, **InteractiveWorker**, **Distributor**. La clase **Agent** posee las principales propiedades de estos servidores, el ID de cada uno, un environment, un status y unas listas de funciones que son las que van a modelar de alguna manera el comportamiento de la funci&oacute;n **next** que se le pasa un status, un perception y devuelve un nuevo status.
+Esta clase posee los funcionamientos de **HandleRequest**, **HandleResponse**, **HandleStatus**  que son los encargados de llevar a cabo el funcionamiento del servidor cuando llega un request, un response o el servidor necesita cambiar su estado interno basado en algo como el tiempo, esto se logra recorriendo cada una de las listas de funciones respectivas donde cada una hace un pequeño cambio en el estado del agente o del ambiente. En el caso del **HandleRequest**, antes de realizar lo anterior se verifica si el server está disponible para poder procesar el request.
+
+La clase **Distributor** posee una lista de workers y un protocolo representado como una función de selección,  la cual es encargada de seleccionar el worker o server al que le vamos a enviar el request. Esta clase tiene funcionalidades como  añadir los workers, enviar un request , que sería  añadir el request a la lista de procesamiento de request en el estado, con el protocolo de selección escogemos el server al cual le vamos a enviar el request y subscribimos el evento al estado. Otra de las funcionalidades es chequear el response, si ya el response  está disponible pues se envía el request original si no, se selecciona otro worker y se envía el request.
+
+
+La clase **InteractiveWorker** tiene un diccionario que posee las posibles necesidades del request y a cada una de estas se le asocia una lista de agentes que pueden dar response a este tipo de request, tiene otro diccionario que contiene todos los request que han llegado hasta el momento y a cada uno de estos se le asocia una lista de todos los request que fueron necesarios realizar para satisfacer sus necesidades y por último se tiene otro diccionario que contiene el id del request original contra el response que se irá conformando poco a poco. Aquí tenemos dos funcionalidades la primera es que si llegó un request revisamos si se encuentra en el diccionario de necesidades, si es asi enviamos un request a cada uno de los agentes que se encuentra en la lista de agentes asociada a la necesidad del request y la otra funcionalidad es a la hora en que llega un response, revisamos de cual request es y se verifica si  ya tenemos todos los responses necesarios para realizar el response del request original, si es así realizamos el proceso y si no continuamos hasta obtenerlo completo.
+
+La clase **Worker** posee varias funcionalidades como **GettingRequest** que revisa si el servidor puede atender el request, si no puede envía un response de servidor no disponible y si no subscribe el evento. Otra de las funcionalidades es el procesamiento el request que si el servidor esta disponible añade el request a la lista de procesamiento de request y en dependencia de la cantidad de request que tenga el servidor a procesar cambia el estado a no disponible. El método **SendResponse** conforma el response de acuerdo al request original y lo envía y **SetAvailableAfterSendResponse** luego de enviar el response de un request se elimina este de la lista de request en procesamiento
+
+#### Status
+
+La clase **Status**, representa el estado interno de un Servidor por ahora, tiene como objetivo guardar valores necesarios en la ejecución de la simulación y también guardar estad&iacute;sticas. Este es modificado en las funciones de manejo de Request, Response u Observer. Tiene referencias a su agente correspondiente, y permite la suscripción de eventos a la l&iacute;nea temporal.
+
+
+#### Eventos de la L&iacute;nea Temporal
+
+Estas 3 clases a continuación, representan cada vez que ocurre algo en la simulación, **Request** representa la llegada de un request, **Response** la llegada de un response y **Observer** el conocimiento de un cambio en el estado interno de un agente. Estos se agregan al Heap del ambiente a medida que van apareciendo y cuando es su turno de salir del ambiente, se "ejecutan" en su agente correspondiente variando el funcionamiento del mismo de acuerdo a sus valores internos. 
+
+La clase **Request** posee características como su ID que es único para cada request, la URL, el sender (quien lo envió) y el tiempo en que fue enviado. Son procesados por los agentes en el m&eacute;todo que llama a HandleRequest para cambiar de estado y otro método para conformar el response y suscribirlo al ambiente. 
+
+La clase **Response** posee  propiedades similares a la clase **Request** como su ID, el sender, el que lo recibe, el tiempo, el cuerpo de la respuesta y dos booleanos para conocer si el response est&aacute; disponible o no. Son procesados por un agente al igual que en **Request**  en vez de ser HandleRequest es HandleResponse. 
+
+La clase **Observer** tiene el agente el cual va (no necesariamente) a cambiar el estado, un objeto genérico (por ahora) el cual nos sirve para saber qu&eacute; tipo de cambio en el estado interno del agente se va llevar a cabo y como los anteriores tiene una referencia al ambiente correspondiente. Es procesado por su agente correspondiente al salir del Heap del ambiente en el método HandleStatus.
+
+### Sobre el Lenguaje
+El DSL se llama GoS y es un lenguaje de tipado din&aacute;mico desarrollado en C#. 
+
+Se implement&oacute; un *parser* LR(1).
+
+#### Caracter&iacute;sticas
+Se puede declarar variables:
+
+![let](let.jpg)
+
+Emplear expresiones matem&aacute;ticas:
+
+![math](math.jpg)
+
+Se puede declarar funciones:
+
+![func](func.jpg)
+
+*Statements* en varias l&iacute;neas:
+
+![multiline](multiline.jpg)
+
+Crear servidores de tipo *worker* simple y distribuidores de carga:
+
+![dist/simplew](simplew-distw.jpg)
+
+Conectarlos:
+
+![connections](connections.jpg)
+
+Al primer distribuidor de carga declarado se le har&aacute;n 100 pedidos, resultando el grafo de flujo de la siguiente manera:
+
+```mermaid
+graph LR
+    s[100 pedidos entrantes] --> d1
+    d1{d1} --> w1[w1]
+    d1 --> d2{d2}
+    d1 --> w2[w2]
+    d2 --> w3[w3]
+    d2 --> w4[w4]
+```
+#### Gram&aacute;tica de GoS
 ```
 <program> := <stat-list>
 
 <stat-list> := <stat> ";"
              | <stat> ";" <stat-list>
-	           | <block-stat>
+             | <block-stat>
              | <block-stat> <stat-list>
              
 <block-stat> := <if>
@@ -138,22 +234,27 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
         | <print-stat>
         | <return>
         | <func-call>
+        | ID <right-conn>
 
 <let-var> := "let" ID "=" <expr>
 
-<def-func> := "fun" ID "(" <arg-list> ")" "{" <stat-list> "}"
+<def-func> := "fun" ID "(" <id-list> ")" "{" <stat-list> "}"
 
 <print-stat> := "print" <expr>
 
-<arg-list> := ID
-            | ID "," <arg-list>
+<id-list> := ID
+           | ID "," <id-list>
 
 <cond> := <math> "<" <math>
-		| <math> ">" <math>
+        | <math> ">" <math>
         | <math> "==" <math>
 
 <expr> := <cond>
-		| <math>
+        | <math>
+        | "simplew"
+        | "distw"
+
+<right-conn> := "->" <id-list>
 
 <math> := <math> "+" <term>
         | <math> "-" <term>
@@ -181,8 +282,23 @@ A continuaci&oacute;n se definen las variables y los eventos de la simulaci&oacu
 ```
 **El `;` lo pone el *lexer***, no es necesario que el usuario lo haga. Este puede emplear `\` para definir *statements* de m&aacute;s de una l&iacute;nea.
 
-### Reglas Sem&aacute;nticas
-Una variable solo puede ser definida una vez en todo el
+N&oacute;tese que bajo esta gram&aacute;tica no se soporta el llamado a funciones en la condici&oacute;n del `if`:
+
+![if func](if-with-func.jpg)
+
+Esto el equipo lo tiene en cuenta y ser&aacute; rectificado en entregas posteriores.
+
+#### Tipos
+El lenguaje tiene 3 tipos:
+- `Number`: para todo tipo de n&uacute;meros
+- `Bool`: para valores de verdad (*true* o *false*)
+- `Server`: para los servidores
+
+Los operadores `+`, `-`, `*`, `/` solo est&aacute;n permitidos para el tipo `Number`. 
+
+En el caso del operador de conexi&oacute;n de servidores (`->`), solo est&aacute; permitido para el tipo `Server`, y el operando de la izquierda debe ser un distribuidor de carga (lo que se espera es que pueda ser de cualquier tipo de servidor; ser&aacute; rectificado en una entrega posterior).
+#### Reglas Sem&aacute;nticas
+- Una variable solo puede ser definida una vez en todo el
 programa.
 - Los nombres de variables y funciones no comparten el mismo
 ámbito (pueden existir una variable y una función llamadas
@@ -198,3 +314,94 @@ variables definidas globalmente o a argumentos definidos en
 otras funciones.
 - En el cuerpo de una función, los nombres de los argumentos
 ocultan los nombres de variables iguales.
+- En el cuerpo de un *statement* de bloque o una función, los nombres de las variables ocultan los nombres de variables en &aacute;mbitos superiores.
+
+#### Gram&aacute;tica de REGEX 
+El lenguaje de REGEX utilizado es el definido en la correspondiente conferencia de la asignatura.
+
+Para el procesamiento de expresiones regulares se emple&oacute; la siguiente gram&aacute;tica:
+```
+<regex> := <union>
+
+<union> := <union> "|" <concat>
+         | <concat>
+
+<concat> := <concat> <basic>
+          | <basic>
+
+<basic> := <atom> "*" 
+         | <atom> "+" 
+         | <atom> "?" 
+         | <atom>
+
+<atom> := <group> 
+        | CHAR 
+        | <set>
+
+<group> := "(" <regex> ")"
+
+<set> := "[" <item-list> "]"
+
+<item-list> := <item> 
+             | <item> <item-list>
+
+<item> := <range>
+        | CHAR
+
+<range> := CHAR "-" CHAR
+```
+`CHAR` es un tipo de *token* definido especialmente para esta gram&aacute;tica. Representa a un caracter del lenguaje que no es *meta*. Por ejemplo, dada la REGEX `a*\+`, el *lexer* de REGEX devuelve los siguientes *tokens*
+
+| Tipo | Lexema |
+|------|--------|
+| CHAR | a |
+| * | * |
+| CHAR | + |
+
+N&oacute;tese que como el `+` est&aacute; precedido por un `\`, entonces el *token* producido es de tipo `CHAR`, en lugar de tipo `+`.
+
+#### DSL para las Gram&aacute;ticas
+El equipo se enfrent&oacute; a la tarea de expresar estas gram&aacute;ticas en C# mediante el empleo de un DSL embebido, desarrollado por el propio equipo :muscle::sunglasses:. Se cree que fue una buena oportunidad para aplicar las ense&ntilde;anzas de las asignaturas Compilaci&oacute;n y LP. Para lograrlo, se utiliz&oacute; principalmente la sobrescritura de operadores.
+
+La gram&aacute;tica de REGEX queda expresada entonces de esta manera:
+```c#
+Regex > Union,
+
+Union > (Union | Concat),
+Union > Concat,
+
+Concat > (Concat, Basic),
+Concat > Basic,
+
+Basic > (Atom, times),
+Basic > (Atom, plus),
+Basic > (Atom, quest),
+Basic > Atom,
+
+Atom > Group,
+Atom > @char,
+Atom > Set,
+
+Group > (lpar, Regex, rpar),
+
+Set > (lbrak, ItemList, rbrak),
+
+ItemList > Item,
+ItemList > (Item, ItemList),
+
+Item > Range,
+Item > @char,
+
+Range > @char - @char
+```
+
+#### *Syntax Highlight* en el Code
+Es posible lograr *syntax highlight* de GoS en Visual Studio Code mediante la instalaci&oacute;n de la [extensi&oacute;n GoS](https://marketplace.visualstudio.com/items?itemName=TheGoSTeam.gos), desarrollada por el equipo.
+
+### Ejecutando `gos`
+Ahora el ejecutable del proyecto interpreta un archivo con c&oacute;digo en GoS y ejecuta la simulaci&oacute;n que se configura. La salida del programa es una serie de l&iacute;neas con el tiempo y cuerpo de cada respuesta a los pedidos. Si el pedido no pudo ser procesado, el cuerpo es "Servidor no disponible", mientras que si fue procesado por el servidor $w_1$, entonces el cuerpo es "Cosas de servidor simple w1".
+
+En la entrega se encuentra un archivo `distrb.gos` en la carpeta `Sources/`. Este se puede ejecutar de la siguiente manera:
+```console
+$ gos Sources/distrb.gos
+```
