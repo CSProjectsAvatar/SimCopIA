@@ -6,9 +6,6 @@ namespace ServersWithLayers
     public class Environment{
 
         public static Environment CurrentEnv {get; private set;}
-        const int RESPONSE_TIME = 2; //tiempo de demora de llegada de un response
-        const int REQUEST_TIME = 1;  //tiempo de demora de llegada de un request 
-
         Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
         public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
@@ -39,14 +36,7 @@ namespace ServersWithLayers
 
         //Suscribe un evento en el environment.
         public void SubsribeEvent(int time, Event e){
-            // Considerar luego otras clases de eventos 
-            if(e is Request) 
-                turn.Add(time + REQUEST_TIME,e);
-            else if(e is Response) 
-                turn.Add(time + RESPONSE_TIME,e);
-            else 
-                turn.Add(time,e);
-
+            turn.Add(time + e.MatureTime, e);
         }
         //Retorna un servidor con el identificador 'ID' si esta en el environment.
         public Server GetServerByID(string ID){

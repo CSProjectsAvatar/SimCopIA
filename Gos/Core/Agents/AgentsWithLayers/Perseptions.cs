@@ -46,6 +46,7 @@ namespace ServersWithLayers
         public List<Resource> Asking { get; set; }
         public Request(string sender, string receiber, RequestType type) : base(sender,receiber, type){
             this.ID = ++lastRequestID; 
+            this.MatureTime = 1;
         }
 
         // Crea un reponse a partir del request,
@@ -71,6 +72,7 @@ namespace ServersWithLayers
         public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, object> data ) : base(sender, receiber, type){
             this.RequestID = requestID;
             this.Data = data;
+            this.MatureTime = 1;
         }
 
     }

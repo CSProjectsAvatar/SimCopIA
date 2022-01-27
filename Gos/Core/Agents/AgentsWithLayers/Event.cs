@@ -3,7 +3,13 @@ using System.Collections.Generic;
 
 namespace ServersWithLayers{
     public abstract class Event{
+        public int MatureTime {get; protected set;}
+        public Event(){}
+        public Event(int matureTime){
+            this.MatureTime = matureTime;
+        }
         public abstract void ExecuteInTime();
+        
     }
 
     //evento de ejemplo, Imprime algo en la terminal 
