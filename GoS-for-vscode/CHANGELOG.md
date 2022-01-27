@@ -12,6 +12,8 @@ El formato se basa en [*Keep a Changelog*](https://keepachangelog.com/en/1.0.0/)
 - Palabras claves `and` y `or`.
 - Palabras claves `true` y `false`.
 - Palabra clave `server`.
+- Palablas claves `behav` e `init`.
+- *Highlight* para el nombre de los comportamientos.
 
 ### Removed
 - Palabras claves `distw` y `simplew`.
