@@ -167,6 +167,21 @@ for i, item in [5, 4, 3] {
             Assert.AreEqual($"5{_endl}4{_endl}", @out.ToString());
         }
 
+        [TestMethod]
+        public void ThreeForVars() {
+            var tokens = _lex.Tokenize(@"
+for i, item, poff in [5, 4, 3] {
+    if i == 3 {
+        break
+        print 0
+    }
+    print item
+}" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            Assert.IsFalse(ast.Validate(new Context()));
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();

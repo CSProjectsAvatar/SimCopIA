@@ -238,10 +238,7 @@ graph LR
 
 <init> := "init" "{" <stat-list> "}"
 
-<foreach> := "for" <foreach-vars> "in" <expr> "{" <stat-list> "}"
-
-<foreach-vars> := ID
-                | ID "," ID
+<foreach> := "for" <id-list> "in" <expr> "{" <stat-list> "}"
 
 <inf-loop> := "forever" "{" <stat-list> "}"
 

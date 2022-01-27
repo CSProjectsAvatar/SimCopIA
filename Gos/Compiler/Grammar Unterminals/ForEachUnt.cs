@@ -9,13 +9,12 @@ using System.Threading.Tasks;
 namespace Compiler.Grammar_Unterminals {
     class ForEachUnt : Unterminal {
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation) {
-            // <foreach> := "for" <foreach-vars> "in" <expr> "{" <stat-list> "}"
-            IReadOnlyList<string> vars = (derivation[1] as ForEachVarsUnt).Vars;
+            // <foreach> := "for" <id-list> "in" <expr> "{" <stat-list> "}"
+            IReadOnlyList<string> vars = (derivation[1] as IdListUnt).Ids.ToList();
 
-            return new ForEachAst {
+            return new ForEachAst(Helper.Logger<ForEachAst>()) {
                 Token = derivation[0] as Token,
-                Item = vars[^1],
-                Index = vars.Count == 2 ? vars[0] : default,
+                Variables = vars,
                 Iterable = (derivation[3] as ExpressionUnt).Ast as Expression,
                 Code = (derivation[^2] as StatListUnt).Statements
             };

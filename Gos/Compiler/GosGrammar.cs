@@ -34,7 +34,6 @@ namespace Compiler {
         private static readonly UntType ToIdx = new UntType(typeof(ToIdxUnt));
         private static readonly UntType InfLoop = new UntType(typeof(InfLoopUnt));
         private static readonly UntType ForEach = new UntType(typeof(ForEachUnt));
-        private static readonly UntType ForEachVars = new UntType(typeof(ForEachVarsUnt));
         private static readonly UntType Conjtion = new UntType(typeof(ConjtionUnt));
         private static readonly UntType Disj = new UntType(typeof(DisjUnt));
         private static readonly UntType Behav = new UntType(typeof(BehavUnt));
@@ -102,10 +101,7 @@ namespace Compiler {
 
             Init > (init, lbrace, StatList, rbrace),
 
-            ForEach > (@for, ForEachVars, @in, Expr, lbrace, StatList, rbrace),
-
-            ForEachVars > id,
-            ForEachVars > (id, comma, id),
+            ForEach > (@for, IdList, @in, Expr, lbrace, StatList, rbrace),
 
             InfLoop > (forever, lbrace, StatList, rbrace),
 
