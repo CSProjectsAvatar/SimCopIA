@@ -188,6 +188,31 @@ print foo() or a+3 == 8
             Assert.IsFalse(success);
         }
 
+        [TestMethod]
+        public void Parenthesis() {
+            var tokens = _lex.Tokenize(
+                @"
+fun foo() {
+    return 1==0
+}
+let a = 5
+print a+3 == 8 and (foo() or 1==1 or 3==4 and 5<7)
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual(
+                $"True{_endl}",
+                @out.ToString());
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();

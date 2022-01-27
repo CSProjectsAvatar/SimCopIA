@@ -275,15 +275,8 @@ graph LR
         | <math>
 
 <expr> := <disj>
-        | "new" CLASS
-        | <gos-list>
 
-<list-idx> := <to-idx> "[" <math> "]"
-
-<to-idx> := ID
-          | <func-call>
-          | <gos-list>
-          | <list-idx>
+<list-idx> := <factor> "[" <math> "]"
 
 <gos-list> := "[" <expr-list> "]"
 
@@ -299,15 +292,15 @@ graph LR
         | <factor>
 
 <factor> := <atom>
-          | "(" <math> ")"
+          | "(" <expr> ")"
 
 <atom> := NUMBER
-        | <atom-any>
         | BOOL
-
-<atom-any> := ID
-            | <func-call>
-            | <list-idx>
+        | ID
+        | <func-call>
+        | <list-idx>
+        | "new" CLASS
+        | <gos-list>
 
 <func-call> := ID "(" <expr-list> ")"
              | ID "(" ")"

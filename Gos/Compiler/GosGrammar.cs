@@ -16,7 +16,6 @@ namespace Compiler {
         private static readonly UntType Term = new UntType(typeof(TermUnt));
         private static readonly UntType Factor = new UntType(typeof(FactorUnt));
         private static readonly UntType Atom = new UntType(typeof(AtomUnt));
-        private static readonly UntType AtomAny = new UntType(typeof(AtomAnyUnt));
         private static readonly UntType FuncCall = new UntType(typeof(FunCallUnt));
         private static readonly UntType ExprList = new UntType(typeof(ExprListUnt));
         private static readonly UntType If = new UntType(typeof(IfUnt));
@@ -31,7 +30,6 @@ namespace Compiler {
         private static readonly UntType GosList = new UntType(typeof(GosListUnt));
         private static readonly UntType ListIdx = new UntType(typeof(ListIdxUnt));
         private static readonly UntType LeftVal = new UntType(typeof(LeftValUnt));
-        private static readonly UntType ToIdx = new UntType(typeof(ToIdxUnt));
         private static readonly UntType InfLoop = new UntType(typeof(InfLoopUnt));
         private static readonly UntType ForEach = new UntType(typeof(ForEachUnt));
         private static readonly UntType Conjtion = new UntType(typeof(ConjtionUnt));
@@ -139,15 +137,9 @@ namespace Compiler {
             Cond > Math,
 #pragma warning restore CS1718 // Comparison made to same variable
 
-            Expr > Disj, 
-            Expr > (@new, @class),
-            Expr > GosList,
+            Expr > Disj,
 
-            ListIdx > ToIdx[Math],
-
-            ToIdx > id,
-            ToIdx > FuncCall,
-            ToIdx > ListIdx,
+            ListIdx > Factor[Math],
 
             GosList > (lbrak, ExprList, rbrak),
 
@@ -163,15 +155,15 @@ namespace Compiler {
             Term > Factor,
 
             Factor > Atom,
-            Factor > (lpar, Math, rpar),
+            Factor > (lpar, Expr, rpar),
 
             Atom > n,
-            Atom > AtomAny,
             Atom > @bool,
-
-            AtomAny > id,
-            AtomAny > FuncCall,
-            AtomAny > ListIdx,
+            Atom > id,
+            Atom > FuncCall,
+            Atom > ListIdx,
+            Atom > (@new, @class),
+            Atom > GosList,
 
             FuncCall > (id, lpar, ExprList, rpar),
             FuncCall > (id, lpar, rpar),
