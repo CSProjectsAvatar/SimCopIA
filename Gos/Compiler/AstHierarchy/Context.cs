@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Agents;
+using Compiler.AstHierarchy.Statements;
+
 namespace DataClassHierarchy
 {
     public class Context
@@ -12,21 +14,32 @@ namespace DataClassHierarchy
         
         Dictionary<string, object> _variables;
         Dictionary<(string, int), DefFun> _functions; // (nombre, aridad) 
+        private readonly Dictionary<string, BehaviorAst> _behavs;
 
         /// <summary>
         /// Whether a function declaration has been started in the validation process but it' hasn't been closed yet.
         /// </summary>
         internal bool OpenFunction { get; set; }
 
+        internal bool DefBehav(string name, BehaviorAst node) {
+            if (_behavs.ContainsKey(name)) {
+                return false;
+            }
+            _behavs[name] = node;
+
+            return true;
+        }
+
         /// <summary>
         /// Whether a loop declaration has been started in the validation process but it' hasn't been closed yet.
         /// </summary>
         internal bool OpenLoop { get; set; }
+        internal bool OpenBehavior { get; set; }
 
         public Context(){
             _variables = new Dictionary<string, object>();
             _functions = new Dictionary<(string, int), DefFun>();
-
+            _behavs = new();
         }
 
         public bool DefVariable(string name, object value = null)

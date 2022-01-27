@@ -15,21 +15,29 @@ namespace DataClassHierarchy {
             if (Expr != null && !Expr.Validate(context)) {
                 return false;
             }
-            bool insideFun = false;
+            bool inside = false;
+            bool inBehav = false;
 
             for (var ctx = context; ctx != null; ctx = ctx.parent) {
-                if (ctx.OpenFunction) {
-                    insideFun = true;
+                if (ctx.OpenFunction || ctx.OpenBehavior) {
+                    inside = true;
+                    inBehav = ctx.OpenBehavior;
                     break;
                 }
             }
-            if (!insideFun) {
+            if (!inside) {
                 _log?.LogError(
-                    "Line {l}, column {c}: return statement must be inside a function.",
+                    "Line {l}, column {c}: return statement must be inside a function or behavior.",
                     Token.Line,
                     Token.Column);
+            } else if (inBehav && Expr != null) {
+                _log?.LogError(
+                    "Line {l}, column {c}: no expression can be returned in a behavior.",
+                    Token.Line,
+                    Token.Column);
+                return false;
             }
-            return insideFun;
+            return inside;
         }
     }
 }

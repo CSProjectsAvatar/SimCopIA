@@ -26,6 +26,8 @@ namespace Compiler {
             ("in", Token.TypeEnum.In),
             ("and", Token.TypeEnum.And),
             ("or", Token.TypeEnum.Or),
+            ("behav", Token.TypeEnum.Behavior),
+            ("init", Token.TypeEnum.InitBehav),
 
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("_?[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
@@ -49,6 +51,8 @@ namespace Compiler {
             (@"\[", Token.TypeEnum.LBracket),
             (@"\]", Token.TypeEnum.RBracket)
         };
+
+        internal const string LogPref = "Line {l}, column {c}: ";
 
         /// <summary>
         /// Convierte un símbolo a una representación en <see cref="string"/>.

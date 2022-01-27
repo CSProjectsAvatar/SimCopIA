@@ -12,11 +12,15 @@ namespace Compiler {
             //               | <def-func>
             //               | <inf-loop>
             //               | <foreach>
+            //               | <behav>
+            //               | <init>
             return derivation[0] switch{
                 IfUnt ifUnt => ifUnt.Ast,
                 DefFunUnt defFuncUnt => defFuncUnt.Ast,
                 InfLoopUnt u => u.Ast,
                 ForEachUnt u => u.Ast,
+                BehavUnt u => u.Ast,
+                InitUnt u => u.Ast,
                 _ => throw new System.Exception("BlockStUnt.SetAst: grammar symbol no esperado")
             };
         

@@ -231,6 +231,12 @@ graph LR
               | <def-func>
               | <inf-loop>
               | <foreach>
+              | <behav>
+              | <init>
+
+<behav> := "behav" ID "{" <stat-list> "}"
+
+<init> := "init" "{" <stat-list> "}"
 
 <foreach> := "for" <foreach-vars> "in" <expr> "{" <stat-list> "}"
 
@@ -370,6 +376,10 @@ otras funciones.
 ocultan los nombres de variables iguales.
 - En el cuerpo de un *statement* de bloque o una función, los nombres de las variables definidas ocultan los 
 nombres de variables en &aacute;mbitos superiores.
+- El bloque `init`, de existir, debe ser el primer *statement* de un bloque `behav`.
+- Todos los *statements* de un bloque `init` son de la forma `ID "=" <expr>`.
+- El *statement* `return` no puede tener expresi&oacute;n asociada cuando se encuentra dentro
+de un bloque de comportamiento.
 
 
 #### Gram&aacute;tica de REGEX 

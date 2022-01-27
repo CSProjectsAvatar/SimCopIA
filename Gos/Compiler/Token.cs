@@ -213,6 +213,17 @@ namespace Compiler {
         }
 
         public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
+
+            /// <summary>
+            /// Definicio'n de comportamiento.
+            /// </summary>
+            Behavior,
+
+            /// <summary>
+            /// Bloque de inicializacio'n de un comportamiento.
+            /// </summary>
+            InitBehav,
+
             /// <summary>
             /// Representa a un tipo relacionado con la simulación. No es la palabra clave "class".
             /// </summary>

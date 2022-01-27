@@ -409,7 +409,12 @@ namespace DataClassHierarchy
             Context.SetFunc(node.Identifier, node.Arguments.Count, node);
             return (true, null);  
         }
-    
+
+        public (bool, object) Visiting(BehaviorAst node) {
+            Context.DefBehav(node.Name, node);
+            return (true, null);
+        }
+
         public (bool, object) Visiting(Variable node){
             var result = Context.GetVar(node.Identifier);
             if(result is null){
