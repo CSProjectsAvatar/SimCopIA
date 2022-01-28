@@ -12,14 +12,19 @@ namespace Compiler {
         public static ILoggerFactory LogFact;  // @remind ASIGNAR ESTO
         internal static IEnumerable<(string Regex, Token.TypeEnum Token)> TokenWithRegexs = new[] {
             ("print", Token.TypeEnum.Print),
-            ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("if", Token.TypeEnum.If),
+            ("let", Token.TypeEnum.Let),
+            ("fun", Token.TypeEnum.Fun),
+            ("return", Token.TypeEnum.Return),
+            ("simplew", Token.TypeEnum.SimpleWorker),
+            ("distw", Token.TypeEnum.DistWorker),
+            ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("{", Token.TypeEnum.LBrace),
             ("}", Token.TypeEnum.RBrace),
             ("_?[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
             ("<", Token.TypeEnum.LowerThan),
+            (">", Token.TypeEnum.GreaterThan),
             (@"\+", Token.TypeEnum.Plus),
-            ("let", Token.TypeEnum.Let),
             ("=", Token.TypeEnum.Eq),
             ("==", Token.TypeEnum.EqEq),
             (@"\-", Token.TypeEnum.Minus),
@@ -27,11 +32,8 @@ namespace Compiler {
             (@"\(", Token.TypeEnum.LPar),
             (@"\)", Token.TypeEnum.RPar),
             (@"\*", Token.TypeEnum.Times),
-            ("fun", Token.TypeEnum.Fun),
-            ("return", Token.TypeEnum.Return),
-            ("simplew", Token.TypeEnum.SimpleWorker),
-            ("distw", Token.TypeEnum.DistWorker),
-            (@"\->", Token.TypeEnum.RightArrow)
+            (@"\->", Token.TypeEnum.RightArrow),
+            (",", Token.TypeEnum.Comma)
         };
 
         /// <summary>

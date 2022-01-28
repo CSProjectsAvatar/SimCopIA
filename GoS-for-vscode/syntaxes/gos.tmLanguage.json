@@ -22,10 +22,10 @@
 					"match": "\\b(if|return)\\b"
 				}, {
 					"name": "keyword.other.gos",
-					"match": "\\b(fun|let|print)\\b"
+					"match": "\\b(fun|let|print|simplew|distw)\\b"
 				}, {
 					"name": "keyword.operator.gos",
-					"match": ">|<|\\=|==|\\+|\\-|\\*|\\/"
+					"match": ">|<|\\=|==|\\+|\\->|\\-|\\*|\\/"
 				}]
 		},
 		"strings": {
