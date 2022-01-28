@@ -5,7 +5,7 @@ namespace ServersWithLayers{
     public class Directory{
 
         //  Resources -> ServersId
-        Dictionary<string, List<string>> YellowPages;
+        public Dictionary<string, List<string>> YellowPages;
 
         //  serverId -> ServerBIo
         Dictionary<string, ServerBio> WhitePages;

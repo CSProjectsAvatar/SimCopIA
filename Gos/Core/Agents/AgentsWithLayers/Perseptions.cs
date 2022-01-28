@@ -5,7 +5,7 @@ namespace ServersWithLayers
     // Cualquier evento que le toque ejecutarse en algun punto de la simulacion.
     public abstract class Perception{
         string receiber;
-        protected Environment env;
+        internal Environment env;
 
         public Perception( Environment env){
             this.env = env;
@@ -44,9 +44,11 @@ namespace ServersWithLayers
         
         static int lastRequestID = 0; 
         public int ID {get;}
+        public string URL;
         public List<Resource> Asking { get; set; }
-        public Request(string sender, string receiver, RequestType type, Environment env, string URL="/") : base(sender,receiber, type, env){
-            this.ID = ++lastRequestID; 
+        public Request(string sender, string receiver, RequestType type, Environment env, string URL="/") : base(sender,receiver, type, env){
+            this.ID = ++lastRequestID;
+            this.URL = URL;
         }
 
         // Crea un reponse a partir del request,
@@ -73,6 +75,7 @@ namespace ServersWithLayers
         public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, object> data, Environment env) : base(sender, receiber, type, env){
             this.RequestID = requestID;
             this.Data = data;
+            
         }
 
     }
