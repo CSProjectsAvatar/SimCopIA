@@ -13,7 +13,7 @@ namespace Core {
             services.BuildServiceProvider();
 
         public IConfiguration Configuration;
-        protected ILoggerFactory LoggerFact;
+        protected static ILoggerFactory LoggerFact;
 
         [TestCleanup]
         public void BaseCleanUp() {

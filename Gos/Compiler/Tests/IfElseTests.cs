@@ -12,26 +12,7 @@ using System.Threading.Tasks;
 
 namespace Compiler.Tests {
     [TestClass]
-    public class IfElseTests : BaseTest {
-        private Lexer.Lexer _lex;
-        private Lr1 _parser;
-        private string _dslSuf;
-
-        [TestInitialize]
-        public void Init() {
-            var logReLex = LoggerFact.CreateLogger<ReLexer>();
-            var logLr1 = LoggerFact.CreateLogger<Lr1>();
-            var logLr1Dfa = LoggerFact.CreateLogger<Lr1Dfa>();
-            var logLex = LoggerFact.CreateLogger<Lexer.Lexer>();
-
-            Helper.LogFact = LoggerFact;
-
-            _lex = new Lexer.Lexer(Helper.TokenWithRegexs, new ReGrammar(), logReLex, logLr1, logLr1Dfa, logLex);
-            _parser = new Lr1(new GosGrammar(), logLr1, logLr1Dfa);
-            _dslSuf = @"
-                ";
-        }
-
+    public class IfElseTests : LangTest {
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();

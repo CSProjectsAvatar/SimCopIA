@@ -10,16 +10,13 @@ using DataClassHierarchy;
 namespace Compiler {
     [TestClass]
     public class Lr1Tests : CompilerTests {
-        private ILogger<Lr1> _log;
-        private ILogger<Lr1Dfa> _dfaLog;
-        private ILogger<EvalVisitor> _logEval;
+        private static ILogger<Lr1> _log = LoggerFact.CreateLogger<Lr1>();
+        private static ILogger<Lr1Dfa> _dfaLog = LoggerFact.CreateLogger<Lr1Dfa>();
+        private static ILogger<EvalVisitor> _logEval = LoggerFact.CreateLogger<EvalVisitor>();
 
-        [TestInitialize]
-        public void Init() {
-            _log = LoggerFact.CreateLogger<Lr1>();
-            _dfaLog = LoggerFact.CreateLogger<Lr1Dfa>();
-            _logEval = LoggerFact.CreateLogger<EvalVisitor>();
-            Helper.LogFact = LoggerFact;
+        [TestCleanup]
+        public void Clean() {
+            _parser.Dispose();
         }
 
         [TestMethod]
@@ -30,8 +27,8 @@ namespace Compiler {
                         E > n,
                         F > n + F,
                         F > n),
-                    this._log,
-                    this._dfaLog)) {
+                    _log,
+                    _dfaLog)) {
 
                 var stack = new Stack<(GramSymbol Symbol, uint State)>(new (GramSymbol Symbol, uint State)[] {
                     (Token.Number, 0),
@@ -74,8 +71,8 @@ namespace Compiler {
                     F > F + T,
                     F > T,
                     T > n),
-                    this._log,
-                    this._dfaLog)) {
+                    _log,
+                    _dfaLog)) {
                 Assert.IsTrue(parser.TryParse(
                     new Token[] {
                         Token.Number, Token.Plus, Token.Number,
@@ -87,8 +84,7 @@ namespace Compiler {
 
         [TestMethod]
         public void UnnasignedExpression() {
-            using var parser = new Lr1(Grammar, _log, _dfaLog);
-            Assert.IsFalse(parser.TryParse(
+            Assert.IsFalse(_parser.TryParse(
                 new[] {
                     Token.IdFor("a"), Token.Plus, Token.IdFor("b"), Token.Endl,  // a+b;
                     Token.Eof
@@ -98,8 +94,7 @@ namespace Compiler {
 
         [TestMethod]
         public void NonRightOperandInSum() {
-            using var parser = new Lr1(Grammar, _log, _dfaLog);
-            Assert.IsFalse(parser.TryParse(
+            Assert.IsFalse(_parser.TryParse(
                 new[] {
                     Token.Let, Token.IdFor("a"), Token.Eq, Token.IdFor("b"), Token.Plus, Token.Endl,  // let a = b + ;
                     Token.Eof
@@ -109,8 +104,7 @@ namespace Compiler {
 
         [TestMethod]
         public void BraceInNewLine() {
-            using var parser = new Lr1(Grammar, _log, _dfaLog);
-            Assert.IsFalse(parser.TryParse(
+            Assert.IsFalse(_parser.TryParse(
                 new[] {
                     Token.Fun, Token.IdFor("f"), Token.LPar, Token.IdFor("param"), Token.RPar, Token.Endl,  // fun f(param);
                     Token.LBrace,                                                                           // {
@@ -121,8 +115,7 @@ namespace Compiler {
 
         [TestMethod]
         public void NoClosingBrace() {
-            using var parser = new Lr1(Grammar, _log, _dfaLog);
-            Assert.IsFalse(parser.TryParse(
+            Assert.IsFalse(_parser.TryParse(
                 new[] {
                     Token.Fun, Token.IdFor("f"), Token.LPar, Token.IdFor("param"), Token.RPar, Token.LBrace,  // fun f(param) {
                     Token.Return, Token.NumberFor(5), Token.Endl,                                             //    return 5;
@@ -133,10 +126,9 @@ namespace Compiler {
 
         [TestMethod]
         public void DivBy0() {
-            using var parser = new Lr1(Grammar, _log, _dfaLog);
             var ctx = new Context();
 
-            Assert.IsTrue(parser.TryParse(
+            Assert.IsTrue(_parser.TryParse(
                 new[] {
                     Token.Let, Token.IdFor("x"), Token.Eq, Token.NumberFor(5), Token.Div, Token.NumberFor(0), Token.Endl,  // let x = 5 / 0;
                     Token.Eof
@@ -150,10 +142,9 @@ namespace Compiler {
 
         [TestMethod]
         public void FunctionAlreadyDefined() {
-            using var parser = new Lr1(Grammar, _log, _dfaLog);
             var ctx = new Context();
 
-            Assert.IsTrue(parser.TryParse(
+            Assert.IsTrue(_parser.TryParse(
                 new[] {
                     Token.Fun, Token.IdFor("f"), Token.LPar, Token.IdFor("n"), Token.RPar, Token.LBrace,  // fun f(n) {
                         Token.Return, Token.IdFor("n"), Token.Endl,                                       //    return n;
@@ -170,10 +161,9 @@ namespace Compiler {
 
         [TestMethod]
         public void InvalidOperation() {
-            using var parser = new Lr1(Grammar, _log, _dfaLog);
             var ctx = new Context();
 
-            Assert.IsTrue(parser.TryParse(
+            Assert.IsTrue(_parser.TryParse(
                 new[] {
                     Token.Let, Token.IdFor("b"), Token.Eq, Token.NumberFor(5), Token.Lt, Token.NumberFor(8), Token.Endl,  // let b = 5 < 8;
                     Token.Let, Token.IdFor("c"), Token.Eq, Token.NumberFor(5), Token.Plus, Token.IdFor("b"), Token.Endl,
@@ -195,8 +185,8 @@ namespace Compiler {
                         T > e,
                         F > n
                     ),
-                    this._log,
-                    this._dfaLog)) {
+                    _log,
+                    _dfaLog)) {
                 Assert.IsTrue(parser.TryParse(
                     new Token[] {
                         Token.Number, Token.Plus, Token.Number,
