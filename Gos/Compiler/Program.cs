@@ -18,20 +18,50 @@ namespace Compiler {
                     .AddFilter("Compiler", LogLevel.Information)
                     .AddConsole();
             });
-            Helper.LogFact = loggerFactory;
-
-            ILogger<ReLexer> logReLex = loggerFactory.CreateLogger<ReLexer>();
-            ILogger<Lr1> logLr1 = loggerFactory.CreateLogger<Lr1>();
             ILogger<Lr1Dfa> logLr1Dfa = loggerFactory.CreateLogger<Lr1Dfa>();
-            ILogger<Lexer.Lexer> logLex = loggerFactory.CreateLogger<Lexer.Lexer>();
-            var lex = new Lexer.Lexer(Helper.TokenWithRegexs, new ReGrammar(), logReLex, logLr1, logLr1Dfa, logLex);
-            var tokens = lex.Tokenize(File.ReadAllText(args[0]));
-            var parser = new Lr1(new GosGrammar(), logLr1, logLr1Dfa);
 
-            if (parser.TryParse(tokens, out var ast)) {
-                if (ast.Validate(new Context())) {
-                    var vis = new EvalVisitor(new Context(), loggerFactory.CreateLogger<EvalVisitor>(), Console.Out);
-                    vis.Visit(ast);
+            if (args.Length == 0) {
+                Console.WriteLine(@"
+Usage:
+
+To build the parser DFA:
+gos init
+
+To run a gos file:
+gos run FILE");
+            } else {
+                switch (args[0]) {
+                    case "init":
+                        var dfa = new Lr1Dfa(new GosGrammar(), logLr1Dfa);
+                        dfa.SaveToFile("./lr1-dfa.json");
+                        break;
+                    case "run" when args.Length > 1:
+                        Helper.LogFact = loggerFactory;
+
+                        ILogger<ReLexer> logReLex = loggerFactory.CreateLogger<ReLexer>();
+                        ILogger<Lr1> logLr1 = loggerFactory.CreateLogger<Lr1>();
+                        ILogger<Lexer.Lexer> logLex = loggerFactory.CreateLogger<Lexer.Lexer>();
+                        var lex = new Lexer.Lexer(Helper.TokenWithRegexs, new ReGrammar(), logReLex, logLr1, logLr1Dfa, logLex);
+                        var tokens = lex.Tokenize(File.ReadAllText(args[1]));
+                        var parser = new Lr1(new GosGrammar(), "./lr1-dfa.json", logLr1, logLr1Dfa);
+
+                        if (parser.TryParse(tokens, out var ast)) {
+                            if (ast.Validate(new Context())) {
+                                var vis = new EvalVisitor(new Context(), loggerFactory.CreateLogger<EvalVisitor>(), Console.Out);
+                                vis.Visit(ast);
+                            }
+                        }
+                        break;
+                    default:
+                        Console.WriteLine(@"
+Usage:
+
+To build the parser DFA:
+gos init
+
+To run a gos file:
+gos run FILE");
+                        break;
                 }
             }
         }

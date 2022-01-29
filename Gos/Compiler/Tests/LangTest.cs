@@ -16,7 +16,7 @@ namespace Compiler.Tests {
         private static ILogger<Lr1Dfa> logLr1Dfa = LoggerFact.CreateLogger<Lr1Dfa>();
         private static ILogger<Lexer.Lexer> logLex = LoggerFact.CreateLogger<Lexer.Lexer>();
         protected static Lexer.Lexer _lex = new Lexer.Lexer(Helper.TokenWithRegexs, new ReGrammar(), logReLex, logLr1, logLr1Dfa, logLex);
-        protected static Lr1 _parser = new Lr1(new GosGrammar(), logLr1, logLr1Dfa);
+        protected static Lr1 _parser = new Lr1(new GosGrammar(), "./lr1-dfa.json", logLr1, logLr1Dfa);
         protected string _dslSuf;
         protected string _endl;
 

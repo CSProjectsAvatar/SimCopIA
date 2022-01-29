@@ -12,13 +12,19 @@ namespace Compiler {
     /// </summary>
     public class Lr1 : IDisposable {
         private readonly Lr1Dfa _dfa;
-        private readonly Grammar gram;
+        private readonly Grammar _gram;
         private readonly ILogger<Lr1> _log;
 
         public Lr1(Grammar grammar, ILogger<Lr1> logger, ILogger<Lr1Dfa> dfaLogger) {
-            this._dfa = new Lr1Dfa(grammar, dfaLogger);
-            this.gram = grammar;
-            this._log = logger;
+            _dfa = new Lr1Dfa(grammar, dfaLogger);
+            _gram = grammar;
+            _log = logger;
+        }
+
+        public Lr1(Grammar grammar, string dfaFile, ILogger<Lr1> logLr1, ILogger<Lr1Dfa> logLr1Dfa) {
+            _dfa = new Lr1Dfa(grammar, dfaFile, logLr1Dfa);
+            _log = logLr1;
+            _gram = grammar;
         }
 
         /// <summary>
@@ -92,7 +98,7 @@ namespace Compiler {
                     $"One of these expected:{Environment.NewLine}{{token}}",
                     string.Join(
                         Environment.NewLine, 
-                        from k in _dfa.action.Keys
+                        from k in _dfa._action.Keys
                             where k.Item1 == state
                             select Token.GetDefaultLexeme(k.Item2)));
 
@@ -121,7 +127,7 @@ namespace Compiler {
         /// <param name="history"></param>
         /// <returns></returns>
         internal bool TryReduce(uint productionId, Stack<(GramSymbol Symbol, uint State)> history, out uint newState) {
-            var prod = this.gram.Productions.First(p => p.Id == productionId);
+            var prod = this._gram.Productions.First(p => p.Id == productionId);
             IReadOnlyList<GramSymbol> derivants = PopDerivants(history, prod.Derivation.Count, out var topState);
             Unterminal unterminal = Unterminal.FromReduction(prod.Unterminal, derivants);
 
@@ -162,7 +168,7 @@ namespace Compiler {
         }
 
         public void Dispose() {
-            gram.Dispose();
+            _gram.Dispose();
         }
     }
 }
