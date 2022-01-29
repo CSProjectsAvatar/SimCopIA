@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace ServersWithLayers{
     public class Resource {
-        private static Dictionary<string, Resource> resources = new();
+        internal static Dictionary<string, Resource> Resources = new();
         public string Name {get => _name; 
             set {
-                if (resources.ContainsKey(Name))
+                if (Resources.ContainsKey(Name))
                     throw new Exception("Resource already exists");
-                resources.Add(Name, this);
+                Resources.Add(Name, this);
                 _name = value;
             }
         }
@@ -21,7 +21,7 @@ namespace ServersWithLayers{
         }
 
         public void AddReq(string resource, int quantity=1){
-            if(!resources.ContainsKey(resource))
+            if(!Resources.ContainsKey(resource))
                 throw new Exception("Resource doesn't exists");
                 
             this.Requirements.Add((quantity,resource));

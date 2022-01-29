@@ -48,12 +48,6 @@ namespace ServersWithLayers
             var copy = copyLayer.Clone();
             copy.server = server;
         }
-
-        public void SetServer(Server serv)
-        {
-            this.server = serv;
-            // @todo ver si poner un Clone() cuando se asigna el servidor.
-        }
     }
 
 }

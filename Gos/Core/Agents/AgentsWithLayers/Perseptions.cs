@@ -3,18 +3,17 @@ using System.Collections.Generic;
 namespace ServersWithLayers
 {
     // Cualquier evento que le toque ejecutarse en algun punto de la simulacion.
-    public abstract class Perception{
+    public abstract class Perception : Event{
         string receiber;
-        internal Environment env;
 
-        public Perception( Environment env){
-            this.env = env;
+        internal Environment env;
+        public Perception() : base(){
         }
 
         // Se ejecuta al salir de la cola de prioridad en el Environment en su tiempo correspondiente.
         // Le hace conocer al servidor que tiene que manejar su llegada.
-        public void ExecuteInTime(){
-            var receiber=env.GetServerByID(this.receiber);
+        public override void ExecuteInTime(){
+            var receiber=Environment.CurrentEnv.GetServerByID(this.receiber);
             if(receiber != null)
                 receiber.HandlePerception(this);
             else{
@@ -31,7 +30,7 @@ namespace ServersWithLayers
         public string Sender {get;} 
         public string Receiber {get;}
         public RequestType Type {get;}
-        public Message(string sender, string receiber, RequestType type, Environment env): base(env){
+        public Message(string sender, string receiber, RequestType type): base(){
             this.Sender = sender;
             this.Receiber = receiber;
         }
@@ -44,11 +43,11 @@ namespace ServersWithLayers
         
         static int lastRequestID = 0; 
         public int ID {get;}
-        public string URL;
+
         public List<Resource> Asking { get; set; }
-        public Request(string sender, string receiver, RequestType type, Environment env, string URL="/") : base(sender,receiver, type, env){
-            this.ID = ++lastRequestID;
-            this.URL = URL;
+        public Request(string sender, string receiber, RequestType type) : base(sender,receiber, type){
+            this.ID = ++lastRequestID; 
+            this.MatureTime = 1;
         }
 
         // Crea un reponse a partir del request,
@@ -60,11 +59,9 @@ namespace ServersWithLayers
                 this.Receiber,
                 this.Sender,
                 this.Type,
-                data,
-                this.env
+                data
             );
         }
- 
     }
     //Un Response con informacion como:
     //  - ID del request asociado.
@@ -72,12 +69,11 @@ namespace ServersWithLayers
     public class Response : Message{
         public int RequestID {get;}
         public Dictionary<string,object> Data {get;}
-        public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, object> data, Environment env) : base(sender, receiber, type, env){
+        public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, object> data ) : base(sender, receiber, type){
             this.RequestID = requestID;
             this.Data = data;
-            
+            this.MatureTime = 1;
         }
-
     }
 
     // Un Observer esta encargado de informarle a un servidor que debe manejar un su estado interno, 
@@ -86,7 +82,7 @@ namespace ServersWithLayers
     public class Observer:Perception{
         public string Sender;
         public object Objetive {get;}
-        public Observer( string sender, object obj, Environment env) : base(env){
+        public Observer( string sender, object obj) : base(){
             this.Sender = sender;
             this.Objetive=  obj; 
         }
@@ -97,7 +93,6 @@ namespace ServersWithLayers
         AskSomething,
         DoSomething,
         Ping
-
     }
     
 }
