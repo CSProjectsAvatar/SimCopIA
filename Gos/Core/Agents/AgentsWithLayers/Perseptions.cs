@@ -40,7 +40,6 @@ namespace ServersWithLayers
     //  -ID
     //  -URL asociada.
     public class Request:Message{
-        
         static int lastRequestID = 0; 
         public int ID {get;}
 
@@ -81,10 +80,9 @@ namespace ServersWithLayers
     // contiene el objeto Objective, que es un objeto que identifica lo que va a suceder dentro del server que suscribio el Observer. 
     public class Observer:Perception{
         public string Sender;
-        public object Objetive {get;}
-        public Observer( string sender, object obj) : base(){
+        // public object Objetive {get;}
+        public Observer( string sender) : base(){
             this.Sender = sender;
-            this.Objetive=  obj; 
         }
     }
 

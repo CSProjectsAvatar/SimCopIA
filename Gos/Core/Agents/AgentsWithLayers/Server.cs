@@ -6,11 +6,9 @@ namespace ServersWithLayers
         public string ID {get;}
         public Status Stats {get;}
         private List<Layer> _layers; 
-        public Server(Env env, string ID){
-            
+        public Server(string ID){
             this.ID = ID;
-
-            this.Stats = new();
+            this.Stats = new(ID);
             
             this._layers = new();
         }
@@ -24,7 +22,6 @@ namespace ServersWithLayers
                 Env.CurrentEnv.SubsribeEvent(e.Item1,e.Item2);
         }
 
-        
         public void SetLayers(IEnumerable<Layer> layers){
             _layers = new List<Layer>();
             AddLayers(layers);
