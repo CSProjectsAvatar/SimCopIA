@@ -6,7 +6,7 @@ namespace ServersWithLayers
         public string ID {get;}
         public Status Stats {get;}
         private List<Layer> _layers; 
-        public Server(Environment env, string ID){
+        public Server(Env env, string ID){
             
             this.ID = ID;
 
@@ -21,7 +21,7 @@ namespace ServersWithLayers
                 l.Process(p);
                         
             foreach(var e in this.Stats.EnumerateAndClear())
-                Environment.CurrentEnv.SubsribeEvent(e.Item1,e.Item2);
+                Env.CurrentEnv.SubsribeEvent(e.Item1,e.Item2);
         }
 
         

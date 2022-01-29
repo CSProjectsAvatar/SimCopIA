@@ -3,16 +3,17 @@ using System.Collections.Generic;
 
 namespace ServersWithLayers
 {
-    public class Environment{
+    public class Env {
 
-        public static Environment CurrentEnv {get; private set;}
+        public static Env CurrentEnv {get; private set;}
+        public static int Time => CurrentEnv.currentTime;
         Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
         public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
 
         public bool debug{get;set;}
-        public Environment(bool debug=false){
-            Environment.CurrentEnv = this;
+        public Env(bool debug=false){
+            Env.CurrentEnv = this;
             this.debug = debug;
             currentTime = 0;
             this.servers = new();

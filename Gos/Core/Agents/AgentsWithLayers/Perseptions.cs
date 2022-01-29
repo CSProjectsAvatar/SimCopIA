@@ -12,7 +12,7 @@ namespace ServersWithLayers
         // Se ejecuta al salir de la cola de prioridad en el Environment en su tiempo correspondiente.
         // Le hace conocer al servidor que tiene que manejar su llegada.
         public override void ExecuteInTime(){
-            var receiber=Environment.CurrentEnv.GetServerByID(this.receiber);
+            var receiber=Env.CurrentEnv.GetServerByID(this.receiber);
             if(receiber != null)
                 receiber.HandlePerception(this);
             else{

@@ -6,15 +6,20 @@ namespace ServersWithLayers
 
     public static class BehaviorsLib
     {
-        private static string inProcessStr = "inProcess";
+        public Behavior Worker;
+
+        
+        private static string inProcess_Worker = "inProcess";
        
 
        private static void WorkerBehavInit(Dictionary<string, object> vars){
-           vars[inProcessStr] = new Utils.Heap<Request>();
+           vars[inProcess_Worker] = new Utils.Heap<Request>();
        }
+
        private void WorkerBehav(Status status, Perception perce, Dictionary<string, object> vars){
-            var heap = vars[inProcessStr] as Utils.Heap<Request>;
-            (int, Request) closest = heap.First; 
+            var heap = vars[inProcess_Worker] as Utils.Heap<Request>;
+            while(heap.First.item1 <= )
+            (int, Request) closest = heap.First;
             
             if(closest.Item1 <= Environment.CurrentEnvironment.time){ // ended < actual_time
                 var req = heap.RemoveMin().Item2; // Request completed

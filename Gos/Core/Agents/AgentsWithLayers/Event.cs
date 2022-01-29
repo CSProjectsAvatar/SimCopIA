@@ -17,7 +17,7 @@ namespace ServersWithLayers{
         public string ToWrite{get;set;}
         public override void ExecuteInTime()
         {
-            Console.WriteLine($" ({Environment.CurrentEnv.currentTime}) WriteEvent: {ToWrite}"); 
+            Console.WriteLine($" ({Env.CurrentEnv.currentTime}) WriteEvent: {ToWrite}"); 
         }
     }
 }
