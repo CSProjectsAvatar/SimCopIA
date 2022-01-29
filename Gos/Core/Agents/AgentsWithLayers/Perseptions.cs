@@ -6,6 +6,7 @@ namespace ServersWithLayers
     public abstract class Perception : Event{
         string receiber;
 
+        internal Environment env;
         public Perception() : base(){
         }
 
@@ -61,7 +62,6 @@ namespace ServersWithLayers
                 data
             );
         }
- 
     }
     //Un Response con informacion como:
     //  - ID del request asociado.
@@ -74,7 +74,6 @@ namespace ServersWithLayers
             this.Data = data;
             this.MatureTime = 1;
         }
-
     }
 
     // Un Observer esta encargado de informarle a un servidor que debe manejar un su estado interno, 
@@ -94,7 +93,6 @@ namespace ServersWithLayers
         AskSomething,
         DoSomething,
         Ping
-
     }
     
 }

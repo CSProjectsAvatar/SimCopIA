@@ -28,5 +28,46 @@ namespace ServersWithLayers
 
             }
        }
+
+        private static void ArrivesRequest(Status status, Perception r)
+        {
+            Dictionary<Resource, object> data = new Dictionary<Resource, object> { };
+            if (r is not Request)
+                return;
+            Request req = r as Request;
+            if (req.Type == RequestType.AskSomething)
+            {
+                bool acepted = true; //Aceptation(); // esto es si el worker lo puede o lo quiere acaptar por ahora pongamoslo en true
+                if (acepted)
+                {
+                    foreach (var item in req.Asking)
+                    {
+                        if (status.availableResources.Contains(item))
+                        {
+                            data[item] = true;
+                            continue;
+                        }
+                        data[item] = false;
+                    }
+                    var response = req.MakeResponse(data);//aqui da error pq es dic es de resorce,object y no de string
+                    status.Subscribe(response);
+                }
+            }
+            else if (req.Type == RequestType.DoSomething)
+            {
+                status.acepted_requests.Add(req);
+            }
+            else
+            {
+                var response = req.MakeResponse(data);//aqui da error pq es dic es de resorce,object y no de string
+                status.Subscribe(response);
+            }
+
+        }
+
+        private  static bool Aceptation(string item)
+        {
+            throw new NotImplementedException();
+        }
     }
 } 

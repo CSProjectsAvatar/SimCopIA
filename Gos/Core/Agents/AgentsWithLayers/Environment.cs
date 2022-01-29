@@ -10,6 +10,7 @@ namespace ServersWithLayers
         Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
         public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
+        private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
 
         public bool debug{get;set;}
         public Env(bool debug=false){
@@ -20,7 +21,6 @@ namespace ServersWithLayers
             turn = new();
             solutionResponses = new();
         }
-        private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
         public IEnumerable<Action> EnumerateActions(){
             while (turn.Count != 0){
                 (int time, Event exe ) = this.turn.RemoveMin();
