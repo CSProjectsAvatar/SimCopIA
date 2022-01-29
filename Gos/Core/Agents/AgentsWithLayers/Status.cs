@@ -5,7 +5,8 @@ namespace ServersWithLayers{
     public class Status{
         List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
-        List<Resource> _resources;
+        internal List<Resource> availableResources;
+        internal List<Request> aceptedRequests;
         public Status(){
             _sendToEnv = new();
             _variables = new();
