@@ -42,11 +42,12 @@ namespace ServersWithLayers
             return copy;
         }
 
-        public void CloneInServer(Server server)
+        public Layer CloneInServer(Server server)
         {
             var copyLayer = this;
             var copy = copyLayer.Clone();
             copy.server = server;
+            return copy;
         }
     }
 
