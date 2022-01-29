@@ -470,6 +470,260 @@ a[2][1] = 12" + _dslSuf);
             Assert.IsFalse(success);
         }
 
+        [TestMethod]
+        public void Length() {
+            var tokens = _lex.Tokenize(
+                @"
+print [1, 2, 3].length" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"3{_endl}", @out.ToString());
+        }
+
+        [TestMethod]
+        public void InvalidProperty() {
+            var tokens = _lex.Tokenize(
+                @"
+print [1, 2, 3].count" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void LengthSet() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = [1, 2, 3]
+l.length = 3" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void AddItem() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = [1, 2, 3]
+l.add(7)
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"[1, 2, 3, 7]{_endl}", @out.ToString());
+        }
+
+        [TestMethod]
+        public void DelAt() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = [4, 3, 10]
+l.del_at(2)
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"[4, 10]{_endl}", @out.ToString());
+        }
+
+        [TestMethod]
+        public void AddOnNonList() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = 13
+l.add(2)
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void NoExistingMethod() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = [1, 2]
+l.call(2, 7)
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void TooManyArgsOnAdd() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = [1, 2]
+l.add(2, 7)
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void TooManyArgsOnDelAt() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = [1, 2]
+l.del_at(2, 7)
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void DelAtOnNonList() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = 5
+l.del_at(2)
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void NotIndexOnDelAt() {
+            var tokens = _lex.Tokenize(
+                @"
+fun f() {
+    return true
+}
+let l = [1, 2]
+l.del_at(f())
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void TypeMismatchOnAdd() {
+            var tokens = _lex.Tokenize(
+                @"
+fun f() {
+    return true
+}
+let l = [1, 2]
+l.add(f())
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void IdxOutOfRangeOnDelAt() {
+            var tokens = _lex.Tokenize(
+                @"
+fun f() {
+    return 3
+}
+let l = [1, 2]
+l.del_at(f())
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();

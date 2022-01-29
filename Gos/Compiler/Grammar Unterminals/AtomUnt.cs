@@ -17,12 +17,14 @@ namespace Compiler.Grammar_Unterminals {
                      | <list-idx>
                      | "new" CLASS
                      | <gos-list>
+                     | <method-call>
+                     | <prop-get>
             */
             return derivation[0] switch {
                 Token { Type: Token.TypeEnum.Number } t => new Number { Value = t.Lexem, Token = t },
                 Token { Type: Token.TypeEnum.Bool } t => new BoolAst { Value = t.Lexem, Token = t },
-                Token { Type: Token.TypeEnum.Id } t => new Variable { Identifier = t.Lexem, Token = t },
-                FunCallUnt or ListIdxUnt or GosListUnt => 
+                Token { Type: Token.TypeEnum.Id } t => new Variable(Helper.Logger<Variable>()) { Identifier = t.Lexem, Token = t },
+                FunCallUnt or ListIdxUnt or GosListUnt or MethodCallUnt or PropGetUnt => 
                     (derivation[0] as Unterminal).Ast,
                 Token { Type: Token.TypeEnum.New } when derivation[1] is Token { Type: Token.TypeEnum.Class } c =>
                     new ClassAst { ClassName = c.Lexem, Token = c },

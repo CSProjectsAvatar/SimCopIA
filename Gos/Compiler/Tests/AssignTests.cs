@@ -81,6 +81,33 @@ namespace Compiler.Tests {
             Assert.IsFalse(success);
         }
 
+        [TestMethod]
+        public void LValueIsConstant() {
+            var tokens = _lex.Tokenize(
+                @"
+                let a = 5
+                3 = 20
+                print a" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsFalse(ast.Validate(ctx));
+        }
+
+        [TestMethod]
+        public void LValueIsFuncCall() {
+            var tokens = _lex.Tokenize(
+                @"
+fun f() {
+    return
+}
+f() = 20" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsFalse(ast.Validate(ctx));
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();

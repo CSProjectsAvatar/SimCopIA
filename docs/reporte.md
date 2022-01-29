@@ -247,11 +247,9 @@ graph LR
         | <return>
         | <func-call>
         | ID <right-conn>
-        | <left-val> "=" <expr>
+        | <atom> "=" <expr>
         | "break"
-
-<left-val> := ID
-            | <left-val> "[" <math> "]"
+        | <method-call>
 
 <let-var> := "let" ID "=" <expr>
 
@@ -301,6 +299,12 @@ graph LR
         | <list-idx>
         | "new" CLASS
         | <gos-list>
+        | <method-call>
+        | <prop-get>
+
+<prop-get> := <factor> "." ID
+
+<method-call> := <factor> "." <func-call>
 
 <func-call> := ID "(" <expr-list> ")"
              | ID "(" ")"

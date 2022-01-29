@@ -49,7 +49,8 @@ namespace Compiler {
             (@"\->", Token.TypeEnum.RightArrow),
             (",", Token.TypeEnum.Comma),
             (@"\[", Token.TypeEnum.LBracket),
-            (@"\]", Token.TypeEnum.RBracket)
+            (@"\]", Token.TypeEnum.RBracket),
+            (".", Token.TypeEnum.Dot)
         };
 
         internal const string LogPref = "Line {l}, column {c}: ";

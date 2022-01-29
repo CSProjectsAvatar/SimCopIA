@@ -16,8 +16,9 @@ namespace Compiler.Grammar_Unterminals {
                      | <return>
                      | <func-call>
                      | ID <right-conn>
-                     | <left-val> "=" <expr>
+                     | <atom> "=" <expr>
                      | "break"
+                     | <method-call>
             */
             return derivation[0] switch {
                 Token { Type: Token.TypeEnum.Id } id when derivation[1] is RightConnUnt rc
@@ -26,19 +27,12 @@ namespace Compiler.Grammar_Unterminals {
                         LeftAgent = id.Lexem,
                         Token = id
                     },
-                LeftValUnt lv when derivation[2] is ExpressionUnt e
-                    => lv.IsListIdx
-                        ? new ListIdxSetAst(Helper.Logger<VarAssign>()) {
-                            RootListName = lv.Id,
-                            Idxs = lv.Idxs,
-                            NewValueExpr = e.Ast as Expression,
-                            Token = new Token(Token.TypeEnum.Id, lv.Line, lv.Column, lv.Id)
-                        }
-                        : new VarAssign(Helper.Logger<VarAssign>()) {
-                            Variable = lv.Id,
-                            NewValueExpr = e.Ast as Expression,
-                            Token = derivation[1] as Token
-                        },
+                AtomUnt a when derivation[2] is ExpressionUnt e
+                    => new AssignAst(Helper.Logger<AssignAst>()) {
+                        Left = a.Ast as Expression,
+                        NewVal = e.Ast as Expression,
+                        Token = derivation[1] as Token
+                    },
                 LetVarUnt u => u.Ast,
                 PrintUnt u => u.Ast,
                 ReturnUnt u => u.Ast,
@@ -46,6 +40,7 @@ namespace Compiler.Grammar_Unterminals {
                 Token { Type: Token.TypeEnum.Break } b => new BreakAst(Helper.Logger<BreakAst>()) {
                     Token = b
                 },
+                MethodCallUnt u => u.Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

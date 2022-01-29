@@ -29,13 +29,14 @@ namespace Compiler {
         private static readonly UntType RightConn = new UntType(typeof(RightConnUnt));
         private static readonly UntType GosList = new UntType(typeof(GosListUnt));
         private static readonly UntType ListIdx = new UntType(typeof(ListIdxUnt));
-        private static readonly UntType LeftVal = new UntType(typeof(LeftValUnt));
         private static readonly UntType InfLoop = new UntType(typeof(InfLoopUnt));
         private static readonly UntType ForEach = new UntType(typeof(ForEachUnt));
         private static readonly UntType Conjtion = new UntType(typeof(ConjtionUnt));
         private static readonly UntType Disj = new UntType(typeof(DisjUnt));
         private static readonly UntType Behav = new UntType(typeof(BehavUnt));
         private static readonly UntType Init = new UntType(typeof(InitUnt));
+        private static readonly UntType PropGet = new UntType(typeof(PropGetUnt));
+        private static readonly UntType MethodCall = new UntType(typeof(MethodCallUnt));
 
         #region terminales
         private static readonly TokenType n = TokenType.Number;
@@ -76,6 +77,7 @@ namespace Compiler {
         private static readonly TokenType @class = Token.TypeEnum.Class;
         private static readonly TokenType behav = Token.TypeEnum.Behavior;
         private static readonly TokenType init = Token.TypeEnum.InitBehav;
+        private static readonly TokenType dot = Token.TypeEnum.Dot;
 
         #endregion
         public GosGrammar() : base(
@@ -108,11 +110,9 @@ namespace Compiler {
             Stat > Return,
             Stat > FuncCall,
             Stat > (id, RightConn),
-            Stat > (LeftVal, eq, Expr),  // asignacio'n
+            Stat > (Atom, eq, Expr),  // asignacio'n
             Stat > @break,
-
-            LeftVal > id,  // l-values
-            LeftVal > LeftVal[Math],
+            Stat > MethodCall,
 
             LetVar > (let, id, eq, Expr),
 
@@ -164,6 +164,12 @@ namespace Compiler {
             Atom > ListIdx,
             Atom > (@new, @class),
             Atom > GosList,
+            Atom > MethodCall,
+            Atom > PropGet,
+
+            PropGet > (Factor, dot, id),
+
+            MethodCall > (Factor, dot, FuncCall),
 
             FuncCall > (id, lpar, ExprList, rpar),
             FuncCall > (id, lpar, rpar),

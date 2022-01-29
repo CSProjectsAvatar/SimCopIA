@@ -257,7 +257,81 @@ namespace DataClassHierarchy
             }
             return (true, returnedValue);
         }
-        
+
+        public (bool, object) Visiting(MethodCallAst node) {
+            var (tsucc, tval) = Visit(node.Target);
+            if (!tsucc) {
+                return default;
+            }
+            var exprValues = new List<object>();
+            foreach (var expr in node.Function.Args) {
+                var (success, result) = Visit(expr);  // evaluando los argumentos
+                if (!success) {
+                    return (false, null);
+                }
+                exprValues.Add(result);
+            }
+            var ttype = Helper.GetType(tval);
+            switch (ttype) {
+                case GosType.List when node.Function.Identifier == "add" && node.Function.Args.Count == 1:
+                    if (!TryEval(node.Function.Args, out IReadOnlyList<object> addArgs)) {
+                        return default;
+                    }
+                    var l = tval as List<object>;
+                    var expectedType = Helper.GetType(l[0]);
+                    var itemType = Helper.GetType(addArgs[0]);
+                    if (expectedType != itemType) {
+                        _log.LogError(
+                            Helper.LogPref + "expected type: {exp}, actual type: {type}.",
+                            node.Function.Args[0].Token.Line,
+                            node.Function.Args[0].Token.Column,
+                            expectedType,
+                            itemType);
+                        return default;
+                    }
+                    l.Add(addArgs[0]);
+                    break;
+
+                case GosType.List when node.Function.Identifier == "del_at" && node.Function.Args.Count == 1:
+                    if (!TryEval(node.Function.Args, out IReadOnlyList<object> delAtArgs)) {
+                        return default;
+                    }
+                    l = tval as List<object>;
+
+                    if (!IdxValid(delAtArgs[0], l.Count, node.Function.Args[0].Token.Line, node.Function.Args[0].Token.Column)) {
+                        return default;
+                    }
+                    l.RemoveAt((int)(double)delAtArgs[0] - 1);
+                    break;
+
+                default:
+                    _log.LogError(
+                        Helper.LogPref + "no method called '{method}' in type {type} receives {args} arguments.",
+                        node.Function.Token.Line,
+                        node.Function.Token.Column,
+                        node.Function.Identifier,
+                        ttype,
+                        node.Function.Args.Count);
+                    return default;
+            }
+            return (true, null);
+        }
+
+        private bool TryEval(IEnumerable<Expression> exprs, out IReadOnlyList<object> results) {
+            results = null;
+
+            var ans = new List<object>();
+            foreach (var expr in exprs) {
+                var (success, result) = Visit(expr);
+                if (!success) {
+                    return false;
+                }
+                ans.Add(result);
+            }
+            results = ans;
+            return true;
+        }
+
         public (bool, object) Visiting(LetVar node){
             var (success, result) = Visit(node.Expr);
             if(!success){
@@ -268,6 +342,29 @@ namespace DataClassHierarchy
             }
             Context.DefVariable(node.Identifier, result);
             return (true, result);  
+        }
+
+        public (bool, object) Visiting(AssignAst node) {
+            return node.Left switch {
+                Variable v => Visiting(new VarAssign(Helper.Logger<VarAssign>()) {
+                    Token = node.Token,
+                    Variable = v.Identifier,
+                    NewValueExpr = node.NewVal
+                }),
+                ListIdxGetAst lg => Visiting(new ListIdxSetAst(Helper.Logger<VarAssign>()) {
+                    NewValueExpr = node.NewVal,
+                    Idx = lg.Index,
+                    Target = lg.Left,
+                    Token = node.Token
+                }),
+                PropGetAst pg => Visiting(new PropSetAst {
+                    Token = node.Token,
+                    Target = pg.Target,
+                    Property = pg.Property,
+                    NewVal = node.NewVal
+                }),
+                _ => throw new ArgumentException("Invalid left value.", nameof(node))
+            };
         }
 
         public (bool, object) Visiting(VarAssign node) {
@@ -292,44 +389,30 @@ namespace DataClassHierarchy
         }
 
         public (bool, object) Visiting(ListIdxSetAst node) {
-            List<object> list = null;
-            int idxToUse = -1;
-            var newListObj = Context.GetVar(node.RootListName); ;
-
-            foreach (var idxExpr in node.Idxs) {
-                // chekean2 tipo de la lista
-                var newListType = Helper.GetType(newListObj);
-
-                if (newListType != GosType.List) {
-                    _log.LogError(
-                        "Line {l}, column {c}: '{id}' must be a list but it's a {idType} instead.",
-                        node.Token.Line,
-                        node.Token.Column,
-                        node.RootListName,
-                        newListType);
-                    return (false, null);
-                }
-                list = newListObj as List<object>;
-
-                var (idxSucc, idxObj) = Visit(idxExpr);
-
-                if (!idxSucc) {
-                    return (false, null);
-                }
-                if (!IdxValid(idxObj, list.Count, node.Token.Line, node.Token.Column)) {
-                    return (false, null);
-                }
-                idxToUse = (int)(double)idxObj - 1;
-                newListObj = list[idxToUse];
+            var (tsucc, tvalue) = Visit(node.Target);
+            if (!tsucc) {
+                return (false, null);
             }
-            var (succ, value) = Visit(node.NewValueExpr);
-
-            if (!succ) {
+            var ttype = Helper.GetType(tvalue);
+            if (ttype != GosType.List) {
+                _log.LogError(
+                    Helper.LogPref + "target object must be a list, but it's of type {ttype} instead.",
+                    node.Token.Line,
+                    node.Token.Column,
+                    ttype);
+                return default;
+            }
+            var (idxSucc, idxVal) = Visit(node.Idx);
+            var list = tvalue as List<object>;
+            if (!idxSucc || !IdxValid(idxVal, list.Count, node.Idx.Token.Line, node.Idx.Token.Column)) {
+                return default;
+            }
+            var (vsucc, value) = Visit(node.NewValueExpr);
+            if (!vsucc) {
                 return (false, null);
             }
             var valType = Helper.GetType(value);
             var expectedType = Helper.GetType(list[0]);
-
             if (valType != expectedType) {
                 _log.LogError(
                     "Line {l}, column {c}: new value must be of type {expect} but it's of type {act} instead.",
@@ -339,7 +422,7 @@ namespace DataClassHierarchy
                     valType);
                 return (false, null);
             }
-            list[idxToUse] = value;
+            list[(int)(double)idxVal - 1] = value;
 
             return (true, null);
         }
@@ -377,6 +460,24 @@ namespace DataClassHierarchy
             return true;
         }
 
+        public (bool, object) Visiting(PropSetAst node) {
+            var (tsucc, tval) = Visit(node.Target);
+            if (!tsucc) {
+                return default;
+            }
+            var type = Helper.GetType(tval);
+            switch (type) {
+                default:
+                    _log.LogError(
+                        Helper.LogPref + "{type} doesn't have a property called '{prop}' or it's value can't be set.",
+                        node.Token.Line,
+                        node.Token.Column,
+                        type,
+                        node.Property);
+                    return default;
+            }
+        }
+
         public (bool, object) Visiting(ListIdxGetAst node) {
             var (succ, val) = Visit(node.Left);
 
@@ -403,6 +504,26 @@ namespace DataClassHierarchy
                 return (false, null);
             }
             return (true, list[(int)(double)idxObj - 1]);
+        }
+
+        public (bool, object) Visiting(PropGetAst node) {
+            var (tsucc, tval) = Visit(node.Target);
+            if (!tsucc) {
+                return default;
+            }
+            var type = Helper.GetType(tval);
+            switch (type) {
+                case GosType.List when node.Property == "length":
+                    return (true, (double)(tval as List<object>).Count);
+                default:
+                    _log.LogError(
+                        Helper.LogPref + "{type} doesn't have a property called '{prop}'.",
+                        node.Token.Line,
+                        node.Token.Column,
+                        type,
+                        node.Property);
+                    return default;
+            }
         }
 
         public (bool, object) Visiting(DefFun node){

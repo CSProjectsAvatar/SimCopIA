@@ -25,19 +25,19 @@ namespace Compiler.AstHierarchy.Statements {
                 return false;
             }
             foreach (var st in Code) {
-                if (st is not VarAssign va) {
+                if (st is not AssignAst a || a.Left is not Variable va) {
                     _log.LogError(
                         Helper.LogPref + "it must be a variable assignment (e.g. a = 5).",
                         (st as AstNode).Token.Line,
                         (st as AstNode).Token.Column);
                     return false;
                 }
-                if (!context.DefVariable(va.Variable)) {  // se define la variable en el contexto padre pa q pueda ser usada en to2 el comportamiento
+                if (!context.DefVariable(va.Identifier)) {  // se define la variable en el contexto padre pa q pueda ser usada en to2 el comportamiento
                     _log.LogError(
                         Helper.LogPref + "variable '{id}' already defined.",
                         (st as AstNode).Token.Line,
                         (st as AstNode).Token.Column,
-                        va.Variable);
+                        va.Identifier);
                     return false;
                 }
                 if (!st.Validate(context)) {

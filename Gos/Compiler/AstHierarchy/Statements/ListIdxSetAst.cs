@@ -14,21 +14,12 @@ namespace Compiler.AstHierarchy.Statements {
         public ListIdxSetAst(ILogger<VarAssign> logger) {
             _log = logger;
         }
-
-        public string RootListName { get; init; }
-        public IEnumerable<Expression> Idxs { get; init; }
         public Expression NewValueExpr { get; init; }
+        public Expression Target { get; internal set; }
+        public Expression Idx { get; internal set; }
 
         public override bool Validate(Context context) {
-            if (!context.CheckVar(RootListName)) {
-                _log.LogError(
-                    "Line {l}, column {c}: variable \"{id}\" is not defined.",
-                    Token.Line,
-                    Token.Column,
-                    RootListName);
-                return false;
-            }
-            return Idxs.All(idx => idx.Validate(context)) && NewValueExpr.Validate(context);
+            return Idx.Validate(context) && NewValueExpr.Validate(context) && Target.Validate(context);
         }
     }
 }
