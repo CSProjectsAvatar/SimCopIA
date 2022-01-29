@@ -13,7 +13,7 @@ namespace Compiler {
                 ? el.Exprs
                 : Enumerable.Empty<Expression>();
 
-            return new FunCall(){
+            return new FunCall(Helper.Logger<FunCall>()){
                 Identifier = id,
                 Args = args.ToList(),
                 Token = t

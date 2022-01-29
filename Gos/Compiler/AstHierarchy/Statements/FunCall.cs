@@ -12,10 +12,8 @@ namespace DataClassHierarchy
         private readonly ILogger<FunCall> _log;
 
         public FunCall(){ }
-        public FunCall(string identifier, List<Expression> args, ILogger<FunCall> logger)
+        public FunCall(ILogger<FunCall> logger)
         {
-            Identifier = identifier;
-            Args = args;
             _log = logger;
         }
 
@@ -23,7 +21,7 @@ namespace DataClassHierarchy
         {
             if (!context.CheckFunc(Identifier, Args.Count)) {
                 _log?.LogError(
-                    "Line {line}, column {col}: function '{id}' is already defined with {args} arguments.",
+                    "Line {line}, column {col}: function '{id}' is not defined with {args} arguments.",
                     Token.Line,
                     Token.Column,
                     Identifier,
