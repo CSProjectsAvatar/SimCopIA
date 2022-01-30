@@ -66,7 +66,7 @@ namespace ServersWithLayers
     //  - ID del request asociado.
     //  - Los datos que contiene el response asociados a lo solicitado por el request. ( por ahora es un diccionario de strings )
     public class Response : Message{
-        public int ReqID {get;}
+        public int ReqID {get; private set;}
         public Dictionary<string,bool> AnswerRscs {get;}
         public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, bool> data ) : base(sender, receiber, type){
             this.ReqID = requestID;
@@ -74,6 +74,9 @@ namespace ServersWithLayers
             this.MatureTime = 1;
         }
 
+        public void Reassign(int reqID){
+            this.ReqID = reqID;
+        }
         // Crea un response union, quedandose con los valores en True de los values alguna Data.
         public static Response Union(Response r1, Response r2){
             var list = r1.AnswerRscs.Concat(r2.AnswerRscs);

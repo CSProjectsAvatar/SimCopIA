@@ -10,7 +10,6 @@ namespace ServersWithLayers
         public static Behavior Worker = new Behavior(WorkerBehav, WorkerBehavInit);
 
         private static string inProcessRequests_Worker = "inProcessRequests";
-        private static string respInProcess_Worker = "respInProcess";
 
         private static void WorkerBehavInit(Status state, Dictionary<string, object> vars){
             vars[inProcessRequests_Worker] = new Utils.Heap<Request>();
