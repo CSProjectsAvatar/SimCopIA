@@ -7,6 +7,7 @@ namespace Utils
         
         private List<(int,T)> _data;
         public int Count => this._data.Count;
+        public (int, T) First => this._data[0];
         public Heap(){
             this._data = new();
         }

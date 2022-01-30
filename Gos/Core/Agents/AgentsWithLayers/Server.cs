@@ -6,11 +6,9 @@ namespace ServersWithLayers
         public string ID {get;}
         public Status Stats {get;}
         private List<Layer> _layers; 
-        public Server(Environment env, string ID){
-            
+        public Server(string ID){
             this.ID = ID;
-
-            this.Stats = new();
+            this.Stats = new(ID);
             
             this._layers = new();
         }
@@ -21,10 +19,9 @@ namespace ServersWithLayers
                 l.Process(p);
                         
             foreach(var e in this.Stats.EnumerateAndClear())
-                Environment.CurrentEnv.SubsribeEvent(e.Item1,e.Item2);
+                Env.CurrentEnv.SubsribeEvent(e.Item1,e.Item2);
         }
 
-        
         public void SetLayers(IEnumerable<Layer> layers){
             _layers = new List<Layer>();
             AddLayers(layers);

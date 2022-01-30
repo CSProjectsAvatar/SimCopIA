@@ -13,7 +13,7 @@ namespace ServersWithLayers
         // Se ejecuta al salir de la cola de prioridad en el Environment en su tiempo correspondiente.
         // Le hace conocer al servidor que tiene que manejar su llegada.
         public override void ExecuteInTime(){
-            var receiber=Environment.CurrentEnv.GetServerByID(this.receiber);
+            var receiber=Env.CurrentEnv.GetServerByID(this.receiber);
             if(receiber != null)
                 receiber.HandlePerception(this);
             else{
@@ -40,7 +40,6 @@ namespace ServersWithLayers
     //  -ID
     //  -URL asociada.
     public class Request:Message{
-        
         static int lastRequestID = 0; 
         public int ID {get;}
 
@@ -81,10 +80,9 @@ namespace ServersWithLayers
     // contiene el objeto Objective, que es un objeto que identifica lo que va a suceder dentro del server que suscribio el Observer. 
     public class Observer:Perception{
         public string Sender;
-        public object Objetive {get;}
-        public Observer( string sender, object obj) : base(){
+        // public object Objetive {get;}
+        public Observer( string sender) : base(){
             this.Sender = sender;
-            this.Objetive=  obj; 
         }
     }
 

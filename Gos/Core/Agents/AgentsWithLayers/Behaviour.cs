@@ -8,9 +8,12 @@ namespace ServersWithLayers
     {
         Dictionary<string, object> variables;
         Action<Status, Perception, Dictionary<string, object>> action;
-        public Behavior()
+        public Behavior():this(null) { }
+        public Behavior(Action<Status, Perception, Dictionary<string, object>> action, Action<Dictionary<string, object>> init = null)
         {
-            variables = new Dictionary<string, object>();
+            this.action = action;
+            this.variables = new Dictionary<string, object>();
+            if (init != null) init(variables);
         }
 
         public void SetVar(string name, object value)
@@ -18,11 +21,14 @@ namespace ServersWithLayers
             variables[name] = value;
         }
 
-        public void Run(Status status, Perception perception) { }
+        public void Run(Status status, Perception perception) {
+            action(status, perception, variables);
+         }
 
         public Behavior Clone()
         {
             var copy = new Behavior();  //@todo review dict var
+            copy.action += this.action;
             return copy;
         }
     }

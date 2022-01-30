@@ -12,8 +12,11 @@ namespace ServersWithLayers{
                 _name = value;
             }
         }
+
+        public int RequiredTime { get; internal set; }
+
         public List<(int, string)> Requirements;
-        public int TimeCost;
+        
         private string _name;
 
         public Resource(){
