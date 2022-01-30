@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using ServersWithLayers;
+using System.Linq;
 
 namespace Core {
     [TestClass]
@@ -23,7 +24,7 @@ namespace Core {
             var r2 = new Resource("index.html");
 
             var p = new Request("S1", "S2", RequestType.AskSomething);
-            p.Asking.AddRange(new[] { r1, r2 });
+            p.AskingRscs.AddRange(new[] { r1, r2 });
 
 
             // worker.Run(server1.Stats, p);
@@ -31,11 +32,34 @@ namespace Core {
 
         [TestMethod]
         public void ContractorBehavTest_1() {
-            var contractor = BehaviorsLib.Contractor;
+            // var contractor = BehaviorsLib.Contractor;
+            // hallarle el inverso al subconjunto, y crear un nuevo dict<string, List<string>> 
+            //de agentes a recursos que proveen donde cada item de los values son una llave del nuevo dict
+            var subDict = new Dictionary<string, List<string>>();
+            subDict.Add("img1", new List<string>() { "s1", "s2" });
+            subDict.Add("img2", new List<string>() { "s2" });
+            subDict.Add("img3", new List<string>() { "s1" });
 
-            // ...
+            var inverseDict = from kv in subDict
+                            group kv by kv.Value into gr
+                            select new
+                            {
+                                Key = gr.Key,
+                                Value = gr.Select(x => x.Key).ToList()
+                            };
 
-            // Assert.AreEqual(0, algo);
+            //  agrupa los key de inverseDict y le asigna sus valores
+            var grouped = from kv in inverseDict
+                            group kv by kv.Key into gr
+                            select new
+                            {
+                                Key = gr.Key,
+                                Value = gr.Select(x => x.Value).ToList()
+                            };
+
+            foreach (var item in grouped) {
+                Console.WriteLine($"{item.Key} => {string.Join(",", item.Value)}");
+            }
         }
 
     }
