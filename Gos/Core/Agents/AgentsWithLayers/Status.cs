@@ -9,7 +9,7 @@ namespace ServersWithLayers{
         internal Queue<Request> aceptedRequests;
         internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
         internal string serverID;
-
+        internal MicroService MicroService;
         List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
    
@@ -36,6 +36,10 @@ namespace ServersWithLayers{
                 yield return x;
             }
             _sendToEnv.Clear();
+        }
+        
+        public void SetMicroservice(string microserviceID){
+            this.MicroService = MicroService.Get(microserviceID);
         }
     }
 }
