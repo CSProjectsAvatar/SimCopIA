@@ -115,7 +115,7 @@ namespace ServersWithLayers
 
         public static Behavior BossAnnounceBehievor = new Behavior(BossAnnounce,BossAnnounceInit);
 
-        private static void BossAnnounceInit(Dictionary<string, object> vars){
+        private static void BossAnnounceInit(Status status,Dictionary<string, object> vars){
             vars["reviewTime"] = 5; //cambiar cualquier cosa 
         } 
         private static void BossAnnounce(Status status, Perception p,Dictionary<string,object> variables)
@@ -127,7 +127,7 @@ namespace ServersWithLayers
             Dictionary<string, Request> server_Request = new Dictionary<string, Request>();
 
             //Asumamos que ya no estan aqui los recursos que puede solucionar el propio jefe...    
-            foreach(var resource in request.Asking)
+            foreach(var resource in request.AskingRscs)
             {
                 var servers = status.MicroService.Dir.YellowPages[resource.Name];
                 foreach(var s in servers){
@@ -135,7 +135,7 @@ namespace ServersWithLayers
                         server_Request[s] = new Request(status.serverID,s,RequestType.AskSomething);
                         status.Subscribe(server_Request[s]);
                     }
-                    server_Request[s].Asking.Add(resource);
+                    server_Request[s].AskingRscs.Add(resource);
                 }
             }
             int reviewTime = (int)variables["reviewTime"];
