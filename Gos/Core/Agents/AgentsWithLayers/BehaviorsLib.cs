@@ -9,18 +9,31 @@ namespace ServersWithLayers
         #region Worker
         public static Behavior Worker = new Behavior(WorkerBehav, WorkerBehavInit);
 
-        private static string inProcess_Worker = "inProcess";
-        private static void WorkerBehavInit(Dictionary<string, object> vars){
-            vars[inProcess_Worker] = new Utils.Heap<Request>();
+        private static string inProcessRequests_Worker = "inProcessRequests";
+        private static string respInProcess_Worker = "respInProcess";
+        
+        private static void WorkerBehavInit(Status status, Dictionary<string, object> vars){
+            vars[inProcessRequests_Worker] = new Utils.Heap<Request>();
+            // @todo pasar para el init de el Jefe, lo de Mauricio
+            status.SetVariable(respInProcess_Worker, new Dictionary<string, Response>());
         }
         private static void WorkerBehav(Status status, Perception perce, Dictionary<string, object> vars){
             // Checking Tasks Done
-            var heap = vars[inProcess_Worker] as Utils.Heap<Request>;
+            var heap = vars[inProcessRequests_Worker] as Utils.Heap<Request>;
+            var dict = vars[respInProcess_Worker] as Dictionary<int, Response>;
+
             while(heap.Count !=0 && heap.First.Item1 <= Env.Time) { // first elem is done
 
                 var req = heap.RemoveMin().Item2; // Request completed
                 var response = BuildResponse(status, req);
-                status.Subscribe(response); // Subscribe response
+
+                if(Incomplete(response)){ // if incomplete I save it for fill it later
+                    // Add to dict
+                    dict[req.ID] = response;
+                }
+                else{
+                    status.Subscribe(response); // Subscribe response
+                }
             }
 
             // Checking Tasks to do
@@ -33,6 +46,12 @@ namespace ServersWithLayers
                 status.Subscribe(Env.Time + rtime, new Observer(status.serverID)); // 
             }
         }
+
+        private static bool Incomplete(Response response)
+        {
+            throw new NotImplementedException();
+        }
+
         private static int GetRequiredTimeToProcess(Request req)
         {// Returns the max of all the required time to process the resources of the request
             var max = 0;

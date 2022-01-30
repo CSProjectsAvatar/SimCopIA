@@ -7,13 +7,16 @@ namespace ServersWithLayers
     public class Behavior
     {
         Dictionary<string, object> variables;
+        private Action<Status, Dictionary<string, object>> _init;
         Action<Status, Perception, Dictionary<string, object>> action;
+        
+        bool _firstTime = true;
         public Behavior():this(null) { }
-        public Behavior(Action<Status, Perception, Dictionary<string, object>> action, Action<Dictionary<string, object>> init = null)
+        public Behavior(Action<Status, Perception, Dictionary<string, object>> action, Action<Status, Dictionary<string, object>> init = null)
         {
             this.action = action;
             this.variables = new Dictionary<string, object>();
-            if (init != null) init(variables);
+            _init = init;
         }
 
         public void SetVar(string name, object value)
@@ -22,6 +25,10 @@ namespace ServersWithLayers
         }
 
         public void Run(Status status, Perception perception) {
+            if(_firstTime){
+                _firstTime = false;
+                if(_init is not null) _init(status, variables);
+            }
             action(status, perception, variables);
          }
 
