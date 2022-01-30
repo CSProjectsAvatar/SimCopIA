@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 namespace ServersWithLayers
 {
 
@@ -96,6 +96,41 @@ namespace ServersWithLayers
         {
             return true;
         }
+        #endregion
+
+        #region Boss
+
+        public static Behavior BossAnnounceBehievor = new Behavior(BossAnnounce,BossAnnounceInit);
+
+        private static void BossAnnounceInit(Dictionary<string, object> vars){
+            vars["reviewTime"] = 5; //cambiar cualquier cosa 
+        } 
+        private static void BossAnnounce(Status status, Perception p,Dictionary<string,object> variables)
+        {
+            var request = p as Request;
+            if (request == null)
+                return;
+
+            Dictionary<string, Request> server_Request = new Dictionary<string, Request>();
+
+            //Asumamos que ya no estan aqui los recursos que puede solucionar el propio jefe...    
+            foreach(var resource in request.Asking)
+            {
+                var servers = status.MicroService.Dir.YellowPages[resource.Name];
+                foreach(var s in servers){
+                    if(!server_Request.Keys.Contains(s)){
+                        server_Request[s] = new Request(status.serverID,s,RequestType.AskSomething);
+                        status.Subscribe(server_Request[s]);
+                    }
+                    server_Request[s].Asking.Add(resource);
+                }
+            }
+            int reviewTime = (int)variables["reviewTime"];
+            status.Subscribe(Env.Time + reviewTime ,new Observer(status.serverID));
+        }
+
+
+
         #endregion
     }
 } 
