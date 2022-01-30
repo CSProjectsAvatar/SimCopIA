@@ -6,7 +6,7 @@ namespace ServersWithLayers
     public abstract class Perception : Event{
         string receiber;
 
-        internal Environment env;
+        internal Env env;
         public Perception() : base(){
         }
 

@@ -19,7 +19,8 @@ namespace ServersWithLayers{
         
         private string _name;
 
-        public Resource(){
+        public Resource(string name){
+            this.Name = name;
             this.Requirements = new();
         }
 
