@@ -3,16 +3,23 @@ using System.Collections.Generic;
 
 namespace ServersWithLayers{
     public class Status{
+        #region Server Properties
         public int MaxCapacity { get; private set; }
-
-        internal List<Resource> availableResources;
-        internal Queue<Request> aceptedRequests;
-        internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
-        internal string serverID;
         internal MicroService MicroService;
+        internal string serverID;
+        internal List<Resource> availableResources;
+        #endregion
 
+        #region  Server State
+        private Queue<Request> aceptedRequests;
+        internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
+        internal bool HasRequests => aceptedRequests.Count > 0;
+
+        Dictionary<int,Response> _notCompletdRespns { get; set; }
         List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
+        Dictionary<int, Request> _requestsAceptedHistory;
+        #endregion
    
         public Status(string iD)
         {
@@ -24,13 +31,31 @@ namespace ServersWithLayers{
             aceptedRequests = new();
             serverID = iD;
         }
+
+        internal void AddPartialRpnse(Response resp)
+        {
+            if (!_notCompletdRespns.ContainsKey(resp.ReqID)) // Si no esta lo agrego
+                _notCompletdRespns.Add(resp.ReqID, resp);
+            else{ // Si esta hago: actual U resp
+                var actualRep = _notCompletdRespns[resp.ReqID];
+                _notCompletdRespns[resp.ReqID] = Response.Union(actualRep, resp);
+            }
+        }
+
         //Suscribe Perceptions en un tiempo 'time' en '_sendToEnv'.
         public void Subscribe(int time, Perception p)
         {
-            // if no hay response para el request dado
             _sendToEnv.Add((time, p));
         }
         public void Subscribe(Perception p) => Subscribe(Env.Time, p);
+
+        public void AcceptReq(Request req)
+        {
+            aceptedRequests.Enqueue(req);
+            _requestsAceptedHistory.Add(req.ID, req);
+        }
+        public Request ExtractAcceptedReq() => aceptedRequests.Dequeue();
+        public Request GetRequestById(int id) => _requestsAceptedHistory[id];
 
         public void SetVariable(string name, object value) => _variables[name] = value;
         public object GetVariable(string name) => _variables.ContainsKey(name) ? _variables[name] : null;

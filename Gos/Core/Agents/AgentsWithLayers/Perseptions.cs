@@ -66,10 +66,10 @@ namespace ServersWithLayers
     //  - ID del request asociado.
     //  - Los datos que contiene el response asociados a lo solicitado por el request. ( por ahora es un diccionario de strings )
     public class Response : Message{
-        public int RequestID {get;}
+        public int ReqID {get;}
         public Dictionary<string,bool> AnswerRscs {get;}
         public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, bool> data ) : base(sender, receiber, type){
-            this.RequestID = requestID;
+            this.ReqID = requestID;
             this.AnswerRscs = data;
             this.MatureTime = 1;
         }
@@ -88,7 +88,7 @@ namespace ServersWithLayers
             Dictionary<string, bool> unionData = re.ToDictionary(x => x.Key, y => y.Value);
 
             return new Response(
-                r1.RequestID,
+                r1.ReqID,
                 r1.Sender,
                 r1.Receiber,
                 r1.Type,
@@ -129,13 +129,15 @@ namespace ServersWithLayers
             var r2 = new Response(1, "sender", "receiber", RequestType.AskSomething, new Dictionary<string, bool>{
                 {"r1", false},
                 {"r2", true},
-                {"r3", true}
+                {"r3", true},
+                {"r4", true}
             });
             var r3 = Response.Union(r1, r2);
-            Assert.AreEqual(3, r3.AnswerRscs.Count);
+            Assert.AreEqual(4, r3.AnswerRscs.Count);
             Assert.AreEqual(r3.AnswerRscs["r1"], true);
             Assert.AreEqual(r3.AnswerRscs["r2"], true);
             Assert.AreEqual(r3.AnswerRscs["r3"], true);
+            Assert.AreEqual(r3.AnswerRscs["r4"], true);
         }
         
 
