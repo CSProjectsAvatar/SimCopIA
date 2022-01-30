@@ -10,53 +10,50 @@ namespace ServersWithLayers
         public static Behavior Worker = new Behavior(WorkerBehav, WorkerBehavInit);
 
         private static string inProcessRequests_Worker = "inProcessRequests";
-        private static string respInProcess_Worker = "respInProcess";
 
-        private static void WorkerBehavInit(Status status, Dictionary<string, object> vars){
+        private static void WorkerBehavInit(Status state, Dictionary<string, object> vars){
             vars[inProcessRequests_Worker] = new Utils.Heap<Request>();
-            // @todo pasar tb para el init de el Jefe, lo de Mauricio
-            status.SetVariable(respInProcess_Worker, new Dictionary<string, Response>());
         }
-        private static void WorkerBehav(Status status, Perception perce, Dictionary<string, object> vars){
+        private static void WorkerBehav(Status st, Perception perce, Dictionary<string, object> vars){
             // Checking Tasks Done
             var heap = vars[inProcessRequests_Worker] as Utils.Heap<Request>;
-            var dict = vars[respInProcess_Worker] as Dictionary<int, Response>;
 
-            while(heap.Count !=0 && heap.First.Item1 <= Env.Time) { // first elem is done
+            while(heap.Count != 0 && heap.First.Item1 <= Env.Time) { // first elem is done
 
                 var req = heap.RemoveMin().Item2; // Request completed
-                var response = BuildResponse(status, req);
+                var response = BuildResponse(st, req);
 
-                if(Incomplete(response)){ // if incomplete I save it for fill it later
-                    dict[req.ID] = response; // Add to dict
+                if(Incomplete(st, response)){ // if incomplete I save it for fill it later
+                    st.AddPartialRpnse(response); // Add to dict
                 }
                 else{
-                    status.Subscribe(response); // Subscribe response
+                    st.Subscribe(response); // Subscribe response
                 }
             }
 
             // Checking Tasks to do
-            while(status.HasCapacity && status.aceptedRequests.Count != 0){
+            while(st.HasCapacity && st.HasRequests){
                 
-                var req = status.aceptedRequests.Dequeue(); // elijo request
+                var req = st.ExtractAcceptedReq(); // elijo request
                 var rtime = GetRequiredTimeToProcess(req);
                 
                 heap.Add(rtime, req); // comienzo a procesar la tarea
-                status.Subscribe(Env.Time + rtime, new Observer(status.serverID)); // 
+                st.Subscribe(Env.Time + rtime, new Observer(st.serverID)); // 
             }
         }
 
-        private static bool Incomplete(Response response)
+        private static bool Incomplete(Status st, Response response)
         {
-            throw new NotImplementedException();
+            var req = st.GetRequestById(response.ReqID);
+            return response.AnswerRscs.Count < req.AskingRscs.Count;
         }
 
         private static int GetRequiredTimeToProcess(Request req)
-        {// Returns the max of all the required time to process the resources of the request
-            var max = 0;
+        {// Returns the sum of all the required time to process the resources of the request
+            var sum = 0;
             foreach(var r in req.AskingRscs)
-                max = Math.Max(max, r.RequiredTime);
-            return max;
+                sum += r.RequiredTime;
+            return sum;
         }
 
         #endregion
@@ -64,7 +61,7 @@ namespace ServersWithLayers
         #region Contractor
         public static Behavior Contractor = new Behavior(ContractorBehav);
 
-        private static void ContractorBehav(Status status, Perception r, Dictionary<string, object> vars)
+        private static void ContractorBehav(Status state, Perception r, Dictionary<string, object> vars)
         {
             if (r is not Request)
                 return;
@@ -72,15 +69,15 @@ namespace ServersWithLayers
 
             switch (req.Type)
             {
-                case RequestType.AskSomething when Accept(req):
+                case RequestType.AskSomething when IsAccepted(state, req):
 
-                    Response response = BuildResponse(status, req);
-                    status.Subscribe(response);
+                    Response response = BuildResponse(state, req);
+                    state.Subscribe(response);
                     break;
 
                 case RequestType.DoSomething or RequestType.Ping:
 
-                    status.aceptedRequests.Enqueue(req);
+                    state.AcceptReq(req);
                     break;
 
                 default:
@@ -105,9 +102,9 @@ namespace ServersWithLayers
             return response;
         }
         // Accepts a request under certain conditions
-        private  static bool Accept(Request req)
+        private  static bool IsAccepted(Status st, Request req)
         {
-            return true;
+            return st.HasCapacity;
         }
         #endregion
 
