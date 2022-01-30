@@ -21,6 +21,14 @@ namespace ServersWithLayers
             turn = new();
             solutionResponses = new();
         }
+        public void AddServerList(List<Server> servers){
+            foreach(var server in servers){
+                AddServer(server);
+            }
+        }
+        private void AddServer(Server s){
+            servers.Add(s.ID, s);
+        }
         public IEnumerable<Action> EnumerateActions(){
             while (turn.Count != 0){
                 (int time, Event exe ) = this.turn.RemoveMin();

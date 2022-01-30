@@ -10,6 +10,7 @@ namespace ServersWithLayers{
         internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
         internal string serverID;
         internal MicroService MicroService;
+
         List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
    
@@ -26,10 +27,14 @@ namespace ServersWithLayers{
         //Suscribe Perceptions en un tiempo 'time' en '_sendToEnv'.
         public void Subscribe(int time, Perception p)
         {
+            // if no hay response para el request dado
             _sendToEnv.Add((time, p));
         }
         public void Subscribe(Perception p) => Subscribe(Env.Time, p);
 
+        public void SetVariable(string name, object value) => _variables[name] = value;
+        public object GetVariable(string name) => _variables.ContainsKey(name) ? _variables[name] : null;
+        
         //Se llama cuando se recorrieron todas las capas, retorna un enumerable con todas las persepciones acumuladas de las capas y luego borra el historial de ellas.
         public IEnumerable<(int, Perception)> EnumerateAndClear() {
             foreach(var x in _sendToEnv){
