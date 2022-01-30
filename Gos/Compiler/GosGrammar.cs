@@ -142,6 +142,7 @@ namespace Compiler {
             ListIdx > Factor[Math],
 
             GosList > (lbrak, ExprList, rbrak),
+            GosList > (lbrak, rbrak),  // lista vaci'a
 
             RightConn > (rightArrow, IdList),
 

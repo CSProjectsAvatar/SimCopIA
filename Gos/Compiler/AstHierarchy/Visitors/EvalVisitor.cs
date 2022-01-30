@@ -278,16 +278,19 @@ namespace DataClassHierarchy
                         return default;
                     }
                     var l = tval as List<object>;
-                    var expectedType = Helper.GetType(l[0]);
-                    var itemType = Helper.GetType(addArgs[0]);
-                    if (expectedType != itemType) {
-                        _log.LogError(
-                            Helper.LogPref + "expected type: {exp}, actual type: {type}.",
-                            node.Function.Args[0].Token.Line,
-                            node.Function.Args[0].Token.Column,
-                            expectedType,
-                            itemType);
-                        return default;
+
+                    if (l.Count > 0) {
+                        var expectedType = Helper.GetType(l[0]);
+                        var itemType = Helper.GetType(addArgs[0]);
+                        if (expectedType != itemType) {
+                            _log.LogError(
+                                Helper.LogPref + "expected type: {exp}, actual type: {type}.",
+                                node.Function.Args[0].Token.Line,
+                                node.Function.Args[0].Token.Column,
+                                expectedType,
+                                itemType);
+                            return default;
+                        }
                     }
                     l.Add(addArgs[0]);
                     break;
@@ -452,9 +455,10 @@ namespace DataClassHierarchy
             }
             if (idxInt <= 0 || idxInt > listCount) {
                 _log.LogError(
-                    "Line {l}, column {c}: index must be greater than 0 and less or equal than the list size.",
+                    "Line {l}, column {c}: index must be greater than 0 and less or equal than the list size ({lsize}).",
                     line,
-                    column);
+                    column,
+                    listCount);
                 return false;
             }
             return true;
@@ -720,6 +724,11 @@ namespace DataClassHierarchy
         }
 
         public (bool, object) Visiting(GosListAst node) {
+            var ans = new List<object>();
+
+            if (!node.Elements.Any()) {
+                return (true, ans);
+            }
             var first = node.Elements.First();
             var (succ, val) = Visit(first);
 
@@ -728,7 +737,6 @@ namespace DataClassHierarchy
             }
             var fstType = Helper.GetType(val);  // el 1er tipo
 
-            var ans = new List<object>();
             ans.Add(val);
 
             foreach (var elem in node.Elements.Skip(1)) {

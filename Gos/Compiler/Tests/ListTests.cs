@@ -12,6 +12,94 @@ namespace Compiler.Tests {
     [TestClass]
     public class ListTests : LangTest {
         [TestMethod]
+        public void TypesMismatchAfterAddingToEmptyList() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = []
+l.add(5)
+l.add(true)" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void EmptyList() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = []
+print l.length
+
+for x in l {
+    print x
+}
+for i, x in l {
+    print i
+    print x
+}
+l.add(3)
+print l
+
+l.del_at(1)
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual($"0{_endl}[3]{Environment.NewLine}[]{_endl}", @out.ToString());
+        }
+
+        [TestMethod]
+        public void DelAtOnEmptyList() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = []
+l.del_at(1)
+print l" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void IndexOnEmptyList() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = []
+print l[1]" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+
+            var ctx = new Context();
+            Assert.IsTrue(ast.Validate(ctx));
+
+            var @out = new StringWriter();
+            var vis = new EvalVisitor(new Context(), LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
         public void Creation() {
             var tokens = _lex.Tokenize(
                 @"

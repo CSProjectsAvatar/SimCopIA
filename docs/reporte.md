@@ -277,6 +277,7 @@ graph LR
 <list-idx> := <factor> "[" <math> "]"
 
 <gos-list> := "[" <expr-list> "]"
+            | "[" "]"
 
 <right-conn> := "->" <id-list>
 
