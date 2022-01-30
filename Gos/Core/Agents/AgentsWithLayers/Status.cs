@@ -26,6 +26,7 @@ namespace ServersWithLayers{
         //Suscribe Perceptions en un tiempo 'time' en '_sendToEnv'.
         public void Subscribe(int time, Perception p)
         {
+            // if no hay response para el request dado
             _sendToEnv.Add((time, p));
         }
         public void Subscribe(Perception p) => Subscribe(Env.Time, p);

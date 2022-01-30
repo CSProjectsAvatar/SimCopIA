@@ -16,7 +16,7 @@ namespace ServersWithLayers
         private static void WorkerBehav(Status status, Perception perce, Dictionary<string, object> vars){
             // Checking Tasks Done
             var heap = vars[inProcess_Worker] as Utils.Heap<Request>;
-            while(heap.First.Item1 <= Env.Time) { // first elem is done
+            while(heap.Count !=0 && heap.First.Item1 <= Env.Time) { // first elem is done
 
                 var req = heap.RemoveMin().Item2; // Request completed
                 var response = BuildResponse(status, req);
@@ -60,12 +60,7 @@ namespace ServersWithLayers
                     status.Subscribe(response);
                     break;
 
-                case RequestType.DoSomething:
-
-                    status.aceptedRequests.Enqueue(req);
-                    break;
-
-                case RequestType.Ping:
+                case RequestType.DoSomething or RequestType.Ping:
 
                     status.aceptedRequests.Enqueue(req);
                     break;

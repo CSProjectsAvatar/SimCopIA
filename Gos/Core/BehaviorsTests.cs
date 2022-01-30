@@ -6,7 +6,7 @@ using ServersWithLayers;
 
 namespace Core {
     [TestClass]
-    public class BehaviorsTests : BaseTest {
+    public class BehaviorsTests {
 
         [TestInitialize]
         public void Init() {
@@ -21,12 +21,12 @@ namespace Core {
             
             var r1 = new Resource("img1");
             var r2 = new Resource("index.html");
-            
+
             var p = new Request("S1", "S2", RequestType.AskSomething);
             p.Asking.AddRange(new[] { r1, r2 });
 
 
-            worker.Run(server.Stats, p);
+            // worker.Run(server1.Stats, p);
         }
 
         [TestMethod]
