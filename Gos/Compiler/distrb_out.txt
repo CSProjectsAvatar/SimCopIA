@@ -1,2 +1,0 @@
-fail: Compiler.Lr1[0]
-      Syntax error in line 6, column 11 at w2.
