@@ -42,12 +42,11 @@ namespace ServersWithLayers
             // Checking Tasks to do
             while (st.HasCapacity && st.HasRequests)
             {
-
                 var req = st.ExtractAcceptedReq(); // elijo request
                 var rtime = GetRequiredTimeToProcess(req);
 
                 heap.Add(rtime, req); // comienzo a procesar la tarea
-                st.Subscribe(Env.Time + rtime, new Observer(st.serverID)); // 
+                st.SubscribeIn(rtime, new Observer(st.serverID)); // 
             }
         }
 
@@ -121,19 +120,19 @@ namespace ServersWithLayers
 
         public static Behavior FalenLeader = new Behavior(FallenLeaderBehav,FallenLeaderInit);
 
-        private static string timeFallenLeaderStr = "timePing";
         private static string countPingStr = "countPing";
         private static string maxPingStr = "maxPing";
         private static string initialPotenceStr = "initialPotence";
+        private static string lastTSeeLeaderStr = "lastTimeSeeLeader";
 
 
         private static void FallenLeaderInit(Status state, Dictionary<string, object> vars)
         {
             vars[initialPotenceStr] = 5;
             vars[maxPingStr] = 3;
-            vars[timeFallenLeaderStr] = 3;
             vars[countPingStr] = 0;
 
+            vars[lastTSeeLeaderStr] = 0;
         }
 
         public static void FallenLeaderBehav(Status st, Perception perce, Dictionary<string, object> vars)
@@ -141,42 +140,33 @@ namespace ServersWithLayers
             int initP = (int)vars[initialPotenceStr];
             int countPing = (int)vars[countPingStr];
             int maxPing = (int)vars[maxPingStr];
-            int timeFallen = (int)vars[timeFallenLeaderStr];
+            int lastTSeeLdr = (int)vars[lastTSeeLeaderStr];
 
-            if (perce is Response resp)
+            if (perce is Message msg && msg.Sender == st.MicroService.LeaderId){// Envio del Lider
+                vars[timeFallenLeaderStr] = initialPotenceStr;
+                vars[lastTSeeLeaderStr] = Env.Time;
+                return;
+            }
+
+            var waitTime = (int)Math.Pow(2, initP + countPing);
+            if (Env.Time - lastTSeeLdr >= waitTime)
             {
-                if (resp.Sender == st.MicroService.LeaderId)
+                if (countPing >= maxPing) // Mucho Tiempo sin saber del lider
                 {
-                    vars[timeFallenLeaderStr] = initialPotenceStr;
+                    vars[countPingStr] = 0;
+                    MicroService.ChangeLeader(st.serverID); //me pongo de lider
                     return;
                 }
+                else
+                {   // Construyo PING Request
+                    Request pingRequest = new Request(st.serverID, st.MicroService.LeaderId, RequestType.Ping);
+                    int time = new Random().Next(waitTime);
 
-                if (Env.Time >= Math.Pow(2, timeFallen))
-                {
-                    if (countPing >= maxPing)
-                    {
-                        //cambiar para lider
-                        //MicroService.ChangeLeader(req.Receiber);
-                        return;
-                    }
-                    else
-                    {
-                        Request pingRequest = new Request(resp.Receiber, MicroService.LeaderId, RequestType.Ping);
-                        vars[countPingStr] = countPing + 1;
-                        Random r = new Random();
-                        int minValue = (int)Math.Pow(2, (int)vars[timeFallenLeaderStr]);
-                        vars[timeFallenLeaderStr] = (int)vars[timeFallenLeaderStr] + 1;
-                        int maxValue = (int)Math.Pow(2, (int)vars[timeFallenLeaderStr]);
-                        int time = r.Next(minValue, maxValue);
-
-                        st.Subscribe(time, pingRequest);
-                    }
-
-
+                    st.SubscribeIn(time, pingRequest); // Envio PING
+                    vars[countPingStr] = countPing + 1;
                 }
             }
-            #endregion
-
+        
         }
     }
 }
