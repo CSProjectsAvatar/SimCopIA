@@ -1,5 +1,4 @@
-﻿using Agents;
-using DataClassHierarchy;
+﻿using DataClassHierarchy;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -84,7 +83,7 @@ namespace Compiler {
             return obj switch {
                 double => GosType.Number,
                 bool => GosType.Bool,
-                Agent => GosType.Server,
+                //Agent => GosType.Server,
                 List<object> => GosType.List,
                 null => GosType.Null,
                 _ => throw new NotImplementedException()

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Agents;
 using Compiler;
 using Compiler.AstHierarchy;
 using Compiler.AstHierarchy.Operands;
@@ -177,53 +176,53 @@ namespace DataClassHierarchy
             return (true, lNum % rNum);
         }
 
-        public (bool, object) Visiting(Connection node) {  
-            var eval = CheckConnection(node, out var left, out var rightList);
-            if(!eval){
-                return (false, null);
-            }
-            var (succ, result) = VisitConnection(node, left, rightList);
+        //public (bool, object) Visiting(Connection node) {  
+        //    var eval = CheckConnection(node, out var left, out var rightList);
+        //    if(!eval){
+        //        return (false, null);
+        //    }
+        //    var (succ, result) = VisitConnection(node, left, rightList);
 
-            if(!succ){
-                return (false, null);
-            }
+        //    if(!succ){
+        //        return (false, null);
+        //    }
 
-            return (true, null);
-        }
+        //    return (true, null);
+        //}
 
-        private (bool, object) VisitConnection(Connection node, Agent left, List<Agent> rightList) {
-            return ((dynamic)this).Visiting(node, left, rightList);
-        }
+        //private (bool, object) VisitConnection(Connection node, Agent left, List<Agent> rightList) {
+        //    return ((dynamic)this).Visiting(node, left, rightList);
+        //}
 
-        public (bool, object) Visiting(RightConn node, Agent left, List<Agent> rightList) {
-            throw new NotImplementedException();
-        }
+        //public (bool, object) Visiting(RightConn node, Agent left, List<Agent> rightList) {
+        //    throw new NotImplementedException();
+        //}
 
-        private bool CheckConnection(Connection node, out Agent left, out List<Agent> agList)
-        {
-            left = null;
-            agList = new List<Agent>();
-            // Checking Types of Agents
-            foreach (var serv in node.Agents.Concat(new[] { node.LeftAgent }))
-            {
-                var varInstance = Context.GetVar(serv);
-                var varType = Helper.GetType(varInstance);
+        //private bool CheckConnection(Connection node, out Agent left, out List<Agent> agList)
+        //{
+        //    left = null;
+        //    agList = new List<Agent>();
+        //    // Checking Types of Agents
+        //    foreach (var serv in node.Agents.Concat(new[] { node.LeftAgent }))
+        //    {
+        //        var varInstance = Context.GetVar(serv);
+        //        var varType = Helper.GetType(varInstance);
 
-                if (varType is not GosType.Server) {
-                    _log?.LogError(
-                        "Line {line}, column {col}: variable '{serv}' has to be of type Server but it's of type {type}.",
-                        node.Token.Line,
-                        node.Token.Column,
-                        serv,
-                        varType);
-                    return false;
-                }
-                agList.Add(varInstance as Agent);
-            }
-            left = agList.Last();
-            agList.RemoveAt(agList.Count - 1);
-            return true;
-        }
+        //        if (varType is not GosType.Server) {
+        //            _log?.LogError(
+        //                "Line {line}, column {col}: variable '{serv}' has to be of type Server but it's of type {type}.",
+        //                node.Token.Line,
+        //                node.Token.Column,
+        //                serv,
+        //                varType);
+        //            return false;
+        //        }
+        //        agList.Add(varInstance as Agent);
+        //    }
+        //    left = agList.Last();
+        //    agList.RemoveAt(agList.Count - 1);
+        //    return true;
+        //}
 
         public (bool, object) Visiting(FunCall node){
             var exprValues = new List<object>();
@@ -340,9 +339,9 @@ namespace DataClassHierarchy
             if(!success){
                 return (false, null);
             }
-            if (result is Agent serv) {
-                serv.ID = node.Identifier;
-            }
+            //if (result is Agent serv) {
+            //    serv.ID = node.Identifier;
+            //}
             Context.DefVariable(node.Identifier, result);
             return (true, result);  
         }
@@ -568,7 +567,7 @@ namespace DataClassHierarchy
         }
 
         public (bool, object) Visiting(ProgramNode node){
-            Context.Simulation = new Agents.Environment();
+            //Context.Simulation = new Agents.Environment();
 
             var vis = Visit(node.Statements);
             

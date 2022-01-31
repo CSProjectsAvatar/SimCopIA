@@ -1,15 +1,15 @@
 
 using System;
 using System.Collections.Generic;
+using ServersWithLayers;
 using System.Linq;
-using Agents;
 using Compiler.AstHierarchy.Statements;
 
 namespace DataClassHierarchy
 {
     public class Context
     {
-        public static Agents.Environment Simulation {get; internal set;}
+        public static Env Simulation {get; internal set;}
         internal Context parent;
         
         Dictionary<string, object> _variables;

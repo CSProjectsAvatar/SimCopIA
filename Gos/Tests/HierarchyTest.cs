@@ -10,7 +10,6 @@ using DataClassHierarchy;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Agents;
 using Compiler;
 using Compiler.AstHierarchy;
 
