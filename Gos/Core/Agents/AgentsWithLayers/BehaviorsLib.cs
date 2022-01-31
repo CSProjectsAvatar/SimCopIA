@@ -48,7 +48,7 @@ namespace ServersWithLayers
             }
         }
 
-        private static bool Incomplete(Status st, Response response)
+        internal static bool Incomplete(Status st, Response response)
         {
             var req = st.GetRequestById(response.ReqID);
             return response.AnswerRscs.Count < req.AskingRscs.Count;
@@ -116,10 +116,13 @@ namespace ServersWithLayers
 
         #region FalenLeader
 
-        public static Behavior falenLeader = new Behavior(FalenLeader,FalenLeaderInit);
+        public static Behavior FalenLeader = new Behavior(FalenLeaderBehav,FalenLeaderInit);
 
         private static string time_FalenLeader = "timePing";
         private static string count_ping = "countPing";
+        private static int maxPing = 3;
+
+
 
         private static void FalenLeaderInit(Status state, Dictionary<string, object> vars)
         {
@@ -127,20 +130,20 @@ namespace ServersWithLayers
             vars[count_ping] = 0;
         }
 
-        public static void FalenLeader(Status st, Perception perce, Dictionary<string, object> vars)
+        public static void FalenLeaderBehav(Status st, Perception perce, Dictionary<string, object> vars)
         {
             if (perce is Response)
             {
                 Response req = perce as Response;
-                if (req.Sender == MicroService.LeaderId && Env.Time <= (int)vars[time_FalenLeader] && req.Type == RequestType.Ping)
+                if (req.Sender == MicroService.LeaderId && req.Type == RequestType.Ping)
                 {
                     vars[time_FalenLeader] = 3;
                     return;
                 }
 
-                if (Env.Time > (int)vars[time_FalenLeader])
+                if (Env.Time >= Math.Pow(2, (int)vars[time_FalenLeader]))
                 {
-                    if ((int)vars[count_ping] >= 3)
+                    if ((int)vars[count_ping] >= maxPing)
                     {
                         //cambiar para lider
                         //MicroService.ChangeLeader(req.Receiber);
@@ -149,8 +152,7 @@ namespace ServersWithLayers
                     else
                     {
                         Request pingRequest = new Request(req.Receiber, MicroService.LeaderId, RequestType.Ping);
-                        int varCount = (int)vars[count_ping] + 1;
-                        vars[count_ping] = varCount;
+                        vars[count_ping] = (int)vars[count_ping] + 1;
                         Random r = new Random();
                         int minValue = (int)Math.Pow(2, (int)vars[time_FalenLeader]);
                         vars[time_FalenLeader] = (int)vars[time_FalenLeader] + 1;
