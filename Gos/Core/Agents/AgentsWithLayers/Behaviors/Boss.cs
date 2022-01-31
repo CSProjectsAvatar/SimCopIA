@@ -72,8 +72,8 @@ namespace ServersWithLayers.Behaviors
 
             }
         }
-        internal static IEnumerable<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
-            var availList = status.availableResources;
+        internal static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
+            var availList = status.AvailableResources;
             var res = resources.Where(x => !availList.Contains(x)).ToList();
 
             return res;
@@ -86,41 +86,52 @@ namespace ServersWithLayers.Behaviors
 
     [TestClass]
     public class BossAuxiliarMethodsTests {
+        #region  vars
+        private Server s1;
+        private Server s2;
+        private Resource r1;
+        private Resource r2;
+        private Resource r3;
+        private Request p1;
+        private Request p2;
+        private Request p3;
+        #endregion
 
         [TestInitialize]
         public void Init() {
-            var worker = BehaviorsLib.Worker;
-            var server1 = new Server("S1");
-            var server2 = new Server("S2");
+            s1 = new Server("S1");
+            s2 = new Server("S2");
             
             // server2.AddLayer();
-            var r1 = new Resource("img1");
-            var r2 = new Resource("img2");
-            var r3 = new Resource("index");
+            r1 = new Resource("img1");
+            r2 = new Resource("img2");
+            r3 = new Resource("index");
 
-            var p1 = new Request("S1", "S2", RequestType.AskSomething);
+            p1 = new Request("S1", "S2", RequestType.AskSomething);
             p1.AskingRscs.AddRange(new[] { r1 });
 
-            var p2 = new Request("S1", "S2", RequestType.AskSomething);
+            p2 = new Request("S1", "S2", RequestType.AskSomething);
             p2.AskingRscs.AddRange(new[] { r1, r2 });
 
-            var p3 = new Request("S1", "S2", RequestType.AskSomething);
+            p3 = new Request("S1", "S2", RequestType.AskSomething);
             p3.AskingRscs.AddRange(new[] { r1, r2, r3 });
         }
         
       
         [TestMethod]
         public void FilterResourcesTest() {
-            
+            s2.SetResources(new[] { r1, r2 });
+            var resList = BossBehav.FilterNotAvailableRscs(s2.Stats, p3.AskingRscs);
 
-            server2.Stats.availableResources.AddRange(new[] { r1, r2 });
+            Assert.AreEqual(1, resList.Count);
+            Assert.AreEqual(r3, resList[0]);
 
+            s1.SetResources(new[] { r2 });
+            resList = BossBehav.FilterNotAvailableRscs(s1.Stats, p3.AskingRscs);
 
-
-            server2.HandlePerception(p1);
-
-
-            // worker.Run(server1.Stats, p);
+            Assert.AreEqual(2, resList.Count);
+            Assert.IsTrue(resList.Contains(r1));
+            Assert.IsTrue(resList.Contains(r3));
         }
       
 

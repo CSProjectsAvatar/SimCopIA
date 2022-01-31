@@ -26,7 +26,7 @@ namespace Core {
             var r2 = new Resource("img2");
             var r3 = new Resource("index");
 
-            server2.Stats.availableResources.AddRange(new[] { r1, r2 });
+            server2.Stats.AvailableResources.AddRange(new[] { r1, r2 });
 
             var p1 = new Request("S1", "S2", RequestType.AskSomething);
             p1.AskingRscs.AddRange(new[] { r1 });
@@ -53,7 +53,7 @@ namespace Core {
             var r2 = new Resource("img2");
             var r3 = new Resource("index");
 
-            server2.Stats.availableResources.AddRange(new[] { r1, r2 });
+            server2.Stats.AvailableResources.AddRange(new[] { r1, r2 });
 
             var p1 = new Request("S1", "S2", RequestType.AskSomething);
             p1.AskingRscs.AddRange(new[] { r1 });

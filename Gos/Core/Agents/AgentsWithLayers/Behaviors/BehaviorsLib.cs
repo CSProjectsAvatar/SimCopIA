@@ -94,7 +94,7 @@ namespace ServersWithLayers
             Dictionary<string, bool> data = new();
             foreach (var item in req.AskingRscs)
             {
-                if (status.availableResources.Contains(item))
+                if (status.AvailableResources.Contains(item))
                 {
                     data[item.Name] = true;
                     continue;
@@ -111,9 +111,8 @@ namespace ServersWithLayers
         }
         #endregion
 
-        #region Boss
 
-        public static Behavior BossAnnounceBehievor = new Behavior(BossAnnounce,BossAnnounceInit);
+        // public static Behavior BossAnnounceBehievor = new Behavior(BossAnnounce,BossAnnounceInit);
 
     }
 

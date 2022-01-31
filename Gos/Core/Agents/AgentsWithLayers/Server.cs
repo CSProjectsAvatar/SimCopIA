@@ -34,6 +34,11 @@ namespace ServersWithLayers
             var clonedLayer = layer.CloneInServer(this);
             _layers.Add(clonedLayer);
         }
-        
+
+        internal void SetResources(IEnumerable<Resource> resources)
+        {
+            Stats.AvailableResources = new();
+            Stats.AvailableResources.AddRange(resources);
+        }
     }
 }
