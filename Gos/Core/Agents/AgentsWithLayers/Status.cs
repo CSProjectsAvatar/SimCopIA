@@ -15,7 +15,7 @@ namespace ServersWithLayers{
         internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
         internal bool HasRequests => aceptedRequests.Count > 0;
 
-        Dictionary<int,Response> _notCompletdRespns { get; set; }
+        internal Dictionary<int,Response> _notCompletdRespns { get; set; }
         List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
         Dictionary<int, Request> _requestsAceptedHistory;
@@ -39,6 +39,10 @@ namespace ServersWithLayers{
             else{ // Si esta hago: actual U resp
                 var actualRep = _notCompletdRespns[resp.ReqID];
                 _notCompletdRespns[resp.ReqID] = Response.Union(actualRep, resp);
+            }
+            if (!BehaviorsLib.Incomplete(this, resp)) {
+                this.Subscribe(resp);
+                _notCompletdRespns.Remove(resp.ReqID);
             }
         }
 
