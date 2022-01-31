@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ServersWithLayers.Behaviors;
+
 namespace ServersWithLayers
 {
 
@@ -109,82 +112,9 @@ namespace ServersWithLayers
         #endregion
 
         #region Boss
-        private static string reviewTimeB = "reviewTime";
-        private static string nextReviewB = "nextReview";
-        private static string askResponsesB = "askResponses";
+
         public static Behavior BossAnnounceBehievor = new Behavior(BossAnnounce,BossAnnounceInit);
 
-        private static void BossAnnounceInit(Status status,Dictionary<string, object> vars){
-            vars[reviewTimeB] = 5; //cambiar cualquier cosa 
-            vars[nextReviewB]  = new Utils.Heap<int>(); // la proxima revision a que request pertenece
-            vars[askResponsesB] = new Dictionary<int, List<Response>>();
-        } 
-        private static void BossAnnounce(Status status, Perception p, Dictionary<string,object> variables)
-        {
-            var askResponses = variables[askResponsesB] as Dictionary<int,List<Response>>;
-            var nextReview = variables[nextReviewB] as Utils.Heap<int>;
-            int reviewTime = (int)variables[reviewTimeB];
-
-            switch (p) {
-                case Request:
-
-                    var request = p as Request;
-                    var resourcesToFind = FilterInvalidResources(status,request.AskingRscs);
-
-                    Dictionary<string, Request> server_Request = new Dictionary<string, Request>();
-
-                    //Asumamos que ya no estan aqui los recursos que puede solucionar el propio jefe...    
-                    foreach(var resource in resourcesToFind)
-                    {
-                        var servers = status.MicroService.GetProviders(resource.Name);
-
-                        foreach(var s in servers){
-                            if(!server_Request.Keys.Contains(s)){
-                                server_Request[s] = new Request(status.serverID, s, RequestType.AskSomething);
-                                status.Subscribe(server_Request[s]);  //suscribimos para el evironment
-                                askResponses.Add(server_Request[s].ID,new List<Response>());
-                            }
-                            server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server espesifico
-                        }
-                    }
-                    status.Subscribe(Env.Time + reviewTime ,new Observer(status.serverID));
-                    nextReview.Add(Env.Time + reviewTime,request.ID);
-                    break;
-                
-                case Response :
-                    var response = p as Response;
-                    askResponses[response.ReqID].Add(response);  //Agregamos a el request por el cual se mando...
-                    break;
-                
-                case Observer:
-                    var observer = p as Observer;
-
-                    (_,int current_request_ID) = nextReview.RemoveMin();
-                    var responses =  askResponses[current_request_ID];
-                    Func<Status, List<Response>, List<Response>> selectionFunction = (Status status, List<Response> listResponses) => listResponses;
-                    var selected_servers = selectionFunction(status,responses);
-
-                    //
-                    //  Pedir Recursos  :D
-                    //
-
-                    askResponses.Remove(current_request_ID);
-
-                    break;
-
-            }
-        }
-        static IEnumerable<Resource> FilterInvalidResources(Status status,List<Resource> resources){
-            return (
-                from rec in resources
-                where status.availableResources.Exists(r => r.Name != rec.Name)
-                select rec 
-            );
-        }
-        public static Behavior BossWorkBehievor = new Behavior(BossWork) ;
-        private static void BossWork(Status status, Perception p,Dictionary<string,object> variables){
-           //filtar los requerimientos del request.... que llega   
-        }
-        #endregion
     }
+
 } 
