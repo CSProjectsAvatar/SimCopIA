@@ -114,32 +114,59 @@ namespace ServersWithLayers
 
         private static void BossAnnounceInit(Status status,Dictionary<string, object> vars){
             vars["reviewTime"] = 5; //cambiar cualquier cosa 
+            vars["nextReview"]  = new Utils.Heap<int>(); // la proxima revision a que request pertenece
+            vars["askResponses"] = new Dictionary<int, List<Response>>();
         } 
         private static void BossAnnounce(Status status, Perception p,Dictionary<string,object> variables)
         {
-            var request = p as Request;
-            if (request == null)
-                return;
+            switch (p) {
+                case Request:
 
-            Dictionary<string, Request> server_Request = new Dictionary<string, Request>();
+                    var request = p as Request;
 
-            //Asumamos que ya no estan aqui los recursos que puede solucionar el propio jefe...    
-            foreach(var resource in request.AskingRscs)
-            {
-                var servers = status.MicroService.Dir.YellowPages[resource.Name];
-                foreach(var s in servers){
-                    if(!server_Request.Keys.Contains(s)){
-                        server_Request[s] = new Request(status.serverID,s,RequestType.AskSomething);
-                        status.Subscribe(server_Request[s]);
+                    Dictionary<string, Request> server_Request = new Dictionary<string, Request>();
+
+                    //Asumamos que ya no estan aqui los recursos que puede solucionar el propio jefe...    
+                    foreach(var resource in request.AskingRscs)
+                    {
+                        var servers = status.MicroService.Dir.YellowPages[resource.Name];
+                        foreach(var s in servers){
+                            if(!server_Request.Keys.Contains(s)){
+                                server_Request[s] = new Request(status.serverID,s,RequestType.AskSomething);
+                                status.Subscribe(server_Request[s]);  //suscribimos para el environment
+                                (variables["askResponses"] as Dictionary<int,List<Response>>)
+                                    .Add(server_Request[s].ID,new List<Response>());
+                            }
+                            server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server espesifico
+                        }
                     }
-                    server_Request[s].AskingRscs.Add(resource);
-                }
+                    int reviewTime = (int)variables["reviewTime"];
+                    status.Subscribe(Env.Time + reviewTime ,new Observer(status.serverID));
+                    (variables["nextReview"] as Utils.Heap<int>).Add(Env.Time + reviewTime,request.ID);
+                    break;
+                
+                case Response :
+                    var response = p as Response;
+                    (variables["askResponses"] as Dictionary<int,List<Response>>)[response.ReqID]
+                        .Add(response);  //Agregamos a el request por el cual se mando...
+                    break;
+                
+                case Observer:
+                    var observer = p as Observer;
+
+                    (_,int current_request_ID) = (variables["nextReview"] as Utils.Heap<int>).RemoveMin();
+                    var responses =  (variables["askResponses"] as Dictionary<int,List<Response>>)[current_request_ID];
+                    Func<Status,List<Response>,List<Response>> selectionFunction = (Status status,List<Response> listResponses) => listResponses;
+                    var selected_servers = selectionFunction(status,responses);
+
+                    //
+                    //  Pedir Recursos  :D
+                    //
+
+                    break;
+
             }
-            int reviewTime = (int)variables["reviewTime"];
-            status.Subscribe(Env.Time + reviewTime ,new Observer(status.serverID));
         }
-
-
 
         #endregion
     }
