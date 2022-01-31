@@ -11,32 +11,38 @@ namespace ServersWithLayers
 
         private static string inProcessRequests_Worker = "inProcessRequests";
 
-        private static void WorkerBehavInit(Status state, Dictionary<string, object> vars){
+        private static void WorkerBehavInit(Status state, Dictionary<string, object> vars)
+        {
             vars[inProcessRequests_Worker] = new Utils.Heap<Request>();
         }
-        private static void WorkerBehav(Status st, Perception perce, Dictionary<string, object> vars){
+        private static void WorkerBehav(Status st, Perception perce, Dictionary<string, object> vars)
+        {
             // Checking Tasks Done
             var heap = vars[inProcessRequests_Worker] as Utils.Heap<Request>;
 
-            while(heap.Count != 0 && heap.First.Item1 <= Env.Time) { // first elem is done
+            while (heap.Count != 0 && heap.First.Item1 <= Env.Time)
+            { // first elem is done
 
                 var req = heap.RemoveMin().Item2; // Request completed
                 var response = BuildResponse(st, req);
 
-                if(Incomplete(st, response)){ // if incomplete I save it for fill it later
+                if (Incomplete(st, response))
+                { // if incomplete I save it for fill it later
                     st.AddPartialRpnse(response); // Add to dict
                 }
-                else{
+                else
+                {
                     st.Subscribe(response); // Subscribe response
                 }
             }
 
             // Checking Tasks to do
-            while(st.HasCapacity && st.HasRequests){
-                
+            while (st.HasCapacity && st.HasRequests)
+            {
+
                 var req = st.ExtractAcceptedReq(); // elijo request
                 var rtime = GetRequiredTimeToProcess(req);
-                
+
                 heap.Add(rtime, req); // comienzo a procesar la tarea
                 st.Subscribe(Env.Time + rtime, new Observer(st.serverID)); // 
             }
@@ -51,7 +57,7 @@ namespace ServersWithLayers
         private static int GetRequiredTimeToProcess(Request req)
         {// Returns the sum of all the required time to process the resources of the request
             var sum = 0;
-            foreach(var r in req.AskingRscs)
+            foreach (var r in req.AskingRscs)
                 sum += r.RequiredTime;
             return sum;
         }
@@ -102,10 +108,63 @@ namespace ServersWithLayers
             return response;
         }
         // Accepts a request under certain conditions
-        private  static bool IsAccepted(Status st, Request req)
+        private static bool IsAccepted(Status st, Request req)
         {
             return st.HasCapacity;
         }
         #endregion
+
+        #region FalenLeader
+
+        public static Behavior falenLeader = new Behavior(FalenLeader,FalenLeaderInit);
+
+        private static string time_FalenLeader = "timePing";
+        private static string count_ping = "countPing";
+
+        private static void FalenLeaderInit(Status state, Dictionary<string, object> vars)
+        {
+            vars[time_FalenLeader] = 3;
+            vars[count_ping] = 0;
+        }
+
+        public static void FalenLeader(Status st, Perception perce, Dictionary<string, object> vars)
+        {
+            if (perce is Response)
+            {
+                Response req = perce as Response;
+                if (req.Sender == MicroService.LeaderId && Env.Time <= (int)vars[time_FalenLeader] && req.Type == RequestType.Ping)
+                {
+                    vars[time_FalenLeader] = 3;
+                    return;
+                }
+
+                if (Env.Time > (int)vars[time_FalenLeader])
+                {
+                    if ((int)vars[count_ping] >= 3)
+                    {
+                        //cambiar para lider
+                        //MicroService.ChangeLeader(req.Receiber);
+                        return;
+                    }
+                    else
+                    {
+                        Request pingRequest = new Request(req.Receiber, MicroService.LeaderId, RequestType.Ping);
+                        int varCount = (int)vars[count_ping] + 1;
+                        vars[count_ping] = varCount;
+                        Random r = new Random();
+                        int minValue = (int)Math.Pow(2, (int)vars[time_FalenLeader]);
+                        vars[time_FalenLeader] = (int)vars[time_FalenLeader] + 1;
+                        int maxValue = (int)Math.Pow(2, (int)vars[time_FalenLeader]);
+                        int time = r.Next(minValue, maxValue);
+
+                        st.Subscribe(time, pingRequest);
+                    }
+
+
+                }
+            }
+            #endregion
+
+        }
     }
-} 
+}

@@ -14,7 +14,7 @@ namespace ServersWithLayers{
                 _name = value;
             }
         }   
-        public string LeaderId { get; set; }
+        public static string LeaderId { get; set; }
         public Directory Dir { get; set; }
 
         public MicroService(string name){
