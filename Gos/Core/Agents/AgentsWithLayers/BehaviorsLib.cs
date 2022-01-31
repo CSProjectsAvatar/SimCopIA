@@ -124,10 +124,12 @@ namespace ServersWithLayers
 
                     var request = p as Request;
 
+                    var resourcesToFind = FilterInvalidResources(status,request.AskingRscs);
+
                     Dictionary<string, Request> server_Request = new Dictionary<string, Request>();
 
                     //Asumamos que ya no estan aqui los recursos que puede solucionar el propio jefe...    
-                    foreach(var resource in request.AskingRscs)
+                    foreach(var resource in resourcesToFind)
                     {
                         var servers = status.MicroService.Dir.YellowPages[resource.Name];
                         foreach(var s in servers){
@@ -163,11 +165,23 @@ namespace ServersWithLayers
                     //  Pedir Recursos  :D
                     //
 
+                    (variables["askResponses"] as Dictionary<int,List<Response>>).Remove(current_request_ID);
+
                     break;
 
             }
         }
-
+        static IEnumerable<Resource> FilterInvalidResources(Status status,List<Resource> resources){
+            return (
+                from rec in resources
+                where status.availableResources.Exists(r => r.Name != rec.Name)
+                select rec 
+            );
+        }
+        public static Behavior BossWorkBehievor = new Behavior(BossWork) ;
+        private static void BossWork(Status status, Perception p,Dictionary<string,object> variables){
+           //filtar los requerimientos del request.... que llega   
+        }
         #endregion
     }
 } 
