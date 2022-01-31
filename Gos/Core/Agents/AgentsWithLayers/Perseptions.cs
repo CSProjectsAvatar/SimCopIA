@@ -33,6 +33,7 @@ namespace ServersWithLayers
         public Message(string sender, string receiber, RequestType type): base(){
             this.Sender = sender;
             this.Receiber = receiber;
+            this.Type = type;
         }
     }
 

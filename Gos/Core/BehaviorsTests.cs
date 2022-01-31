@@ -74,6 +74,23 @@ namespace Core {
            
         }
 
+        [TestMethod]
+        public void FalenLeaderBehavTest_1()
+        {
+            var falenLeader = BehaviorsLib.FalenLeader;
+
+            var server2 = new Server("S2");
+
+
+            var p1 = new Request("S1", "S2", RequestType.AskSomething);
+
+            var p2 = new Request("S1", "S2", RequestType.Ping);
+
+            falenLeader.Run(server2.Stats, p1);
+
+
+        }
+
     }
 
 }
