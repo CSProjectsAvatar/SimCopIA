@@ -5,7 +5,7 @@ namespace ServersWithLayers{
     public class MicroService{
         internal static Dictionary<string, MicroService> MicroServices = new();
         private string _name;
-
+        internal ServiceType Type {get; private set;}
         public string Name {get => _name; 
             set {
                 if (MicroServices.ContainsKey(value))
@@ -21,7 +21,9 @@ namespace ServersWithLayers{
             this.Name = name;
             this.Dir = new Directory();
         }
-
+        internal void SetAsEntryPoint(){
+            this.Type = ServiceType.EntryPoint;
+        }
         internal static MicroService Get(string microserviceID)
         {
             if (!MicroServices.ContainsKey(microserviceID))
@@ -36,7 +38,20 @@ namespace ServersWithLayers{
         {
             return Dir.WhitePages[serverID];
         }
+
+        internal static void ChangeLeader(string receiber)
+        {
+            throw new NotImplementedException();
+        }
     }
 
-
+    public enum ServiceType{
+        Private,
+        EntryPoint
+    }
+    public enum ServerStatus{
+        Active,
+        Inactive,
+        Dead
+    }
 }
