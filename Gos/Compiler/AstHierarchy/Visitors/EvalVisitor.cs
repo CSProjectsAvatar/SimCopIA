@@ -8,7 +8,9 @@ using Compiler.AstHierarchy;
 using Compiler.AstHierarchy.Operands;
 using Compiler.AstHierarchy.Operands.BooleanOperands;
 using Compiler.AstHierarchy.Statements;
+using Compiler.Simulation;
 using Microsoft.Extensions.Logging;
+using ServersWithLayers;
 
 namespace DataClassHierarchy
 {
@@ -518,6 +520,12 @@ namespace DataClassHierarchy
             switch (type) {
                 case GosType.List when node.Property == "length":
                     return (true, (double)(tval as List<object>).Count);
+
+                case GosType.ServerStatus when node.Property == "accepted_reqs":
+                    return (true, (tval as IServerStatus).AcceptedReqs);
+                case GosType.ServerStatus when node.Property == "can_process":
+                    return (true, (tval as IServerStatus).CanProcess);
+
                 default:
                     _log.LogError(
                         Helper.LogPref + "{type} doesn't have a property called '{prop}'.",
@@ -535,9 +543,101 @@ namespace DataClassHierarchy
         }
 
         public (bool, object) Visiting(BehaviorAst node) {
-            Context.DefBehav(node.Name, node);
+            Context.DefBehav(
+                node.Name,
+                new Behavior(
+                    // func principal del comportamiento
+                    (status, percep, vars) => {
+                        Context = Context.CreateChildContext();
+                        // definien2 variables
+                        Context.DefVariable(Helper.StatusVar, new StatusWrapper(status));
+                        Context.DefVariable(Helper.PercepVar, percep);
+                        vars
+                            .ToList()
+                            .ForEach(kv => Context.DefVariable(kv.Key, kv.Value));  // las definiciones d otras vars ma'giks deben ir a partir d este punto
+                        DefDoneReqs();
+
+                        var (succ, _) = Visiting(node.Code.Where(st => st is not InitAst));  // ejecutan2 co'digo principal (obvian2 bloke init)
+
+                        if (!succ) {
+                            _log.LogError(
+                                Helper.LogPref + "runtime error in behavior main code.",
+                                node.Token.Line,
+                                node.Token.Column);
+                            stackC.Pop();
+                            return;  // @audit ver https://github.com/CSProjectsAvatar/SimCopIA/issues/67
+                        }
+                        vars
+                            .ToList()
+                            .ForEach(kv => vars[kv.Key] = Context.GetVar(kv.Key));  // actualizan2 variables en el diccionario
+
+                        stackC.Pop();
+                    },
+                    // init del comportamiento
+                    (status, vars) => {
+                        Context = Context.CreateChildContext();
+                        Context.DefVariable(Helper.HiddenDoneReqsHeapVar, new Utils.Heap<Request>());  // variable oculta, el usuario no debe emplearla
+
+                        var init = node.Code
+                            .OfType<InitAst>()
+                            .FirstOrDefault();
+                        if (init != default) {  // hay un bloke init
+                            Context.DefVariable(Helper.StatusVar, new StatusWrapper(status));
+
+                            var (succ, _) = Visit(init);  // ejecutan2 bloke init
+
+                            if (!succ) {
+                                _log.LogError(
+                                    Helper.LogPref + "runtime error in behavior init block.",
+                                    init.Token.Line,
+                                    init.Token.Column);
+                                stackC.Pop();   
+                                return;  // @audit ver https://github.com/CSProjectsAvatar/SimCopIA/issues/67
+                            }
+                        }
+                        Context.Variables
+                            .Where(v => v.Name != Helper.StatusVar)
+                            .ToList()
+                            .ForEach(v => vars[v.Name] = v.Value);  // anyadien2 variables al diccionario
+
+                        stackC.Pop();
+                    }));
             return (true, null);
         }
+
+        /// <summary>
+        /// Define la lista de pedidos q ya fueron procesa2.
+        /// </summary>
+        private void DefDoneReqs() {
+            var heap = Context.GetVar(Helper.HiddenDoneReqsHeapVar) as Utils.Heap<Request>;
+            var ans = new List<object>();
+            var extracted = new List<(int, Request)>();
+
+            while (heap.Count != 0 && heap.First.Item1 <= Env.Time) {
+                var elem = heap.RemoveMin();
+
+                ans.Add(elem.Item2);
+                extracted.Add(elem);
+            }
+            extracted.ForEach(elem => heap.Add(elem.Item1, elem.Item2));  // reinsertan2, por si alguien kiere volver a usar el heap
+
+            Context.DefVariable(Helper.DoneReqsVar, ans);
+        }
+
+        public (bool, object) Visiting(InitAst node) {
+            foreach (var assign in node.Code.OfType<AssignAst>()) {
+                var (succ, _) = Visit(new LetVar {
+                    Expr = assign.NewVal,
+                    Identifier = (assign.Left as Variable).Identifier,
+                    Token = assign.Token
+                });
+                if (!succ) {
+                    return default;
+                }
+            }
+            return (true, null);
+        }
+
 
         public (bool, object) Visiting(Variable node){
             var result = Context.GetVar(node.Identifier);

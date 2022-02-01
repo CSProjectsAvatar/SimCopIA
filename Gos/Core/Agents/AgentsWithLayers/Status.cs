@@ -12,7 +12,8 @@ namespace ServersWithLayers{
 
         #region  Server State
         private Queue<Request> aceptedRequests;
-        internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
+        public IEnumerable<Request> AceptedRequests => aceptedRequests;
+        public bool HasCapacity => aceptedRequests.Count < MaxCapacity;
         internal bool HasRequests => aceptedRequests.Count > 0;
 
         Dictionary<int,Response> _notCompletdRespns { get; set; }

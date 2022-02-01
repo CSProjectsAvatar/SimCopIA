@@ -18,7 +18,7 @@ namespace Compiler.AstHierarchy.Statements {
         public IEnumerable<IStatement> Code { get; init; }
 
         public override bool Validate(Context context) {
-            if (!context.DefBehav(Name, this)) {
+            if (!context.DefBehav(Name, null)) {
                 _log.LogError(
                     Helper.LogPref + "behavior already defined.",
                     Token.Line,
@@ -45,11 +45,20 @@ namespace Compiler.AstHierarchy.Statements {
                 return false;
             }
             var child = context.CreateChildContext();
-            child.DefVariable("state");
-            child.DefVariable("percep");
+            child.DefVariable(Helper.StatusVar);
             child.OpenBehavior = true;
 
-            var ans = Code.All(st => st.Validate(child));
+            var mainCode = Code;
+            var ans = true;
+
+            if (inits.Count != 0) {  // hay un bloke init
+                ans = inits[0].Validate(child);  // valida'ndolo apart xq e'l no puede acceder a percep
+                mainCode = mainCode.Skip(1);
+            }
+            child.DefVariable(Helper.PercepVar);
+            child.DefVariable(Helper.DoneReqsVar);
+
+            ans = ans && mainCode.All(st => st.Validate(child));
 
             child.OpenBehavior = false;
 

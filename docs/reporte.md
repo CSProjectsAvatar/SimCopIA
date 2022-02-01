@@ -343,6 +343,11 @@ El lenguaje tiene 4 tipos:
 - `Server`: para los servidores
 - `List`: para las listas.
 - `Null`: para la no existencia de algo, por ejemplo, el tipo de retorno de las funciones que no devuelven nada.
+- `ServerStatus`: para el estado de un servidor.
+- Para la percepción que tiene el servidor sobre el ambiente, hay 3 tipos:
+    - `Request`: pedido.
+    - `Response`: respuesta.
+    - `Alarm`: notificaci&oacute;n
 
 Los operadores `+`, `-`, `*`, `/`, `%` solo est&aacute;n permitidos para el tipo `Number`. 
 

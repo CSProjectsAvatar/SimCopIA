@@ -1,5 +1,7 @@
-﻿using DataClassHierarchy;
+﻿using Compiler.Simulation;
+using DataClassHierarchy;
 using Microsoft.Extensions.Logging;
+using ServersWithLayers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +31,7 @@ namespace Compiler {
             ("init", Token.TypeEnum.InitBehav),
 
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
-            ("_?[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
+            ("_*[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
             ("true|false", Token.TypeEnum.Bool),
 
             ("{", Token.TypeEnum.LBrace),
@@ -53,6 +55,10 @@ namespace Compiler {
         };
 
         internal const string LogPref = "Line {l}, column {c}: ";
+        internal static readonly string StatusVar = "status";
+        internal static readonly string PercepVar = "percep";
+        internal static readonly string DoneReqsVar = "done_reqs";
+        internal static readonly string HiddenDoneReqsHeapVar = "__done_reqs_heap";
 
         /// <summary>
         /// Convierte un símbolo a una representación en <see cref="string"/>.
@@ -86,6 +92,10 @@ namespace Compiler {
                 //Agent => GosType.Server,
                 List<object> => GosType.List,
                 null => GosType.Null,
+                IServerStatus => GosType.ServerStatus,
+                Response => GosType.Response,
+                Observer => GosType.Alarm,
+                Request => GosType.Request,
                 _ => throw new NotImplementedException()
             };
         }

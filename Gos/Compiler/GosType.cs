@@ -7,6 +7,14 @@
         Bool,
         Server,
         List,
-        Null
+        Null,
+        ServerStatus,
+        Response,
+
+        /// <summary>
+        /// Para el tipo de percepcio'n <see cref="ServersWithLayers.Observer"/>
+        /// </summary>
+        Alarm,
+        Request
     }
 }

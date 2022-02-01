@@ -10,18 +10,19 @@ namespace DataClassHierarchy
     public class Context
     {
         public static Env Simulation {get; internal set;}
+
         internal Context parent;
         
         Dictionary<string, object> _variables;
         Dictionary<(string, int), DefFun> _functions; // (nombre, aridad) 
-        private readonly Dictionary<string, BehaviorAst> _behavs;
+        private readonly Dictionary<string, Behavior> _behavs;
 
         /// <summary>
         /// Whether a function declaration has been started in the validation process but it' hasn't been closed yet.
         /// </summary>
         internal bool OpenFunction { get; set; }
 
-        internal bool DefBehav(string name, BehaviorAst node) {
+        internal bool DefBehav(string name, Behavior node) {
             if (_behavs.ContainsKey(name)) {
                 return false;
             }
@@ -35,6 +36,8 @@ namespace DataClassHierarchy
         /// </summary>
         internal bool OpenLoop { get; set; }
         internal bool OpenBehavior { get; set; }
+
+        public IEnumerable<(string Name, object Value)> Variables => _variables.Select(kv => (kv.Key, kv.Value));
 
         public Context(){
             _variables = new Dictionary<string, object>();
@@ -108,6 +111,10 @@ namespace DataClassHierarchy
             childContent.parent = this;
             
             return childContent;
+        }
+
+        internal Behavior GetBehav(string name) {
+            return _behavs[name];
         }
     }
 }
