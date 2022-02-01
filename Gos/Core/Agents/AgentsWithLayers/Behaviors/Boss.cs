@@ -10,27 +10,31 @@ namespace ServersWithLayers.Behaviors
         private static string reviewTimeB = "reviewTime";
         private static string nextReviewB = "nextReview";
         private static string askResponsesB = "askResponses";
+        private static string solutionResponsesAsocietedIDB = "solutionResponsesAsocietedID";
 
         private static void BossAnnounceInit(Status status,Dictionary<string, object> vars){
             vars[reviewTimeB] = 5; //cambiar cualquier cosa 
             vars[nextReviewB]  = new Utils.Heap<int>(); // la proxima revision a que request pertenece
             vars[askResponsesB] = new Dictionary<int, List<Response>>();
+            vars[solutionResponsesAsocietedIDB] = new Dictionary<int, int>();
         } 
         private static void BossAnnounce(Status status, Perception p, Dictionary<string,object> variables)
         {
             var askResponses = variables[askResponsesB] as Dictionary<int,List<Response>>;
             var nextReview = variables[nextReviewB] as Utils.Heap<int>;
+            var solutionResponsesAsocietedID  = variables[solutionResponsesAsocietedIDB] as Dictionary<int, int>;
             int reviewTime = (int)variables[reviewTimeB];
+
 
             switch (p) {
                 case Request:
 
                     var request = p as Request;
+                    //buscamos los recursos que no puede solucionar este servidor.
                     var resourcesToFind = FilterNotAvailableRscs(status,request.AskingRscs);
 
                     var server_Request = new Dictionary<string, Request>();
 
-                    //Asumamos que ya no estan aqui los recursos que puede solucionar el propio jefe...    
                     foreach(var resource in resourcesToFind)
                     {
                         var servers = status.MicroService.GetProviders(resource.Name);
@@ -51,35 +55,42 @@ namespace ServersWithLayers.Behaviors
                 
                 case Response :
                     var response = p as Response;
-
-                    if (askResponses.Keys.Contains(response.ReqID))
+                    if (response.Type == RequestType.AskSomething && askResponses.Keys.Contains(response.ReqID))
                         askResponses[response.ReqID].Add(response);  //Agregamos a el request por el cual se mando...
+                    else if (response.Type == RequestType.DoSomething && solutionResponsesAsocietedID.Keys.Contains(response.ReqID)){ 
                         
+                        var request_id = response.ReqID;
+                        
+                        //cambiamos el id del response que acaba de llegar para usarlo con AddPartialResponse
+                        response.Reassign(solutionResponsesAsocietedID[response.ReqID]); 
+                        status.AddPartialRpnse(response);
+
+                        //quitamos el id del request asociado al response que acaba de llegar ya que este ha sido respondido.
+                        solutionResponsesAsocietedID.Remove(request_id);
+
+                    } 
                     break;
                 
                 case Observer:
                     var observer = p as Observer;
-
+                    
                     (_,int current_request_ID) = nextReview.RemoveMin();
-                    var responses =  askResponses[current_request_ID];
 
-                    var selected_servers = ResponseSelectionFunction(status,responses);
+                    if(askResponses.Keys.Contains(current_request_ID)){
 
-                    //
-                    //  Pedir Recursos  :D
-                    //
-                        
-                    foreach(var r in selected_servers)
-                        status.Subscribe(r);
+                        var responses =  askResponses[current_request_ID];
 
-                    //
-                    //
-                    //
+                        var selected_servers = ResponseSelectionFunction(status,responses);
 
-                    askResponses.Remove(current_request_ID);
+                        foreach(var r in selected_servers){
+                            status.Subscribe(r);
+                            solutionResponsesAsocietedID.Add(r.ID, current_request_ID);
+                        }
+                        askResponses.Remove(current_request_ID);
+                    }
+                    
 
                     break;
-
             }
         }
         internal static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
