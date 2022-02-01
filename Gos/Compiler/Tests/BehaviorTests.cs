@@ -614,6 +614,41 @@ let " + var + @" = 3
             Assert.IsTrue(ast.Validate(new Context()));
         }
 
+        [TestMethod]
+        public void RequestTypeProperty() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    print [percep.type == DO, percep.type == ASK, percep.type == PING]
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            #region configuran2
+            Behavior behav = ctx.GetBehav("foo");
+            _ = new Env();
+
+            #endregion
+
+            behav.Run(null, new Request("fulano", "mengano", RequestType.AskSomething));
+            behav.Run(null, new Request("fulano", "mengano", RequestType.DoSomething));
+            behav.Run(null, new Request("fulano", "mengano", RequestType.Ping));
+
+            Assert.AreEqual(
+                $"[False, True, False]{_endl}" +
+                $"[True, False, False]{_endl}" +
+                $"[False, False, True]{_endl}",
+                @out.ToString());
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();

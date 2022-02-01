@@ -534,6 +534,9 @@ namespace DataClassHierarchy
                     var status = tval as Status;
                     return (true, status.HasCapacity);
 
+                case GosType.Request when node.Property == "type":
+                    return (true, (double)(tval as Request).Type);
+
                 default:
                     _log.LogError(
                         Helper.LogPref + "{type} doesn't have a property called '{prop}'.",

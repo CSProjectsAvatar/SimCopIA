@@ -114,9 +114,9 @@ namespace ServersWithLayers
 
     
     public enum RequestType{
-        AskSomething,
-        DoSomething,
-        Ping
+        AskSomething = 0,  // @note no cambies los #s asignados
+        DoSomething = 1,
+        Ping = 2
     }
     
     [TestClass]

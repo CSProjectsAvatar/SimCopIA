@@ -125,5 +125,14 @@ namespace DataClassHierarchy
         internal Behavior GetBehav(string name) {
             return _behavs[name];
         }
+
+        internal static Context Global() {
+            var ctx = new Context();
+            ctx.DefVariable("ASK", (double)RequestType.AskSomething);
+            ctx.DefVariable("DO", (double)RequestType.DoSomething);
+            ctx.DefVariable("PING", (double)RequestType.Ping);
+
+            return ctx;
+        }
     }
 }
