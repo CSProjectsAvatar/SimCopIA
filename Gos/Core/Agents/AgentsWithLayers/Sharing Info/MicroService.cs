@@ -3,20 +3,19 @@ using System.Collections.Generic;
 
 namespace ServersWithLayers{
     public class MicroService{
-        internal static Dictionary<string, MicroService> MicroServices = new();
+        internal static Dictionary<string, MicroService> Services = new();
         private string _name;
         internal ServiceType Type {get; private set;}
         public string Name {get => _name; 
             set {
-                if (MicroServices.ContainsKey(value))
+                if (Services.ContainsKey(value))
                     throw new Exception("MicroService already exists");
-                MicroServices.Add(value, this);
+                Services.Add(value, this);
                 _name = value;
             }
         }   
         public string LeaderId { get; set; }
         private Directory Dir { get; set; }
-
         public MicroService(string name){
             this.Name = name;
             this.Dir = new Directory();
@@ -26,9 +25,9 @@ namespace ServersWithLayers{
         }
         internal static MicroService Get(string microserviceID)
         {
-            if (!MicroServices.ContainsKey(microserviceID))
+            if (!Services.ContainsKey(microserviceID))
                 throw new Exception("MicroService doesn't exists");
-            return MicroServices[microserviceID];
+            return Services[microserviceID];
         }
         internal List<string> GetProviders(string resName)
         {

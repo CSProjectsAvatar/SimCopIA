@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ServersWithLayers
 {
@@ -12,10 +13,8 @@ namespace ServersWithLayers
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
 
-        public bool debug{get;set;}
-        public Env(bool debug=false){
+        public Env(){
             Env.CurrentEnv = this;
-            this.debug = debug;
             currentTime = 0;
             this.servers = new();
             turn = new();
@@ -25,6 +24,7 @@ namespace ServersWithLayers
             foreach(var server in servers){
                 AddServer(server);
             }
+            
         }
         private void AddServer(Server s){
             servers.Add(s.ID, s);
@@ -53,6 +53,15 @@ namespace ServersWithLayers
                 return this.servers[ID];
             return null;
         }
+
+        internal string GetRndEntryPoint()
+        {
+            var entryPoints = MicroService.Services
+                .Where(pair => pair.Value.Type is ServiceType.EntryPoint)
+                .Select(pair => pair.Value.LeaderId);
+
+            return entryPoints.ElementAt(new Random().Next(entryPoints.Count()));
+        }
     }
 }
 /*
@@ -69,7 +78,5 @@ Event:
 Resource:
 - Unidad principal pedida y transferida entre agentes. (i.e una pagina web, un archivo, una imagen, etc)
 
-IA
-Como repartir los recursos
 
 */
