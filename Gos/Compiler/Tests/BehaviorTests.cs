@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ServersWithLayers;
+using Core;
 
 namespace Compiler.Tests {
     [TestClass]
@@ -296,6 +297,59 @@ behav foo {
             behav.Run(new Status("server"), null);
 
             Assert.AreEqual($"3{_endl}4{Environment.NewLine}", @out.ToString());
+        }
+
+        [TestMethod]
+        public void OperatingWithStatus() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    init {
+        a = 3
+    }
+    let b = a + status
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var ctx = new Context();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behav = ctx.GetBehav("foo");
+
+            Assert.ThrowsException<GoSException>(() => behav.Run(new Status("server"), null));
+        }
+
+        [TestMethod]
+        public void OperatingWithPercep() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    init {
+        a = 3
+    }
+    let b = a + percep
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var ctx = new Context();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behav = ctx.GetBehav("foo");
+
+            Assert.ThrowsException<GoSException>(
+                () => behav.Run(new Status("server"), new Request("fulano", "mengano", RequestType.AskSomething)));
         }
 
         [TestMethod]

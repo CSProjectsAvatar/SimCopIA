@@ -9,6 +9,7 @@ using Compiler.AstHierarchy.Operands;
 using Compiler.AstHierarchy.Operands.BooleanOperands;
 using Compiler.AstHierarchy.Statements;
 using Compiler.Simulation;
+using Core;
 using Microsoft.Extensions.Logging;
 using ServersWithLayers;
 
@@ -560,12 +561,8 @@ namespace DataClassHierarchy
                         var (succ, _) = Visiting(node.Code.Where(st => st is not InitAst));  // ejecutan2 co'digo principal (obvian2 bloke init)
 
                         if (!succ) {
-                            _log.LogError(
-                                Helper.LogPref + "runtime error in behavior main code.",
-                                node.Token.Line,
-                                node.Token.Column);
                             stackC.Pop();
-                            return;  // @audit ver https://github.com/CSProjectsAvatar/SimCopIA/issues/67
+                            throw new GoSException($"Runtime error in behavior '{node.Name}' main code.");
                         }
                         vars
                             .ToList()
@@ -587,12 +584,8 @@ namespace DataClassHierarchy
                             var (succ, _) = Visit(init);  // ejecutan2 bloke init
 
                             if (!succ) {
-                                _log.LogError(
-                                    Helper.LogPref + "runtime error in behavior init block.",
-                                    init.Token.Line,
-                                    init.Token.Column);
-                                stackC.Pop();   
-                                return;  // @audit ver https://github.com/CSProjectsAvatar/SimCopIA/issues/67
+                                stackC.Pop();
+                                throw new GoSException($"Runtime error in behavior '{node.Name}' init code.");
                             }
                         }
                         Context.Variables
