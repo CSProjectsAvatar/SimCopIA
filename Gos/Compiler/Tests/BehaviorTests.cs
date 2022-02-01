@@ -566,6 +566,54 @@ behav foo {
                 $"False{_endl}", @out.ToString());
         }
 
+        [DataTestMethod]
+        [DataRow(Helper.StatusVar)]
+        [DataRow(Helper.PercepVar)]
+        [DataRow(Helper.DoneReqsVar)]
+        public void MagicVarCantBeAssignedInInit(string var) {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    init {
+        " + var + @" = 3
+    }
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsFalse(ast.Validate(new Context()));
+        }
+
+        [DataTestMethod]
+        [DataRow(Helper.StatusVar)]
+        [DataRow(Helper.PercepVar)]
+        [DataRow(Helper.DoneReqsVar)]
+        public void MagicVarCantBeAssignedInMainCode(string var) {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    " + var + @" = 3
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsFalse(ast.Validate(new Context()));
+        }
+
+        [DataTestMethod]
+        [DataRow(Helper.StatusVar)]
+        [DataRow(Helper.PercepVar)]
+        [DataRow(Helper.DoneReqsVar)]
+        public void MagicVarCanBeAssignedOutside(string var) {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    print true
+}
+let " + var + @" = 3
+" + var + " = 5" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(new Context()));
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();

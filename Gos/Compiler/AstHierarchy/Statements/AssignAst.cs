@@ -25,6 +25,15 @@ namespace Compiler.AstHierarchy.Statements {
                     Token.Column);
                 return false;
             }
+            var magicVars = new[] { Helper.DoneReqsVar, Helper.StatusVar, Helper.PercepVar };
+            if (Left is Variable v && context.IsInsideBehav() && magicVars.Contains(v.Identifier)) {
+                _log.LogError(
+                    Helper.LogPref + "variable '{id}' is read-only.",
+                    Token.Line,
+                    Token.Column,
+                    v.Identifier);
+                return false;
+            }
             return Left.Validate(context) && NewVal.Validate(context);
         }
     }

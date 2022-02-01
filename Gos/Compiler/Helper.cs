@@ -56,9 +56,9 @@ namespace Compiler {
         };
 
         internal const string LogPref = "Line {l}, column {c}: ";
-        internal static readonly string StatusVar = "status";
-        internal static readonly string PercepVar = "percep";
-        internal static readonly string DoneReqsVar = "done_reqs";
+        internal const string StatusVar = "status";
+        internal const string PercepVar = "percep";
+        internal const string DoneReqsVar = "done_reqs";
         internal static readonly string HiddenDoneReqsHeapVar = "__done_reqs_heap";
 
         /// <summary>
