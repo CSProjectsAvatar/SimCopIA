@@ -45,7 +45,7 @@ namespace ServersWithLayers.Behaviors
                             server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server espesifico
                         }
                     }
-                    status.Subscribe(Env.Time + reviewTime, new Observer(status.serverID));
+                    status.SubscribeAt(Env.Time + reviewTime, new Observer(status.serverID));
                     nextReview.Add(Env.Time + reviewTime, request.ID);
                     break;
                 

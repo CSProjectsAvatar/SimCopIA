@@ -14,12 +14,17 @@ namespace ServersWithLayers{
                 _name = value;
             }
         }   
-        public string LeaderId { get; set; }
+        internal string LeaderId { get; set; }
         private Directory Dir { get; set; }
 
         public MicroService(string name){
             this.Name = name;
             this.Dir = new Directory();
+        }
+
+        public MicroService()
+        {
+            
         }
 
         internal static MicroService Get(string microserviceID)
@@ -35,6 +40,11 @@ namespace ServersWithLayers{
         internal ServerBio GetBio(string serverID)
         {
             return Dir.WhitePages[serverID];
+        }
+
+        internal void ChangeLeader(string leaderID)
+        {
+           LeaderId = "S1";
         }
     }
 

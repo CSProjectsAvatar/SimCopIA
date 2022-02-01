@@ -7,7 +7,7 @@ namespace ServersWithLayers
     public class Behavior
     {
         Dictionary<string, object> variables;
-        private Action<Status, Dictionary<string, object>> _init;
+        internal Action<Status, Dictionary<string, object>> _init;
         Action<Status, Perception, Dictionary<string, object>> action;
         
         bool _firstTime = true;

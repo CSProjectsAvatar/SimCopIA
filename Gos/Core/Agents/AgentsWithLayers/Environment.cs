@@ -20,6 +20,7 @@ namespace ServersWithLayers
             this.servers = new();
             turn = new();
             solutionResponses = new();
+            servers = new();
         }
         public void AddServerList(List<Server> servers){
             foreach(var server in servers){
