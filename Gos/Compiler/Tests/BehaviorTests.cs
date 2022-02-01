@@ -417,6 +417,155 @@ behav foo {
             Assert.IsFalse(ast.Validate(new Context()));
         }
 
+        [TestMethod]
+        public void RespondOrSaveOutside() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    print 3
+}
+let r = 3
+respond_or_save r
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsFalse(ast.Validate(new Context()));
+        }
+
+        [TestMethod]
+        public void ProcessOutside() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    print 3
+}
+let r = 3
+process r
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsFalse(ast.Validate(new Context()));
+        }
+
+        [TestMethod]
+        public void ProcessRemovesAcceptedRequests() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    print status.accepted_reqs.length
+
+    for req in status.accepted_reqs {
+        if status.can_process == false {
+            break
+        }
+        print req
+        process req
+    }
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var ctx = new Context();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behav = ctx.GetBehav("foo");
+            var status = new Status("server");
+            var r1 = new Request("sender", "server", RequestType.AskSomething);
+            var r2 = new Request("sender", "server", RequestType.AskSomething);
+            status.AcceptReq(r1);
+            status.AcceptReq(r2);
+            new Env();
+
+            behav.Run(status, null);
+            behav.Run(status, null);
+
+            Assert.AreEqual($"2{_endl}" +
+                $"{EvalVisitor.GosObjToString(r1)}{_endl}" +
+                $"{EvalVisitor.GosObjToString(r2)}{_endl}" +
+                $"0{_endl}", @out.ToString());
+        }
+
+        [TestMethod]
+        public void RespondOrSaveRemovesFromDoneReqs() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    init {
+        call = 1
+    }
+    print call
+    print true
+
+    for req in done_reqs {
+        print req
+        respond_or_save req
+    }
+    print false
+
+    for req in status.accepted_reqs {
+        if status.can_process == false {
+            break
+        }
+        print req
+        process req
+    }
+    call = call + 1
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var ctx = new Context();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            #region configuran2
+            var rs1 = new Resource("img1");
+            var rs2 = new Resource("img2");
+            var rs3 = new Resource("index");
+
+            var serv = new Server("server");
+            serv.Stats.AvailableResources.AddRange(new[] { rs1, rs2 });
+
+            var r1 = new Request("sender", "server", RequestType.AskSomething);
+            r1.AskingRscs.AddRange(new[] { rs1 });
+            var r2 = new Request("sender", "server", RequestType.AskSomething);
+            r2.AskingRscs.AddRange(new[] { rs2, rs3 });
+
+            serv.Stats.AcceptReq(r1);
+            serv.Stats.AcceptReq(r2);
+
+            Behavior behav = ctx.GetBehav("foo");
+            _ = new Env();
+
+            #endregion
+
+            behav.Run(serv.Stats, null);
+            behav.Run(serv.Stats, null);
+            behav.Run(serv.Stats, null);
+
+            Assert.AreEqual(
+                $"1{_endl}" +
+                $"True{_endl}" +
+                $"False{_endl}" +
+                $"{EvalVisitor.GosObjToString(r1)}{_endl}" +
+                $"{EvalVisitor.GosObjToString(r2)}{_endl}" +
+                $"2{_endl}" +
+                $"True{_endl}" +
+                $"{EvalVisitor.GosObjToString(r1)}{_endl}" +
+                $"{EvalVisitor.GosObjToString(r2)}{_endl}" +
+                $"False{_endl}" +
+                $"3{_endl}" +
+                $"True{_endl}" +
+                $"False{_endl}", @out.ToString());
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();

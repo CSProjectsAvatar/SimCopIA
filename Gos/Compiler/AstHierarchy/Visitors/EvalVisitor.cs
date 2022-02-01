@@ -8,7 +8,6 @@ using Compiler.AstHierarchy;
 using Compiler.AstHierarchy.Operands;
 using Compiler.AstHierarchy.Operands.BooleanOperands;
 using Compiler.AstHierarchy.Statements;
-using Compiler.Simulation;
 using Core;
 using Microsoft.Extensions.Logging;
 using ServersWithLayers;
@@ -47,8 +46,15 @@ namespace DataClassHierarchy
             var tResults = (left, right);
 
             switch (tResults) {  // @audit SEGURAMENT NECESITAREMOS UN DICCIONARIO PA SABER Q TIPOS ADMITE CADA OPERADOR EN SUS OPERANDOS
+                case (_, _) when node is EqEqOp eqeq:
+                    var (succ, result) = Visiting(eqeq, left, right);
+                    if (!succ) {
+                        return (false, null);
+                    }
+                    return (true, result);
+
                 case (double lNum, double rNum):
-                    var (succ, result) = VisitBinExpr(node, lNum, rNum);
+                    (succ, result) = VisitBinExpr(node, lNum, rNum);
                     if(!succ){
                         return (false, null);
                     }
@@ -94,8 +100,8 @@ namespace DataClassHierarchy
             return node.TryCompute(lNum, rNum);
         }
 
-        public (bool Success, object Result) Visiting(EqEqOp node, double lNum, double rNum) {
-            return node.TryCompute(lNum, rNum);
+        public (bool Success, object Result) Visiting(EqEqOp node, object lobj, object robj) {
+            return (true, Equals(lobj, robj));
         }
 
         public (bool, object) Visiting(BoolAst node) {
@@ -523,9 +529,10 @@ namespace DataClassHierarchy
                     return (true, (double)(tval as List<object>).Count);
 
                 case GosType.ServerStatus when node.Property == "accepted_reqs":
-                    return (true, (tval as IServerStatus).AcceptedReqs);
+                    return (true, (tval as Status).AceptedRequests.OfType<object>().ToList());
                 case GosType.ServerStatus when node.Property == "can_process":
-                    return (true, (tval as IServerStatus).CanProcess);
+                    var status = tval as Status;
+                    return (true, status.HasCapacity);
 
                 default:
                     _log.LogError(
@@ -551,7 +558,7 @@ namespace DataClassHierarchy
                     (status, percep, vars) => {
                         Context = Context.CreateChildContext();
                         // definien2 variables
-                        Context.DefVariable(Helper.StatusVar, new StatusWrapper(status));
+                        Context.DefVariable(Helper.StatusVar, status);
                         Context.DefVariable(Helper.PercepVar, percep);
                         vars
                             .ToList()
@@ -579,7 +586,7 @@ namespace DataClassHierarchy
                             .OfType<InitAst>()
                             .FirstOrDefault();
                         if (init != default) {  // hay un bloke init
-                            Context.DefVariable(Helper.StatusVar, new StatusWrapper(status));
+                            Context.DefVariable(Helper.StatusVar, status);
 
                             var (succ, _) = Visit(init);  // ejecutan2 bloke init
 
@@ -631,6 +638,62 @@ namespace DataClassHierarchy
             return (true, null);
         }
 
+        public (bool, object) Visiting(RespondOrSaveAst node) {
+            var (rsucc, rval) = Visit(node.Request);
+            if (!rsucc) {
+                return default;
+            }
+            var rtype = Helper.GetType(rval);
+            if (rtype != GosType.Request) {
+                _log.LogError(
+                    Helper.LogPref + "expected type: Request, actual type: {type}.",
+                    node.Request.Token.Line,
+                    node.Request.Token.Column,
+                    rtype);
+                return default;
+            }
+            var req = rval as Request;
+            var status = Context.GetVar(Helper.StatusVar) as Status;
+            Response response = BehaviorsLib.BuildResponse(status, req);
+
+            if (BehaviorsLib.Incomplete(status, response)) {
+                _log.LogDebug("Incomplete response: {r}", GosObjToString(response));
+
+                status.AddPartialRpnse(response);
+            } else {
+                status.Subscribe(response);
+            }
+            var heap = Context.GetVar(Helper.HiddenDoneReqsHeapVar) as Utils.Heap<Request>;
+            heap.RemoveMin();
+
+            return (true, null);
+        }
+
+        public (bool, object) Visiting(ProcessAst node) {
+            var (rsucc, rval) = Visit(node.Request);
+            if (!rsucc) {
+                return default;
+            }
+            var rtype = Helper.GetType(rval);
+            if (rtype != GosType.Request) {
+                _log.LogError(
+                    Helper.LogPref + "expected type: Request, actual type: {type}.",
+                    node.Request.Token.Line,
+                    node.Request.Token.Column,
+                    rtype);
+                return default;
+            }
+            var req = rval as Request;
+            var st = Context.GetVar(Helper.StatusVar) as Status;
+            st.ExtractAcceptedReq();  // saco el pedi2 d la cola
+            int rtime = BehaviorsLib.GetRequiredTimeToProcess(req);
+            var heap = Context.GetVar(Helper.HiddenDoneReqsHeapVar) as Utils.Heap<Request>;
+
+            heap.Add(Env.Time + rtime, req);  // comienzo a procesar la tarea
+            st.Subscribe(Env.Time + rtime, new Observer(st.serverID));
+
+            return (true, null);
+        }
 
         public (bool, object) Visiting(Variable node){
             var result = Context.GetVar(node.Identifier);
@@ -653,10 +716,29 @@ namespace DataClassHierarchy
             return (true, null); // @todo No tenemos soportado null(por eso el ? de arriba), hay q ver eso
         }
 
-        private string GosObjToString(object obj) {
-            return Helper.GetType(obj) is GosType.List
-                ? $"[{string.Join(", ", (obj as List<object>).Select(elem => GosObjToString(elem)))}]"
-                : obj?.ToString();
+        internal static string GosObjToString(object obj) {
+            switch (Helper.GetType(obj)) {
+                case GosType.List:
+                    return $"[{string.Join(", ", (obj as List<object>).Select(elem => GosObjToString(elem)))}]";
+
+                case GosType.Request:
+                    var r = obj as Request;
+                    var type = r.Type switch {
+                        RequestType.AskSomething => "ASK",
+                        RequestType.DoSomething => "DO",
+                        RequestType.Ping => "PING",
+                        _ => throw new NotImplementedException()
+                    };
+                    var resrcs = string.Join(", ", r.AskingRscs.Select(rs => rs.Name));
+                    return $"request {r.ID} {r.Sender} --{type}--> {r.Receiber} ({resrcs})";
+
+                case GosType.Response:
+                    var resp = obj as Response;
+                    return $"response to request {resp.ReqID}";
+
+                default:
+                    return obj?.ToString();
+            }
         }
 
         public (bool, object) Visiting(ProgramNode node){

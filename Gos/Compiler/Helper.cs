@@ -1,5 +1,4 @@
-﻿using Compiler.Simulation;
-using DataClassHierarchy;
+﻿using DataClassHierarchy;
 using Microsoft.Extensions.Logging;
 using ServersWithLayers;
 using System;
@@ -29,6 +28,8 @@ namespace Compiler {
             ("or", Token.TypeEnum.Or),
             ("behav", Token.TypeEnum.Behavior),
             ("init", Token.TypeEnum.InitBehav),
+            ("respond_or_save", Token.TypeEnum.RespondOrSave),
+            ("process", Token.TypeEnum.Process),
 
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("_*[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
@@ -92,7 +93,7 @@ namespace Compiler {
                 //Agent => GosType.Server,
                 List<object> => GosType.List,
                 null => GosType.Null,
-                IServerStatus => GosType.ServerStatus,
+                Status => GosType.ServerStatus,
                 Response => GosType.Response,
                 Observer => GosType.Alarm,
                 Request => GosType.Request,

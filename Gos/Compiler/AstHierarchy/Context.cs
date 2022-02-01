@@ -17,6 +17,15 @@ namespace DataClassHierarchy
         Dictionary<(string, int), DefFun> _functions; // (nombre, aridad) 
         private readonly Dictionary<string, Behavior> _behavs;
 
+        internal bool IsInsideBehav() {
+            for (var ctx = this; ctx != null; ctx = ctx.parent) {
+                if (ctx.OpenBehavior) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Whether a function declaration has been started in the validation process but it' hasn't been closed yet.
         /// </summary>

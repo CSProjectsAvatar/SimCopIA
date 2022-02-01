@@ -13,7 +13,7 @@ namespace ServersWithLayers{
             }
         }
 
-        public int RequiredTime { get; internal set; }
+        public int RequiredTime { get; set; }
 
         public List<(int, string)> Requirements;
         

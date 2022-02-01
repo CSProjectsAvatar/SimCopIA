@@ -19,6 +19,8 @@ namespace Compiler.Grammar_Unterminals {
                      | <atom> "=" <expr>
                      | "break"
                      | <method-call>
+                     | "respond_or_save" <expr>
+                     | "process" <expr>
             */
             return derivation[0] switch {
                 Token { Type: Token.TypeEnum.Id } id when derivation[1] is RightConnUnt rc
@@ -41,6 +43,16 @@ namespace Compiler.Grammar_Unterminals {
                     Token = b
                 },
                 MethodCallUnt u => u.Ast,
+                Token { Type: Token.TypeEnum.RespondOrSave } t when derivation[1] is ExpressionUnt exprUnt
+                    => new RespondOrSaveAst(Helper.Logger<RespondOrSaveAst>()) {
+                        Token = t,
+                        Request = exprUnt.Ast as Expression
+                    },
+                Token { Type: Token.TypeEnum.Process } t when derivation[1] is ExpressionUnt exprUnt
+                    => new ProcessAst(Helper.Logger<ProcessAst>()) {
+                        Token = t,
+                        Request = exprUnt.Ast as Expression
+                    },
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

@@ -6,15 +6,15 @@ namespace ServersWithLayers{
         #region Server Properties
         public int MaxCapacity { get; private set; }
         internal MicroService MicroService;
-        internal string serverID;
-        internal List<Resource> AvailableResources;
+        public string serverID;
+        public List<Resource> AvailableResources;
         #endregion
 
         #region  Server State
         private Queue<Request> aceptedRequests;
         public IEnumerable<Request> AceptedRequests => aceptedRequests;
         public bool HasCapacity => aceptedRequests.Count < MaxCapacity;
-        internal bool HasRequests => aceptedRequests.Count > 0;
+        public bool HasRequests => aceptedRequests.Count > 0;
 
         Dictionary<int,Response> _notCompletdRespns { get; set; }
         List<(int, Perception)> _sendToEnv;
@@ -31,9 +31,11 @@ namespace ServersWithLayers{
             AvailableResources = new();
             aceptedRequests = new();
             serverID = iD;
+            _requestsAceptedHistory = new();
+            _notCompletdRespns = new();
         }
 
-        internal void AddPartialRpnse(Response resp)
+        public void AddPartialRpnse(Response resp)
         {
             if (!_notCompletdRespns.ContainsKey(resp.ReqID)) // Si no esta lo agrego
                 _notCompletdRespns.Add(resp.ReqID, resp);

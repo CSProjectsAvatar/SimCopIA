@@ -250,6 +250,8 @@ graph LR
         | <atom> "=" <expr>
         | "break"
         | <method-call>
+        | "respond_or_save" <expr>
+        | "process" <expr>
 
 <let-var> := "let" ID "=" <expr>
 

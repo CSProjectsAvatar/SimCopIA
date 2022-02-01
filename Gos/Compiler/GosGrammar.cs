@@ -78,6 +78,8 @@ namespace Compiler {
         private static readonly TokenType behav = Token.TypeEnum.Behavior;
         private static readonly TokenType init = Token.TypeEnum.InitBehav;
         private static readonly TokenType dot = Token.TypeEnum.Dot;
+        private static readonly TokenType respondOrSave = Token.TypeEnum.RespondOrSave;
+        private static readonly TokenType process = Token.TypeEnum.Process;
 
         #endregion
         public GosGrammar() : base(
@@ -113,6 +115,8 @@ namespace Compiler {
             Stat > (Atom, eq, Expr),  // asignacio'n
             Stat > @break,
             Stat > MethodCall,
+            Stat > (respondOrSave, Expr),
+            Stat > (process, Expr),
 
             LetVar > (let, id, eq, Expr),
 

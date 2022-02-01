@@ -45,13 +45,13 @@ namespace ServersWithLayers
             }
         }
 
-        private static bool Incomplete(Status st, Response response)
+        public static bool Incomplete(Status st, Response response)
         {
             var req = st.GetRequestById(response.ReqID);
             return response.AnswerRscs.Count < req.AskingRscs.Count;
         }
 
-        private static int GetRequiredTimeToProcess(Request req)
+        public static int GetRequiredTimeToProcess(Request req)
         {// Returns the sum of all the required time to process the resources of the request
             var sum = 0;
             foreach(var r in req.AskingRscs)
@@ -89,7 +89,7 @@ namespace ServersWithLayers
         }
 
         // Builds a response to: asking, imperative and ping request; in the same way
-        private static Response BuildResponse(Status status, Request req)
+        public static Response BuildResponse(Status status, Request req)
         {
             Dictionary<string, bool> data = new();
             foreach (var item in req.AskingRscs)

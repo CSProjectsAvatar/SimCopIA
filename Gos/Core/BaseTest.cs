@@ -36,8 +36,9 @@ namespace Core {
                 builder
                     .AddFilter("Microsoft", LogLevel.Warning)
                     .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("Core", LogLevel.Debug)
+                    .AddFilter("Core", LogLevel.Information)
                     .AddFilter("Compiler", LogLevel.Information)
+                    .AddFilter("DataClassHierarchy", LogLevel.Information)
                     .AddConsole();
             });
         } // init

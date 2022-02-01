@@ -29,7 +29,7 @@ namespace ServersWithLayers
         private void AddServer(Server s){
             servers.Add(s.ID, s);
         }
-        public IEnumerable<Action> EnumerateActions(){
+        public IEnumerable<Action> EnumerateActions(){  // @remind esto so'lo puede ser enumera2 una vez, debi2 al turn.RemoveMin()
             while (turn.Count != 0){
                 (int time, Event exe ) = this.turn.RemoveMin();
                 this.currentTime = time;
