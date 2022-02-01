@@ -38,12 +38,10 @@ namespace ServersWithLayers.Behaviors
                     break;
 
                 case Response response when response.Type is ReqType.Asking:
-                    if (askResponses.ContainsKey(response.ReqID)) // @warning mira ver que kieras hacer esto
+                    if (askResponses.ContainsKey(response.ReqID))
                         askResponses[response.ReqID].Add(response);  //Agregamos a el request por el cual se mando...
 
                     break;
-
-
 
                 case Response response:
 
@@ -52,18 +50,21 @@ namespace ServersWithLayers.Behaviors
 
                 case Observer observer:
 
+                    // (tiempo actual  != timepo de recogida de responses) <=> (observer no asociado a esta capa)
+                    if( Env.Time != nextReview.First.Item1)
+                        return;
+
                     (_,int current_request_ID) = nextReview.RemoveMin();
 
                     var responses =  askResponses[current_request_ID];
 
-                    var finalResponses = ResponseSelectionFunction(status,responses);
+                    var requestsToDo = ResponseSelectionFunction(status,responses);
 
-                    foreach(var r in finalResponses){
+                    foreach(Request r in requestsToDo){
                         status.Subscribe(r);
                         solutionResponsesAsocietedID.Add(r.ID, current_request_ID);
                     }
                     askResponses.Remove(current_request_ID);
-                    
 
                     break;
             }
@@ -71,11 +72,9 @@ namespace ServersWithLayers.Behaviors
 
         private static void ProcessResponse(Response response, Status status, Dictionary<int, List<Response>> askResponses, Dictionary<int, int> solutionResponsesAsocietedID)
         {
-            
-            else if (response.Type == ReqType.DoIt
-                    && solutionResponsesAsocietedID.Keys.Contains(response.ReqID))
+            if (response.Type == ReqType.DoIt 
+                && solutionResponsesAsocietedID.Keys.Contains(response.ReqID))
             {
-
                 var request_id = response.ReqID;
 
                 //cambiamos el id del response que acaba de llegar para usarlo con AddPartialResponse
@@ -107,7 +106,11 @@ namespace ServersWithLayers.Behaviors
 
                         server_Request[s] = new Request(status.serverID, s, ReqType.Asking);
                         status.Subscribe(server_Request[s]);  //suscribimos para el evironment
-                        askResponses.Add(server_Request[s].ID, new List<Response>());
+
+                        //askResponses.Add(server_Request[s].ID, new List<Response>()); // error
+
+                        //lista de los responses asosciados a un request originalmente hecho a este server
+                        askResponses.Add(request.ID, new List<Response>());   
                     }
                     server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server espesifico
                 }
