@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Utils;
 
 namespace ServersWithLayers.Behaviors
 {
@@ -27,72 +28,97 @@ namespace ServersWithLayers.Behaviors
 
 
             switch (p) {
-                case Request:
+                case Request request when request.Type is ReqType.Asking:
+                    ProcessAskingRequest(request, status);
+                    break;
 
-                    var request = p as Request;
+                case Request request when request.Type is ReqType.DoIt:
                     //buscamos los recursos que no puede solucionar este servidor.
-                    var resourcesToFind = FilterNotAvailableRscs(status,request.AskingRscs);
-
-                    var server_Request = new Dictionary<string, Request>();
-
-                    foreach(var resource in resourcesToFind)
-                    {
-                        var servers = status.MicroService.GetProviders(resource.Name);
-                        foreach(var s in servers){
-
-                            if(!server_Request.ContainsKey(s)){
-                                    
-                                server_Request[s] = new Request(status.serverID, s, RequestType.AskSomething);
-                                status.Subscribe(server_Request[s]);  //suscribimos para el evironment
-                                askResponses.Add(server_Request[s].ID,new List<Response>());
-                            }
-                            server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server espesifico
-                        }
-                    }
-                    status.Subscribe(Env.Time + reviewTime, new Observer(status.serverID));
-                    nextReview.Add(Env.Time + reviewTime, request.ID);
+                    ProcessDoItRequest(request, status, askResponses, nextReview, reviewTime);
                     break;
-                
-                case Response :
-                    var response = p as Response;
-                    if (response.Type == RequestType.AskSomething && askResponses.Keys.Contains(response.ReqID))
+
+                case Response response when response.Type is ReqType.Asking:
+                    if (askResponses.ContainsKey(response.ReqID)) // @warning mira ver que kieras hacer esto
                         askResponses[response.ReqID].Add(response);  //Agregamos a el request por el cual se mando...
-                    else if (response.Type == RequestType.DoSomething && solutionResponsesAsocietedID.Keys.Contains(response.ReqID)){ 
-                        
-                        var request_id = response.ReqID;
-                        
-                        //cambiamos el id del response que acaba de llegar para usarlo con AddPartialResponse
-                        response.Reassign(solutionResponsesAsocietedID[response.ReqID]); 
-                        status.AddPartialRpnse(response);
 
-                        //quitamos el id del request asociado al response que acaba de llegar ya que este ha sido respondido.
-                        solutionResponsesAsocietedID.Remove(request_id);
-
-                    } 
                     break;
-                
-                case Observer:
-                    var observer = p as Observer;
-                    
+
+
+
+                case Response response:
+
+                    ProcessResponse(response, status, askResponses, solutionResponsesAsocietedID);
+                    break;
+
+                case Observer observer:
+
                     (_,int current_request_ID) = nextReview.RemoveMin();
 
-                    if(askResponses.Keys.Contains(current_request_ID)){
+                    var responses =  askResponses[current_request_ID];
 
-                        var responses =  askResponses[current_request_ID];
+                    var finalResponses = ResponseSelectionFunction(status,responses);
 
-                        var selected_servers = ResponseSelectionFunction(status,responses);
-
-                        foreach(var r in selected_servers){
-                            status.Subscribe(r);
-                            solutionResponsesAsocietedID.Add(r.ID, current_request_ID);
-                        }
-                        askResponses.Remove(current_request_ID);
+                    foreach(var r in finalResponses){
+                        status.Subscribe(r);
+                        solutionResponsesAsocietedID.Add(r.ID, current_request_ID);
                     }
+                    askResponses.Remove(current_request_ID);
                     
 
                     break;
             }
         }
+
+        private static void ProcessResponse(Response response, Status status, Dictionary<int, List<Response>> askResponses, Dictionary<int, int> solutionResponsesAsocietedID)
+        {
+            
+            else if (response.Type == ReqType.DoIt
+                    && solutionResponsesAsocietedID.Keys.Contains(response.ReqID))
+            {
+
+                var request_id = response.ReqID;
+
+                //cambiamos el id del response que acaba de llegar para usarlo con AddPartialResponse
+                response.Reassign(solutionResponsesAsocietedID[response.ReqID]);
+                status.AddPartialRpnse(response);
+
+                //quitamos el id del request asociado al response que acaba de llegar ya que este ha sido respondido.
+                solutionResponsesAsocietedID.Remove(request_id);
+            }
+        }
+
+        /// <summary>
+        /// Procesa los Request de tipo DoIt, se encarga de repartir la carga de trabajo entre los servidores del microservicio
+        /// </summary>
+        private static void ProcessDoItRequest(Request request, Status status, Dictionary<int, List<Response>> askResponses, Heap<int> nextReview, int reviewTime)
+        {
+            var resourcesToFind = FilterNotAvailableRscs(status, request.AskingRscs);
+
+            var server_Request = new Dictionary<string, Request>();
+
+            foreach (var resource in resourcesToFind)
+            {
+                var servers = status.MicroService.GetProviders(resource.Name);
+                foreach (var s in servers)
+                {
+
+                    if (!server_Request.ContainsKey(s))
+                    {
+
+                        server_Request[s] = new Request(status.serverID, s, ReqType.Asking);
+                        status.Subscribe(server_Request[s]);  //suscribimos para el evironment
+                        askResponses.Add(server_Request[s].ID, new List<Response>());
+                    }
+                    server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server espesifico
+                }
+            }
+            status.Subscribe(Env.Time + reviewTime, new Observer(status.serverID));
+            nextReview.Add(Env.Time + reviewTime, request.ID);
+        }
+        static void ProcessAskingRequest(Request request, Status status){
+
+        }
+
         internal static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
             var availList = status.AvailableResources;
             var res = resources.Where(x => !availList.Contains(x)).ToList();
@@ -128,13 +154,13 @@ namespace ServersWithLayers.Behaviors
             r2 = new Resource("img2");
             r3 = new Resource("index");
 
-            p1 = new Request("S1", "S2", RequestType.AskSomething);
+            p1 = new Request("S1", "S2", ReqType.Asking);
             p1.AskingRscs.AddRange(new[] { r1 });
 
-            p2 = new Request("S1", "S2", RequestType.AskSomething);
+            p2 = new Request("S1", "S2", ReqType.Asking);
             p2.AskingRscs.AddRange(new[] { r1, r2 });
 
-            p3 = new Request("S1", "S2", RequestType.AskSomething);
+            p3 = new Request("S1", "S2", ReqType.Asking);
             p3.AskingRscs.AddRange(new[] { r1, r2, r3 });
         }
         

@@ -11,10 +11,10 @@ namespace ServersWithLayers{
         #endregion
 
         #region  Server State
-        private Queue<Request> aceptedRequests;
         internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
         internal bool HasRequests => aceptedRequests.Count > 0;
 
+        Queue<Request> aceptedRequests;
         Dictionary<int,Response> _notCompletdRespns { get; set; }
         List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;

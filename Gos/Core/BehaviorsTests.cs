@@ -28,13 +28,13 @@ namespace Core {
 
             server2.Stats.AvailableResources.AddRange(new[] { r1, r2 });
 
-            var p1 = new Request("S1", "S2", RequestType.AskSomething);
+            var p1 = new Request("S1", "S2", ReqType.Asking);
             p1.AskingRscs.AddRange(new[] { r1 });
 
-            var p2 = new Request("S1", "S2", RequestType.AskSomething);
+            var p2 = new Request("S1", "S2", ReqType.Asking);
             p2.AskingRscs.AddRange(new[] { r1, r2 });
 
-            var p3 = new Request("S1", "S2", RequestType.AskSomething);
+            var p3 = new Request("S1", "S2", ReqType.Asking);
             p3.AskingRscs.AddRange(new[] { r1, r2, r3 });
 
             server2.HandlePerception(p1);
@@ -55,13 +55,13 @@ namespace Core {
 
             server2.Stats.AvailableResources.AddRange(new[] { r1, r2 });
 
-            var p1 = new Request("S1", "S2", RequestType.AskSomething);
+            var p1 = new Request("S1", "S2", ReqType.Asking);
             p1.AskingRscs.AddRange(new[] { r1 });
 
-            var p2 = new Request("S1", "S2", RequestType.AskSomething);
+            var p2 = new Request("S1", "S2", ReqType.Asking);
             p2.AskingRscs.AddRange(new[] { r1, r2 });
 
-            var p3 = new Request("S1", "S2", RequestType.AskSomething);
+            var p3 = new Request("S1", "S2", ReqType.Asking);
             p3.AskingRscs.AddRange(new[] { r1, r2, r3 });
 
             server2.HandlePerception(p1);

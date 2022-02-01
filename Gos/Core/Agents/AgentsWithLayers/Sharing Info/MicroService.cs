@@ -36,6 +36,11 @@ namespace ServersWithLayers{
         {
             return Dir.WhitePages[serverID];
         }
+
+        internal List<Resource> GetAllResourcesAvailable()
+        {
+            
+        }
     }
 
 

@@ -29,8 +29,8 @@ namespace ServersWithLayers
     public abstract class Message : Perception{
         public string Sender {get;} 
         public string Receiber {get;}
-        public RequestType Type {get;}
-        public Message(string sender, string receiber, RequestType type): base(){
+        public ReqType Type {get;}
+        public Message(string sender, string receiber, ReqType type): base(){
             this.Sender = sender;
             this.Receiber = receiber;
         }
@@ -43,7 +43,7 @@ namespace ServersWithLayers
         static int lastRequestID = 0; 
         public int ID {get;}
         public List<Resource> AskingRscs { get; set; }
-        public Request(string sender, string receiber, RequestType type) : base(sender,receiber, type){
+        public Request(string sender, string receiber, ReqType type) : base(sender,receiber, type){
             this.ID = ++lastRequestID; 
             this.MatureTime = 1;
             AskingRscs = new();
@@ -68,7 +68,7 @@ namespace ServersWithLayers
     public class Response : Message{
         public int ReqID {get; private set;}
         public Dictionary<string,bool> AnswerRscs {get;}
-        public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, bool> data ) : base(sender, receiber, type){
+        public Response(int requestID, string sender, string receiber, ReqType type, Dictionary<string, bool> data ) : base(sender, receiber, type){
             this.ReqID = requestID;
             this.AnswerRscs = data;
             this.MatureTime = 1;
@@ -113,9 +113,9 @@ namespace ServersWithLayers
     }
 
     
-    public enum RequestType{
-        AskSomething,
-        DoSomething,
+    public enum ReqType{
+        Asking,
+        DoIt,
         Ping
     }
     
@@ -124,12 +124,12 @@ namespace ServersWithLayers
 
         [TestMethod]
         public void ResponesUnionTest(){
-            var r1 = new Response(1, "sender", "receiber", RequestType.AskSomething, new Dictionary<string, bool>{
+            var r1 = new Response(1, "sender", "receiber", ReqType.Asking, new Dictionary<string, bool>{
                 {"r1", true},
                 {"r2", false},
                 {"r3", true}
             });
-            var r2 = new Response(1, "sender", "receiber", RequestType.AskSomething, new Dictionary<string, bool>{
+            var r2 = new Response(1, "sender", "receiber", ReqType.Asking, new Dictionary<string, bool>{
                 {"r1", false},
                 {"r2", true},
                 {"r3", true},

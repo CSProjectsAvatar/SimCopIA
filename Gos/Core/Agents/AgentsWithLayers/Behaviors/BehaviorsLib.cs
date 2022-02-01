@@ -72,13 +72,13 @@ namespace ServersWithLayers
 
             switch (req.Type)
             {
-                case RequestType.AskSomething when IsAccepted(state, req):
+                case ReqType.Asking when IsAccepted(state, req):
 
                     Response response = BuildResponse(state, req);
                     state.Subscribe(response);
                     break;
 
-                case RequestType.DoSomething or RequestType.Ping:
+                case ReqType.DoIt or ReqType.Ping:
 
                     state.AcceptReq(req);
                     break;
@@ -89,21 +89,39 @@ namespace ServersWithLayers
         }
 
         // Builds a response to: asking, imperative and ping request; in the same way
-        private static Response BuildResponse(Status status, Request req)
+        internal static Response BuildResponse(Status status, Request req)
+        {
+            Dictionary<string, bool> data = GetAvailablesRscs(req, status.AvailableResources);
+            var response = req.MakeResponse(data);
+            return response;
+        }
+        // Builds a response AS A LEADER to: asking, imperative and ping request; in the same way
+        internal static Response BuildResponse(Status status, Request req)
+        {
+            // Gets the resources that are available in the Microservice 
+            var availInMicro = status.MicroService.GetAllResourcesAvailable();
+            
+            Dictionary<string, bool> data = GetAvailablesRscs(req, availInMicro);
+            var response = req.MakeResponse(data);
+            return response;
+        }
+
+        internal static Dictionary<string, bool> GetAvailablesRscs(Request req, List<Resource> availableResources)
         {
             Dictionary<string, bool> data = new();
             foreach (var item in req.AskingRscs)
             {
-                if (status.AvailableResources.Contains(item))
+                if (availableResources.Contains(item))
                 {
                     data[item.Name] = true;
                     continue;
                 }
                 // data[item.Name] = false; // Comentado para no estorbar con el Jefe recibiendo recursos que no tiene
             }
-            var response = req.MakeResponse(data);
-            return response;
+
+            return data;
         }
+
         // Accepts a request under certain conditions
         private  static bool IsAccepted(Status st, Request req)
         {
