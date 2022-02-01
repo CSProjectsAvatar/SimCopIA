@@ -14,11 +14,16 @@ namespace ServersWithLayers{
                 _name = value;
             }
         }   
-        public string LeaderId { get; set; }
+        internal string LeaderId { get; set; }
         private Directory Dir { get; set; }
         public MicroService(string name){
             this.Name = name;
             this.Dir = new Directory();
+        }
+
+        public MicroService()
+        {
+            
         }
         internal void SetAsEntryPoint(){
             this.Type = ServiceType.EntryPoint;
@@ -38,9 +43,9 @@ namespace ServersWithLayers{
             return Dir.WhitePages[serverID];
         }
 
-        internal static void ChangeLeader(string receiber)
+        internal void ChangeLeader(string leaderID)
         {
-            throw new NotImplementedException();
+           LeaderId =  leaderID;
         }
     }
 

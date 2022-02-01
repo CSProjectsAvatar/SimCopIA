@@ -9,12 +9,11 @@ namespace ServersWithLayers
         internal Server server;
         internal List<Behavior> behaviors;
 
-        public Layer(List<Behavior> behavs)
+        public Layer()
         {
-            behaviors = behavs;
+            behaviors = new List<Behavior> { };
         }
-        public Layer() : this(new List<Behavior>()) { }
-        
+
         //Aqui la capa hace todo lo referente a modificar el estado de 'server'  o suscribir al environment Perceptions.
         //Esto basado en un una Perception 'p' y el estado interno de 'server'
         public void Process(Perception p)
@@ -25,19 +24,23 @@ namespace ServersWithLayers
 
         }
 
+
         public Layer Clone()
         {
             var copy = new Layer();
 
             if (behaviors != null)
             {
-                var tempBehaviors = new List<Behavior> { };
+                var tempBehavior = new List<Behavior> { };
                 for (var i = 0; i < behaviors.Count; i++)
                 {
-                    var value = behaviors[i].Clone();
-                    tempBehaviors.Add(value);
+                    var value = behaviors[i];
+                    //value = value.Clone();
+                    value = value.Clone(value._init);
+
+                    tempBehavior.Add(value);
                 }
-                copy.behaviors = tempBehaviors;
+                copy.behaviors = tempBehavior;
             }
             return copy;
         }
@@ -48,6 +51,8 @@ namespace ServersWithLayers
             copy.server = server;
             return copy;
         }
+
+        
     }
 
 }

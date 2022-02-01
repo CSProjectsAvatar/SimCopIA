@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace ServersWithLayers
 {
 
-    public class Behavior
+    public class Behavior : ICloneable
     {
         Dictionary<string, object> variables;
         private Action<Status, Dictionary<string, object>> _init;
@@ -32,7 +32,7 @@ namespace ServersWithLayers
             action(status, perception, variables);
          }
 
-        public Behavior Clone()
+        public Object Clone()
         {
             var copy = new Behavior();
             copy.action += this.action;
