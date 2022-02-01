@@ -32,6 +32,14 @@ namespace ServersWithLayers
             action(status, perception, variables);
          }
 
+        internal Behavior Clone(Action<Status, Dictionary<string, object>> init)
+        {
+            var copy = new Behavior();  //@todo review dict var
+            copy.action += this.action;
+            copy._init = _init;
+            return copy;
+        }
+
         public Behavior Clone()
         {
             var copy = new Behavior();  //@todo review dict var

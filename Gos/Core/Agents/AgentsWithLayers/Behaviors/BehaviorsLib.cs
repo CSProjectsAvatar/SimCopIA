@@ -143,13 +143,13 @@ namespace ServersWithLayers
             int lastTSeeLdr = (int)vars[lastTSeeLeaderStr];
 
             if (perce is Message msg && msg.Sender == st.MicroService.LeaderId) {// Envio del Lider
-                vars[initialPotenceStr] = initP;
+                vars[countPingStr] = 0;
                 vars[lastTSeeLeaderStr] = Env.Time;
                 return;
             }
 
             var waitTime = (int)Math.Pow(2, initP + countPing);
-            if (/*Env.Time*/12 - lastTSeeLdr >= waitTime)
+            if (Env.Time - lastTSeeLdr >= waitTime)
             {
                 if (countPing >= maxPing) // Mucho Tiempo sin saber del lider
                 {

@@ -46,7 +46,7 @@ namespace ServersWithLayers{
 
         internal void ChangeLeader(string leaderID)
         {
-           LeaderId = "S1";
+           LeaderId =  leaderID;
         }
     }
 

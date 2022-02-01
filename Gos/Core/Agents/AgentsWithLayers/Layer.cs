@@ -11,7 +11,7 @@ namespace ServersWithLayers
 
         public Layer()
         {
-
+            behaviors = new List<Behavior> { };
         }
 
         //Aqui la capa hace todo lo referente a modificar el estado de 'server'  o suscribir al environment Perceptions.
@@ -35,7 +35,9 @@ namespace ServersWithLayers
                 for (var i = 0; i < behaviors.Count; i++)
                 {
                     var value = behaviors[i];
-                    value = value.Clone();
+                    //value = value.Clone();
+                    value = value.Clone(value._init);
+
                     tempBehavior.Add(value);
                 }
                 copy.behaviors = tempBehavior;
