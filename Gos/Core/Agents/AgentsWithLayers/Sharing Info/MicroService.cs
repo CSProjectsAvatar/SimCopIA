@@ -8,14 +8,14 @@ namespace ServersWithLayers{
 
         public string Name {get => _name; 
             set {
-                if (MicroServices.ContainsKey(Name))
+                if (MicroServices.ContainsKey(value))
                     throw new Exception("MicroService already exists");
-                MicroServices.Add(Name, this);
+                MicroServices.Add(value, this);
                 _name = value;
             }
         }   
         public string LeaderId { get; set; }
-        public Directory Dir { get; set; }
+        private Directory Dir { get; set; }
 
         public MicroService(string name){
             this.Name = name;
@@ -27,6 +27,14 @@ namespace ServersWithLayers{
             if (!MicroServices.ContainsKey(microserviceID))
                 throw new Exception("MicroService doesn't exists");
             return MicroServices[microserviceID];
+        }
+        internal List<string> GetProviders(string resName)
+        {
+            return Dir.YellowPages[resName];
+        }
+        internal ServerBio GetBio(string serverID)
+        {
+            return Dir.WhitePages[serverID];
         }
     }
 

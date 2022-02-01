@@ -7,7 +7,7 @@ namespace ServersWithLayers{
         public int MaxCapacity { get; private set; }
         internal MicroService MicroService;
         internal string serverID;
-        internal List<Resource> availableResources;
+        internal List<Resource> AvailableResources;
         #endregion
 
         #region  Server State
@@ -28,7 +28,7 @@ namespace ServersWithLayers{
             _variables = new();
 
             MaxCapacity = 5;
-            availableResources = new();
+            AvailableResources = new();
             aceptedRequests = new();
             serverID = iD;
         }

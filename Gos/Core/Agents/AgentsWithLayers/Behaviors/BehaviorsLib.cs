@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ServersWithLayers.Behaviors;
 
 namespace ServersWithLayers
 {
@@ -91,7 +94,7 @@ namespace ServersWithLayers
             Dictionary<string, bool> data = new();
             foreach (var item in req.AskingRscs)
             {
-                if (status.availableResources.Contains(item))
+                if (status.AvailableResources.Contains(item))
                 {
                     data[item.Name] = true;
                     continue;
@@ -107,5 +110,10 @@ namespace ServersWithLayers
             return st.HasCapacity;
         }
         #endregion
+
+
+        // public static Behavior BossAnnounceBehievor = new Behavior(BossAnnounce,BossAnnounceInit);
+
     }
+
 } 
