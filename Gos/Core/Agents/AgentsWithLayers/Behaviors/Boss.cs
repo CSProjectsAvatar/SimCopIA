@@ -37,7 +37,7 @@ namespace ServersWithLayers.Behaviors
                         foreach(var s in servers){
 
                             if(!server_Request.ContainsKey(s)){
-
+                                    
                                 server_Request[s] = new Request(status.serverID, s, RequestType.AskSomething);
                                 status.Subscribe(server_Request[s]);  //suscribimos para el evironment
                                 askResponses.Add(server_Request[s].ID,new List<Response>());
@@ -51,7 +51,10 @@ namespace ServersWithLayers.Behaviors
                 
                 case Response :
                     var response = p as Response;
-                    askResponses[response.ReqID].Add(response);  //Agregamos a el request por el cual se mando...
+
+                    if (askResponses.Keys.Contains(response.ReqID))
+                        askResponses[response.ReqID].Add(response);  //Agregamos a el request por el cual se mando...
+                        
                     break;
                 
                 case Observer:
@@ -59,11 +62,18 @@ namespace ServersWithLayers.Behaviors
 
                     (_,int current_request_ID) = nextReview.RemoveMin();
                     var responses =  askResponses[current_request_ID];
-                    Func<Status, List<Response>, List<Response>> selectionFunction = (Status status, List<Response> listResponses) => listResponses;
-                    var selected_servers = selectionFunction(status,responses);
+
+                    var selected_servers = ResponseSelectionFunction(status,responses);
 
                     //
                     //  Pedir Recursos  :D
+                    //
+                        
+                    foreach(var r in selected_servers)
+                        status.Subscribe(r);
+
+                    //
+                    //
                     //
 
                     askResponses.Remove(current_request_ID);
@@ -78,9 +88,9 @@ namespace ServersWithLayers.Behaviors
 
             return res;
         }
-        public static Behavior BossWorkBehievor = new Behavior(BossWork) ;
-        private static void BossWork(Status status, Perception p,Dictionary<string,object> variables){
-           //filtar los requerimientos del request.... que llega   
+
+        private static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
+            throw new NotImplementedException("IMPLEMENTAR FUNCION DE SELECCION EN BOSS");
         }
     }
 
