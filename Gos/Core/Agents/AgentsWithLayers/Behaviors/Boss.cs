@@ -29,7 +29,7 @@ namespace ServersWithLayers.Behaviors
 
             switch (p) {
                 case Request request when request.Type is ReqType.Asking:
-                    ProcessAskingRequest(request, status);
+                    BehaviorsLib.BuildLeaderResponse(status, request);
                     break;
 
                 case Request request when request.Type is ReqType.DoIt:
@@ -115,9 +115,7 @@ namespace ServersWithLayers.Behaviors
             status.Subscribe(Env.Time + reviewTime, new Observer(status.serverID));
             nextReview.Add(Env.Time + reviewTime, request.ID);
         }
-        static void ProcessAskingRequest(Request request, Status status){
-
-        }
+        
 
         internal static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
             var availList = status.AvailableResources;

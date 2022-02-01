@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ServersWithLayers{
     public class MicroService{
@@ -36,10 +37,9 @@ namespace ServersWithLayers{
         {
             return Dir.WhitePages[serverID];
         }
-
         internal List<Resource> GetAllResourcesAvailable()
         {
-            
+            return Dir.YellowPages.Keys.Select(resName => Resource.Resources[resName]).ToList();  
         }
     }
 

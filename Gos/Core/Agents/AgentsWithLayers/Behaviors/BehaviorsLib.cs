@@ -96,11 +96,12 @@ namespace ServersWithLayers
             return response;
         }
         // Builds a response AS A LEADER to: asking, imperative and ping request; in the same way
-        internal static Response BuildResponse(Status status, Request req)
+        // takes into account the available resources in the microservice
+        internal static Response BuildLeaderResponse(Status status, Request req)
         {
             // Gets the resources that are available in the Microservice 
             var availInMicro = status.MicroService.GetAllResourcesAvailable();
-            
+
             Dictionary<string, bool> data = GetAvailablesRscs(req, availInMicro);
             var response = req.MakeResponse(data);
             return response;
