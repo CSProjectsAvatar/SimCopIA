@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -6,16 +7,17 @@ namespace ServersWithLayers
 {
     // Cualquier evento que le toque ejecutarse en algun punto de la simulacion.
     public abstract class Perception : Event{
-        string receiber;
+        string receiver;
         internal Env env;
-        public Perception() : base(){
+        public Perception(string receiver) : base(){
+            this.receiver = receiver;
         }
         // Se ejecuta al salir de la cola de prioridad en el Environment en su tiempo correspondiente.
         // Le hace conocer al servidor que tiene que manejar su llegada.
         public override void ExecuteInTime(){
-            var receiber=Env.CurrentEnv.GetServerByID(this.receiber);
-            if(receiber != null)
-                receiber.HandlePerception(this);
+            var rec = Env.CurrentEnv.GetServerByID(this.receiver);
+            if(rec != null)
+                rec.HandlePerception(this);
             else{
                 //no hacer nada si no se encontro un server con ese ID
             }
@@ -28,12 +30,12 @@ namespace ServersWithLayers
     /// -quien lo debe recibir (recieber).
     public abstract class Message : Perception{
         public string Sender {get;} 
-        public string Receiber {get;}
+        public string Receiver {get;}
         public RequestType Type {get;}
-        public Message(string sender, string receiber, RequestType type): base(){
+        public Message(string sender, string receiver, RequestType type): base(receiver){
             this.Sender = sender;
-            this.Receiber = receiber;
             this.Type = type;
+            this.Receiver = receiver;
         }
     }
 
@@ -41,27 +43,38 @@ namespace ServersWithLayers
     //  -ID
     //  -URL asociada.
     public class Request:Message{
+        // public Request RndClientReq => GetRndClientReq();
+
+        // private static Request GetRndClientReq()
+        // {
+        //     var clientId = "0"; // id de los clientes
+        //     var destServer = Env.CurrentEnv.GetRndEntryPoint();
+        //     var askRscs = Resource.GetRndFinishedRscs();
+
+        //     var req = new Request(clientId, destServer, RequestType.DoSomething);
+        //     req.AskingRscs = askRscs;
+        // }
+
         static int lastRequestID = 0; 
         public int ID {get;}
         public List<Resource> AskingRscs { get; set; }
-        public Request(string sender, string receiber, RequestType type) : base(sender,receiber, type){
+        public Request(string sender, string receiver, RequestType type) : base(sender,receiver, type){
             this.ID = ++lastRequestID; 
             this.MatureTime = 1;
             AskingRscs = new();
         }
 
-        // Crea un reponse a partir del request,
-        // esta dirigido a el que envio el request y lo manda el que recibio el request,
-        // se le agregan los datos que supuestamente pide el request en cuestion.
+        // Crea un reponse a partir del request, en sentido contrario, con el campo data
         public Response MakeResponse(Dictionary<string, bool> data){
             return new Response(
                 this.ID,
-                this.Receiber,
+                this.Receiver,
                 this.Sender,
                 this.Type,
                 data
             );
         }
+    
     }
     //Un Response con informacion como:
     //  - ID del request asociado.
@@ -69,7 +82,8 @@ namespace ServersWithLayers
     public class Response : Message{
         public int ReqID {get; private set;}
         public Dictionary<string,bool> AnswerRscs {get;}
-        public Response(int requestID, string sender, string receiber, RequestType type, Dictionary<string, bool> data ) : base(sender, receiber, type){
+        public Response(int requestID, string sender, string receiver, 
+                RequestType type, Dictionary<string, bool> data ) : base(sender, receiver, type){
             this.ReqID = requestID;
             this.AnswerRscs = data;
             this.MatureTime = 1;
@@ -94,7 +108,7 @@ namespace ServersWithLayers
             return new Response(
                 r1.ReqID,
                 r1.Sender,
-                r1.Receiber,
+                r1.Receiver,
                 r1.Type,
                 unionData
             );
@@ -106,11 +120,8 @@ namespace ServersWithLayers
     // es util cuando se usan cronomtros etc,
     // contiene el objeto Objective, que es un objeto que identifica lo que va a suceder dentro del server que suscribio el Observer. 
     public class Observer:Perception{
-        public string Sender;
         // public object Objetive {get;}
-        public Observer( string sender) : base(){
-            this.Sender = sender;
-        }
+        public Observer(string sender) : base(sender){ }
     }
 
     

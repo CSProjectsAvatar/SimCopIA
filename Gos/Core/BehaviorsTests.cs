@@ -70,32 +70,50 @@ namespace Core {
 
         }
 
+        #region FalenLeader
+        #region  vars
+        private Server s1;
+        private Server s2;
+        private Behavior falenLeader;
+        private Request p1;
+        private Request p2;
+        private Env env;
+        private List<Server> servers;
+        private Layer layer;
+        #endregion
+        #endregion
+
+
+        [TestInitialize]
+        public void Init1()
+        {
+            s1 = new Server("S1");
+            s2 = new Server("S2");
+
+            env = new Env();
+            falenLeader = BehaviorsLib.FalenLeader;
+            layer = new Layer();
+
+            p1 = new Request("S1", "S2", RequestType.AskSomething);
+            p2 = new Request("S1", "S2", RequestType.Ping);
+
+            servers = new List<Server> { s1, s2 };
+        }
+
+
         [TestMethod]
         public void FalenLeaderBehavTest_1()
         {
-            var e = new Env();
-            var falenLeader = BehaviorsLib.FalenLeader;
+            layer.behaviors.Add(falenLeader);
 
-            var server1 = new Server("S1");
-            var server2 = new Server("S2");
+            s2.AddLayer(layer);
+            s2.Stats.MicroService.ChangeLeader( "S1");
 
-            Layer l = new Layer();
+            env.AddServerList(servers);
 
-            l.behaviors.Add(falenLeader);
-            server2.AddLayer(l);
 
-            server2.Stats.MicroService.ChangeLeader( "S1");
-            List<Server> s = new List<Server> { server1, server2 };
-
-            e.AddServerList(s);
-
-            //Dictionary<string, bool> data = new  Dictionary<string, bool>{ };
-            var p1 = new Request("S1", "S2", RequestType.AskSomething);
-
-            var p2 = new Request("S1", "S2", RequestType.Ping);
-
-            e.SubsribeEvent(10, p1);
-            e.Run();
+            env.SubsribeEvent(10, p1);
+            env.Run();
 
             ///falenLeader.Run(server2.Stats, p2);
 

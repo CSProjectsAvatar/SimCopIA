@@ -5,7 +5,7 @@ namespace ServersWithLayers{
     public class MicroService{
         internal static Dictionary<string, MicroService> MicroServices = new();
         private string _name;
-
+        internal ServiceType Type {get; private set;}
         public string Name {get => _name; 
             set {
                 if (MicroServices.ContainsKey(value))
@@ -26,7 +26,9 @@ namespace ServersWithLayers{
         {
             
         }
-
+        internal void SetAsEntryPoint(){
+            this.Type = ServiceType.EntryPoint;
+        }
         internal static MicroService Get(string microserviceID)
         {
             if (!MicroServices.ContainsKey(microserviceID))
@@ -48,5 +50,13 @@ namespace ServersWithLayers{
         }
     }
 
-
+    public enum ServiceType{
+        Private,
+        EntryPoint
+    }
+    public enum ServerStatus{
+        Active,
+        Inactive,
+        Dead
+    }
 }
