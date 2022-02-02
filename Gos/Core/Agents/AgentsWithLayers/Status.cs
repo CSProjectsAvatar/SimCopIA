@@ -32,7 +32,6 @@ namespace ServersWithLayers{
             serverID = iD;
 
             _requestsAceptedHistory = new();
-            // MicroService = new MicroService();
         }
 
         internal void AddPartialRpnse(Response resp)
