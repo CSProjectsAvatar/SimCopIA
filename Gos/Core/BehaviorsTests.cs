@@ -34,8 +34,6 @@ namespace Core {
             s2 = new Server("S2");
             s3 = new Server("S2");
 
-
-            // server2.AddLayer();
             r1 = new Resource("img1");
             r2 = new Resource("img2");
             r3 = new Resource("index");
@@ -60,31 +58,8 @@ namespace Core {
         
         [TestMethod]
         public void WorkerBehavTest_1() {
-            var worker = BehaviorsLib.Worker;
-            var server1 = new Server("S1");
-            var server2 = new Server("S2");
             
-            // server2.AddLayer();
-            var r1 = new Resource("img1");
-            var r2 = new Resource("img2");
-            var r3 = new Resource("index");
-
-            //server2.Stats.availableResources.AddRange(new[] { r1, r2 });
-
-            var p1 = new Request("S1", "S2", ReqType.Asking);
-            p1.AskingRscs.AddRange(new[] { r1 });
-
-            p2 = new Request("S3", "S2", ReqType.Asking);
-            p3 = new Request("S3", "S2", ReqType.Asking);
-            p4 = new Request("S3", "S2", ReqType.Asking);
-            p5 = new Request("S3", "S2", ReqType.Asking);
-
-            p2.AskingRscs.AddRange(new[] { r1, r2 });
-
-           // var p3 = new Request("S1", "S2", RequestType.AskSomething);
-           // p3.AskingRscs.AddRange(new[] { r1, r2, r3 });
-
-            server2.HandlePerception(p1);
+            // server2.HandlePerception(p1);
 
 
             // worker.Run(server1.Stats, p);
