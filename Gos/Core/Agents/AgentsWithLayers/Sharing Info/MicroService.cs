@@ -35,6 +35,8 @@ namespace ServersWithLayers{
         {
             if (!Services.ContainsKey(microS))
                 throw new Exception("MicroService doesn't exists");
+
+            server.Stats.SetMicroservice(microS);
             Services[microS].Dir.AddServer(server);
         }
 
