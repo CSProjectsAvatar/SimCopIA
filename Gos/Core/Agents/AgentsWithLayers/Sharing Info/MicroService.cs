@@ -21,6 +21,11 @@ namespace ServersWithLayers{
             this.Name = name;
             this.Dir = new Directory();
         }
+
+        public MicroService()
+        { 
+        }
+
         internal void SetAsEntryPoint(){
             this.Type = ServiceType.EntryPoint;
         }

@@ -16,9 +16,9 @@ namespace ServersWithLayers{
 
         Queue<Request> aceptedRequests;
         Dictionary<int,Response> _notCompletdRespns { get; set; }
-        List<(int, Perception)> _sendToEnv;
+        internal List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
-        Dictionary<int, Request> _requestsAceptedHistory;
+        internal Dictionary<int, Request> _requestsAceptedHistory;
         #endregion
    
         public Status(string iD)
@@ -30,6 +30,8 @@ namespace ServersWithLayers{
             AvailableResources = new();
             aceptedRequests = new();
             serverID = iD;
+
+            MicroService = new MicroService();
 
             _requestsAceptedHistory = new();
         }

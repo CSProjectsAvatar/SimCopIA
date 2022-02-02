@@ -7,7 +7,7 @@ namespace ServersWithLayers
 {
     // Cualquier evento que le toque ejecutarse en algun punto de la simulacion.
     public abstract class Perception : Event{
-        string receiver;
+        internal string receiver;
         internal Env env;
         public Perception(string receiver) : base(){
             this.receiver = receiver;
