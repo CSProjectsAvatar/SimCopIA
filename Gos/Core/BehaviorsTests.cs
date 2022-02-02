@@ -58,7 +58,7 @@ namespace Core {
         
         
         
-        [TestMethod]
+       /* [TestMethod]
         public void WorkerBehavTest_1() {
             var worker = BehaviorsLib.Worker;
             var server1 = new Server("S1");
@@ -88,9 +88,9 @@ namespace Core {
 
 
             // worker.Run(server1.Stats, p);
-        }
+        }*/
 
-        [TestMethod]
+        /*[TestMethod]
         public void ContractorBehavTest_1() {
 
             var e = new Env();
@@ -115,7 +115,7 @@ namespace Core {
             contractor.Run(server2.Stats, p2);
             contractor.Run(server2.Stats, p3);
 
-        }
+        }*/
 
         #region FalenLeader
 
@@ -123,7 +123,7 @@ namespace Core {
         public void FalenLeaderBehavTest_1()
         {
             falenLeader = BehaviorsLib.FalenLeader;
-
+            
             layer.behaviors.Add(falenLeader);
 
             s2.AddLayer(layer);
@@ -145,10 +145,9 @@ namespace Core {
             env.SubsribeEvent(67, p5);
             env.SubsribeEvent(110, p6);
 
-
-
             env.Run();
 
+            Assert.AreEqual(s2.ID, s2.Stats.MicroService.LeaderId);
             ///falenLeader.Run(server2.Stats, p2);
 
         }
