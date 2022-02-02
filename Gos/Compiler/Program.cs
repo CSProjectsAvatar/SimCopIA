@@ -15,6 +15,7 @@ namespace Compiler {
                     .AddFilter("System", LogLevel.Warning)
                     .AddFilter("Core", LogLevel.Information)
                     .AddFilter("Compiler", LogLevel.Information)
+                    .AddFilter("DataClassHierarchy", LogLevel.Information)
                     .AddConsole();
             });
             ILogger<Lr1Dfa> logLr1Dfa = loggerFactory.CreateLogger<Lr1Dfa>();
@@ -45,8 +46,8 @@ gos run FILE");
                         var parser = new Lr1(new GosGrammar(), "./lr1-dfa.json", logLr1, logLr1Dfa);
 
                         if (parser.TryParse(tokens, out var ast)) {
-                            if (ast.Validate(new Context())) {
-                                var vis = new EvalVisitor(new Context(), loggerFactory.CreateLogger<EvalVisitor>(), Console.Out);
+                            if (ast.Validate(Context.Global())) {
+                                var vis = new EvalVisitor(Context.Global(), loggerFactory.CreateLogger<EvalVisitor>(), Console.Out);
                                 vis.Visit(ast);
                             }
                         }

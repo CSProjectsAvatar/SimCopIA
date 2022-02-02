@@ -649,6 +649,125 @@ behav foo {
                 @out.ToString());
         }
 
+        [TestMethod]
+        public void PercepIs() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    print [percep is request, percep is response, percep is alarm]
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            #region configuran2
+            Behavior behav = ctx.GetBehav("foo");
+            _ = new Env();
+
+            #endregion
+
+            behav.Run(null, new Observer("fulano"));
+            behav.Run(null, new Request("fulano", "mengano", RequestType.DoSomething));
+            behav.Run(null, new Response(0, "fulano", "mengano", RequestType.DoSomething, null));
+
+            Assert.AreEqual(
+                $"[False, False, True]{_endl}" +
+                $"[True, False, False]{_endl}" +
+                $"[False, True, False]{_endl}",
+                @out.ToString());
+        }
+
+        [TestMethod]
+        public void PercepIsNot() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    print [percep is not request, percep is not response, percep is not alarm]
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            #region configuran2
+            Behavior behav = ctx.GetBehav("foo");
+            _ = new Env();
+
+            #endregion
+
+            behav.Run(null, new Observer("fulano"));
+            behav.Run(null, new Request("fulano", "mengano", RequestType.DoSomething));
+            behav.Run(null, new Response(0, "fulano", "mengano", RequestType.DoSomething, null));
+
+            Assert.AreEqual(
+                $"[True, True, False]{_endl}" +
+                $"[False, True, True]{_endl}" +
+                $"[True, False, True]{_endl}",
+                @out.ToString());
+        }
+
+        [TestMethod]
+        public void PercepIsAlreadyDefined() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    let a = 5
+    print [percep is not request a, percep is not response, percep is not alarm]
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsFalse(ast.Validate(Context.Global()));
+        }
+
+        [TestMethod]
+        public void PercepIsWithVarInIf() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    if percep is request req {
+        print req
+    }
+    print req
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            #region configuran2
+            Behavior behav = ctx.GetBehav("foo");
+            _ = new Env();
+            var r = new Request("fulano", "mengano", RequestType.DoSomething);
+
+            #endregion
+
+            behav.Run(null, r);
+
+            Assert.AreEqual(
+                    $"{EvalVisitor.GosObjToString(r)}{_endl}" +
+                    $"{EvalVisitor.GosObjToString(r)}{_endl}",
+                @out.ToString());
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();

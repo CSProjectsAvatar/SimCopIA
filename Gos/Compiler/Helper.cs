@@ -19,7 +19,7 @@ namespace Compiler {
             ("fun", Token.TypeEnum.Fun),
             ("return", Token.TypeEnum.Return),
             ("new", Token.TypeEnum.New),
-            ("server", Token.TypeEnum.Class),
+            ("server|request|response|alarm", Token.TypeEnum.Class),
             ("forever", Token.TypeEnum.Forever),
             ("break", Token.TypeEnum.Break),
             ("for", Token.TypeEnum.For),
@@ -30,6 +30,8 @@ namespace Compiler {
             ("init", Token.TypeEnum.InitBehav),
             ("respond_or_save", Token.TypeEnum.RespondOrSave),
             ("process", Token.TypeEnum.Process),
+            ("is", Token.TypeEnum.Is),
+            ("not", Token.TypeEnum.Not),
 
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("_*[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),

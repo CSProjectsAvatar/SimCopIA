@@ -54,6 +54,12 @@ namespace DataClassHierarchy
             _behavs = new();
         }
 
+        /// <summary>
+        /// Define la variable y devuelve true si no habi'a ninguna con ese nombre en el contexto actual.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public bool DefVariable(string name, object value = null)
         {
             if (_variables.ContainsKey(name))

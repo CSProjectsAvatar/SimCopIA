@@ -304,6 +304,15 @@ graph LR
         | <gos-list>
         | <method-call>
         | <prop-get>
+        | <is-type>
+
+<is-type> := <atom> "is" <after-is>
+
+<after-is> := <is-type-end>
+            | "not" <is-type-end>
+
+<is-type-end> := CLASS
+               | CLASS ID
 
 <prop-get> := <factor> "." ID
 

@@ -37,6 +37,9 @@ namespace Compiler {
         private static readonly UntType Init = new UntType(typeof(InitUnt));
         private static readonly UntType PropGet = new UntType(typeof(PropGetUnt));
         private static readonly UntType MethodCall = new UntType(typeof(MethodCallUnt));
+        private static readonly UntType IsType = new UntType(typeof(IsTypeUnt));
+        private static readonly UntType AfterIs = new UntType(typeof(AfterIsUnt));
+        private static readonly UntType IsTypeEnd = new UntType(typeof(IsTypeEndUnt));
 
         #region terminales
         private static readonly TokenType n = TokenType.Number;
@@ -80,6 +83,8 @@ namespace Compiler {
         private static readonly TokenType dot = Token.TypeEnum.Dot;
         private static readonly TokenType respondOrSave = Token.TypeEnum.RespondOrSave;
         private static readonly TokenType process = Token.TypeEnum.Process;
+        private static readonly TokenType @is = Token.TypeEnum.Is;
+        private static readonly TokenType @not = Token.TypeEnum.Not;
 
         #endregion
         public GosGrammar() : base(
@@ -171,6 +176,15 @@ namespace Compiler {
             Atom > GosList,
             Atom > MethodCall,
             Atom > PropGet,
+            Atom > IsType,
+
+            IsType > (Atom, @is, AfterIs),
+
+            AfterIs > IsTypeEnd,
+            AfterIs > (@not, IsTypeEnd),
+
+            IsTypeEnd > @class,
+            IsTypeEnd > (@class, id),
 
             PropGet > (Factor, dot, id),
 

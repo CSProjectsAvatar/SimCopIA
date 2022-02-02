@@ -24,7 +24,7 @@ namespace Compiler.Grammar_Unterminals {
                 Token { Type: Token.TypeEnum.Number } t => new Number { Value = t.Lexem, Token = t },
                 Token { Type: Token.TypeEnum.Bool } t => new BoolAst { Value = t.Lexem, Token = t },
                 Token { Type: Token.TypeEnum.Id } t => new Variable(Helper.Logger<Variable>()) { Identifier = t.Lexem, Token = t },
-                FunCallUnt or ListIdxUnt or GosListUnt or MethodCallUnt or PropGetUnt => 
+                FunCallUnt or ListIdxUnt or GosListUnt or MethodCallUnt or PropGetUnt or IsTypeUnt => 
                     (derivation[0] as Unterminal).Ast,
                 Token { Type: Token.TypeEnum.New } when derivation[1] is Token { Type: Token.TypeEnum.Class } c =>
                     new ClassAst { ClassName = c.Lexem, Token = c },

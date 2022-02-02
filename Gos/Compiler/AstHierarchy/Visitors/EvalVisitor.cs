@@ -174,6 +174,21 @@ namespace DataClassHierarchy
             return (true, (bool)res);
         }
 
+        public (bool Success, object Result) Visiting(IsTypeAst node) {
+            var (tsucc, tval) = Visit(node.Target);
+            if (!tsucc) {
+                return default;
+            }
+            var ttype = Helper.GetType(tval);
+            if (!Enum.TryParse<GosType>($"{char.ToUpper(node.Type[0])}{node.Type[1..]}", out var isType)) {
+                throw new NotImplementedException();
+            }
+            if (node.NewVar != default) {
+                Context.DefVariable(node.NewVar, tval);
+            }
+            return (true, (ttype == isType) ^ node.Not);
+        }
+
         public (bool Success, object Result) Visiting(RestOfDivOp node, double lNum, double rNum) {
             if (rNum == 0) {
                 _log.LogError(

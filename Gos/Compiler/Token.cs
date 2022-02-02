@@ -135,6 +135,7 @@ namespace Compiler {
                 TypeEnum.RightArrow => "->",
                 TypeEnum.Percent => "%",
                 TypeEnum.Dot => ".",
+                TypeEnum.Class => "server, request, alarm or response",
                 _ => token.ToString()
             };
         }
@@ -214,6 +215,8 @@ namespace Compiler {
         }
 
         public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
+            Not,
+            Is,
             RespondOrSave,
             Process,
 
