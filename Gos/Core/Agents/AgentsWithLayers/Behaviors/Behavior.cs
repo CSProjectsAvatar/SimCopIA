@@ -47,5 +47,6 @@ Donde IA:
 - Ponderacion de los parametros que importan a los Jefes para elegir un contratista(reputacion entre ellos)
 - Distribucion de la arquitectura(esto requiere una biyeccion a una gramatica o algo asi)
 - Como repartir los recursos
+- Seleccionar que comportamiento se ejecuta en la capa
 - Algo relacionado con la cache
 */

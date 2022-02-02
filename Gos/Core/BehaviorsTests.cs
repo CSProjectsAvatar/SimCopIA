@@ -60,9 +60,6 @@ namespace Core {
         
        /* [TestMethod]
         public void WorkerBehavTest_1() {
-            var worker = BehaviorsLib.Worker;
-            var server1 = new Server("S1");
-            var server2 = new Server("S2");
             
             // server2.AddLayer();
             var r1 = new Resource("img1");
@@ -85,6 +82,9 @@ namespace Core {
            // p3.AskingRscs.AddRange(new[] { r1, r2, r3 });
 
             server2.HandlePerception(p1);
+
+            // server2.HandlePerception(p1);
+
 
 
             // worker.Run(server1.Stats, p);

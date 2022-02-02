@@ -38,7 +38,11 @@ namespace ServersWithLayers
         internal void SetMServiceIfNull(string main)
         {
             if(this.Stats.MicroService is null)
-                MicroService.AddServer(this, main);
+                SetMService(main);
+        }
+        internal void SetMService(string mService) //Note: the server can't have been in a microS before
+        {
+            MicroService.AddServer(this, mService);
         }
 
         public void AddLayer(Layer layer){
