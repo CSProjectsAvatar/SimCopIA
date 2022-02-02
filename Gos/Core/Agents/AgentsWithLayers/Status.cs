@@ -11,11 +11,11 @@ namespace ServersWithLayers{
         #endregion
 
         #region  Server State
-        private Queue<Request> aceptedRequests;
         internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
         internal bool HasRequests => aceptedRequests.Count > 0;
 
-        internal Dictionary<int,Response> _notCompletdRespns { get; set; }
+        Queue<Request> aceptedRequests;
+        Dictionary<int,Response> _notCompletdRespns { get; set; }
         List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
         Dictionary<int, Request> _requestsAceptedHistory;
@@ -32,7 +32,7 @@ namespace ServersWithLayers{
             serverID = iD;
 
             _requestsAceptedHistory = new();
-            MicroService = new MicroService();
+            // MicroService = new MicroService();
         }
 
         internal void AddPartialRpnse(Response resp)
@@ -82,7 +82,7 @@ namespace ServersWithLayers{
         }
         
         public void SetMicroservice(string microserviceID){
-            this.MicroService = MicroService.Get(microserviceID);
+            this.MicroService = MicroService.GetMS(microserviceID);
         }
     }
 }
