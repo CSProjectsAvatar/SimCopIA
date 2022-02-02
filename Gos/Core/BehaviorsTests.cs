@@ -13,7 +13,7 @@ namespace Core {
         private Server s1;
         private Server s2;
         private Server s3;
-
+        private Layer workerL;
         private Resource r1;
         private Resource r2;
         private Resource r3;
@@ -32,7 +32,10 @@ namespace Core {
         public void Init() {
             s1 = new Server("S1");
             s2 = new Server("S2");
-            s3 = new Server("S2");
+            s3 = new Server("S3");
+
+            workerL = new Layer();
+            workerL.behaviors.Add(BehaviorsLib.Worker);
 
             r1 = new Resource("img1");
             r2 = new Resource("img2");
@@ -47,22 +50,33 @@ namespace Core {
             p5 = new Request("S3", "S2", ReqType.Asking);
             p6 = new Request("S3", "S2", ReqType.Asking);
 
+            s1.Stats.AvailableResources.Add(r1);
+            s2.Stats.AvailableResources = new List<Resource> { r1, r2 };
+            s3.Stats.AvailableResources = new List<Resource> { r1, r2, r3 };
 
-            servers = new List<Server> { s1, s2 };
-            layer = new Layer();
+
+            servers = new List<Server> { s1, s2, s3 };
 
             env = new Env();
+            env.AddServerList(servers);
         }
-        
+        [TestCleanup]
+        public void Clean() {
+            MicroService.Services.Clear();
+        }
         
         
         [TestMethod]
         public void WorkerBehavTest_1() {
-            
-            // server2.HandlePerception(p1);
+            s2.Stats.AcceptReq(p1);
+            BehaviorsLib.Worker.Run(s2.Stats, p1);
 
+            s2.Stats.AcceptReq(p3);
+            BehaviorsLib.Worker.Run(s2.Stats, p1);
+            // s2.AddLayer(workerL);
+            // s2.Stats.AcceptReq(p1);
 
-            // worker.Run(server1.Stats, p);
+            env.Run();
         }
 
         [TestMethod]
