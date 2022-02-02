@@ -13,15 +13,19 @@ namespace ServersWithLayers
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
 
+        private static string main = "Main";
         public Env(){
             Env.CurrentEnv = this;
             currentTime = 0;
             this.servers = new();
             turn = new();
             solutionResponses = new();
+             
+            new MicroService(main); // crea el microservicio principal
         }
         public void AddServerList(List<Server> servers){
             foreach(var server in servers){
+                server.SetMServiceIfNull(main);
                 AddServer(server);
             }
             
@@ -36,7 +40,9 @@ namespace ServersWithLayers
                 yield return exe.ExecuteInTime;
             }
         }
-
+        public Event FirstEvent(){
+            return turn.First.Item2;
+        }
         //Ejecuta la simulacion.
         public void Run(){
             foreach (var item in this.EnumerateActions())

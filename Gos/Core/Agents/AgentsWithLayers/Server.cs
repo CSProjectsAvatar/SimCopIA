@@ -34,6 +34,13 @@ namespace ServersWithLayers
             foreach(var l in layers)
                 AddLayer(l);
         }
+
+        internal void SetMServiceIfNull(string main)
+        {
+            if(this.Stats.MicroService is null)
+                MicroService.AddServer(this, main);
+        }
+
         public void AddLayer(Layer layer){
             var clonedLayer = layer.CloneInServer(this);
             _layers.Add(clonedLayer);

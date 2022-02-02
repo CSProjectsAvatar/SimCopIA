@@ -40,14 +40,14 @@ namespace Core {
             r2 = new Resource("img2");
             r3 = new Resource("index");
 
-            p1 = new Request("S1", "S2", RequestType.AskSomething);
+            p1 = new Request("S1", "S2", ReqType.Asking);
             p1.AskingRscs.AddRange(new[] { r1 });
 
-            p2 = new Request("S3", "S2", RequestType.AskSomething);
-            p3 = new Request("S3", "S2", RequestType.AskSomething);
-            p4 = new Request("S3", "S2", RequestType.AskSomething);
-            p5 = new Request("S3", "S2", RequestType.AskSomething);
-            p6 = new Request("S3", "S2", RequestType.AskSomething);
+            p2 = new Request("S3", "S2", ReqType.Asking);
+            p3 = new Request("S3", "S2", ReqType.Asking);
+            p4 = new Request("S3", "S2", ReqType.Asking);
+            p5 = new Request("S3", "S2", ReqType.Asking);
+            p6 = new Request("S3", "S2", ReqType.Asking);
 
 
             servers = new List<Server> { s1, s2 };
@@ -71,13 +71,13 @@ namespace Core {
 
             //server2.Stats.availableResources.AddRange(new[] { r1, r2 });
 
-            var p1 = new Request("S1", "S2", RequestType.AskSomething);
+            var p1 = new Request("S1", "S2", ReqType.Asking);
             p1.AskingRscs.AddRange(new[] { r1 });
 
-            p2 = new Request("S3", "S2", RequestType.AskSomething);
-            p3 = new Request("S3", "S2", RequestType.AskSomething);
-            p4 = new Request("S3", "S2", RequestType.AskSomething);
-            p5 = new Request("S3", "S2", RequestType.AskSomething);
+            p2 = new Request("S3", "S2", ReqType.Asking);
+            p3 = new Request("S3", "S2", ReqType.Asking);
+            p4 = new Request("S3", "S2", ReqType.Asking);
+            p5 = new Request("S3", "S2", ReqType.Asking);
 
             p2.AskingRscs.AddRange(new[] { r1, r2 });
 
@@ -104,10 +104,10 @@ namespace Core {
             var r2 = new Resource("img2");
             var r3 = new Resource("index");
 
-            var p2 = new Request("S1", "S2", RequestType.AskSomething);
+            var p2 = new Request("S1", "S2", ReqType.Asking);
             p2.AskingRscs.AddRange(new[] { r1, r2, r3 });
 
-            var p3 = new Request("S1", "S2", RequestType.DoSomething);
+            var p3 = new Request("S1", "S2", ReqType.DoIt);
 
             server2.Stats.AvailableResources.Add(r1);
             server2.Stats.AvailableResources.Add(r3);
@@ -122,7 +122,7 @@ namespace Core {
         [TestMethod]
         public void FalenLeaderBehavTest_1()
         {
-            falenLeader = BehaviorsLib.FalenLeader;
+            falenLeader = BehaviorsLib.FallenLeader;
 
             layer.behaviors.Add(falenLeader);
 
@@ -144,8 +144,6 @@ namespace Core {
             env.SubsribeEvent(56, p5);
             env.SubsribeEvent(67, p5);
             env.SubsribeEvent(110, p6);
-
-
 
             env.Run();
 

@@ -12,8 +12,8 @@ namespace ServersWithLayers
     public abstract class Message : Perception{
         public string Sender {get;} 
         public string Receiver {get;}
-        public RequestType Type {get;}
-        public Message(string sender, string receiver, RequestType type): base(receiver){
+        public ReqType Type {get;}
+        public Message(string sender, string receiver, ReqType type): base(receiver){
             this.Sender = sender;
             this.Receiver = receiver;
             this.Type = type;

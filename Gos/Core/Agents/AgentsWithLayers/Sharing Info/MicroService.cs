@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ServersWithLayers{
     public class MicroService{
@@ -20,20 +21,23 @@ namespace ServersWithLayers{
             this.Name = name;
             this.Dir = new Directory();
         }
-
-        public MicroService()
-        {
-            
-        }
         internal void SetAsEntryPoint(){
             this.Type = ServiceType.EntryPoint;
         }
-        internal static MicroService Get(string microserviceID)
+        internal static MicroService GetMS(string microserviceID)
         {
             if (!Services.ContainsKey(microserviceID))
                 throw new Exception("MicroService doesn't exists");
             return Services[microserviceID];
         }
+
+        internal static void AddServer(Server server, string microS)
+        {
+            if (!Services.ContainsKey(microS))
+                throw new Exception("MicroService doesn't exists");
+            Services[microS].Dir.AddServer(server);
+        }
+
         internal List<string> GetProviders(string resName)
         {
             return Dir.YellowPages[resName];
@@ -42,7 +46,10 @@ namespace ServersWithLayers{
         {
             return Dir.WhitePages[serverID];
         }
-
+        internal List<Resource> GetAllResourcesAvailable()
+        {
+            return Dir.YellowPages.Keys.Select(resName => Resource.Resources[resName]).ToList();  
+        }
         internal void ChangeLeader(string leaderID)
         {
            LeaderId =  leaderID;
