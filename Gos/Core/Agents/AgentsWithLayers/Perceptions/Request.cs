@@ -20,7 +20,7 @@ namespace ServersWithLayers
         static int lastRequestID = 0; 
         public int ID {get;}
         public List<Resource> AskingRscs { get; set; }
-        public Request(string sender, string receiver, ReqType type) : base(sender,receiver, type){
+        public Request(string sender, string receiver, ReqType type) : base(sender, receiver, type){
             this.ID = ++lastRequestID; 
             this.MatureTime = 1;
             AskingRscs = new();

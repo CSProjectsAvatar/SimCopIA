@@ -12,7 +12,7 @@ namespace ServersWithLayers
         public int ReqID {get; private set;}
         public Dictionary<string,bool> AnswerRscs {get;}
         public Response(int requestID, string sender, string receiver, 
-                RequestType type, Dictionary<string, bool> data ) : base(sender, receiver, type){
+                ReqType type, Dictionary<string, bool> data ) : base(sender, receiver, type){
             this.ReqID = requestID;
             this.AnswerRscs = data;
             this.MatureTime = 1;
@@ -50,12 +50,12 @@ namespace ServersWithLayers
 
         [TestMethod]
         public void ResponesUnionTest(){
-            var r1 = new Response(1, "sender", "receiber", RequestType.AskSomething, new Dictionary<string, bool>{
+            var r1 = new Response(1, "sender", "receiber", ReqType.Asking, new Dictionary<string, bool>{
                 {"r1", true},
                 {"r2", false},
                 {"r3", true}
             });
-            var r2 = new Response(1, "sender", "receiber", RequestType.AskSomething, new Dictionary<string, bool>{
+            var r2 = new Response(1, "sender", "receiber", ReqType.Asking, new Dictionary<string, bool>{
                 {"r1", false},
                 {"r2", true},
                 {"r3", true},
