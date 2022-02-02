@@ -30,6 +30,8 @@ namespace ServersWithLayers{
             AvailableResources = new();
             aceptedRequests = new();
             serverID = iD;
+
+            _requestsAceptedHistory = new();
         }
 
         internal void AddPartialRpnse(Response resp)
@@ -40,14 +42,24 @@ namespace ServersWithLayers{
                 var actualRep = _notCompletdRespns[resp.ReqID];
                 _notCompletdRespns[resp.ReqID] = Response.Union(actualRep, resp);
             }
+            if (!BehaviorsLib.Incomplete(this, resp)) {
+                this.Subscribe(resp);
+                _notCompletdRespns.Remove(resp.ReqID);
+            }
         }
 
-        //Suscribe Perceptions en un tiempo 'time' en '_sendToEnv'.
-        public void Subscribe(int time, Perception p)
+        //Suscribe Perceptions en un tiempo 'time'
+        public void SubscribeAt(int time, Perception p)
         {
             _sendToEnv.Add((time, p));
         }
-        public void Subscribe(Perception p) => Subscribe(Env.Time, p);
+        //Suscribe Perceptions dentro de un tiempo 'time'
+        public void SubscribeIn(int time, Perception p)
+        {
+            _sendToEnv.Add((Env.Time + time, p));
+        }
+        //Suscribe Perceptions para ya
+        public void Subscribe(Perception p) => SubscribeIn(0, p);
 
         public void AcceptReq(Request req)
         {
@@ -69,7 +81,7 @@ namespace ServersWithLayers{
         }
         
         public void SetMicroservice(string microserviceID){
-            this.MicroService = MicroService.Get(microserviceID);
+            this.MicroService = MicroService.GetMS(microserviceID);
         }
     }
 }

@@ -29,10 +29,12 @@ namespace ServersWithLayers.Behaviors
 
             switch (p) {
                 case Request request when request.Type is ReqType.Asking:
-                    ProcessAskingRequest(request, status);
+
+                    BuildLeaderResponse(status, request);
                     break;
 
                 case Request request when request.Type is ReqType.DoIt:
+
                     //buscamos los recursos que no puede solucionar este servidor.
                     ProcessDoItRequest(request, status, askResponses, nextReview, reviewTime);
                     break;
@@ -40,12 +42,11 @@ namespace ServersWithLayers.Behaviors
                 case Response response when response.Type is ReqType.Asking:
                     if (askResponses.ContainsKey(response.ReqID))
                         askResponses[response.ReqID].Add(response);  //Agregamos a el request por el cual se mando...
-
                     break;
 
-                case Response response:
+                case Response response when response.Type is ReqType.DoIt:
 
-                    ProcessResponse(response, status, askResponses, solutionResponsesAsocietedID);
+                    ProcessDoItResp(response, status, askResponses, solutionResponsesAsocietedID);
                     break;
 
                 case Observer observer:
@@ -70,10 +71,9 @@ namespace ServersWithLayers.Behaviors
             }
         }
 
-        private static void ProcessResponse(Response response, Status status, Dictionary<int, List<Response>> askResponses, Dictionary<int, int> solutionResponsesAsocietedID)
+        private static void ProcessDoItResp(Response response, Status status, Dictionary<int, List<Response>> askResponses, Dictionary<int, int> solutionResponsesAsocietedID)
         {
-            if (response.Type == ReqType.DoIt 
-                && solutionResponsesAsocietedID.Keys.Contains(response.ReqID))
+            if (solutionResponsesAsocietedID.Keys.Contains(response.ReqID))
             {
                 var request_id = response.ReqID;
 
@@ -115,12 +115,10 @@ namespace ServersWithLayers.Behaviors
                     server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server espesifico
                 }
             }
-            status.Subscribe(Env.Time + reviewTime, new Observer(status.serverID));
+            status.SubscribeIn(reviewTime, new Observer(status.serverID));
             nextReview.Add(Env.Time + reviewTime, request.ID);
         }
-        static void ProcessAskingRequest(Request request, Status status){
-
-        }
+        
 
         internal static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
             var availList = status.AvailableResources;
@@ -131,6 +129,18 @@ namespace ServersWithLayers.Behaviors
 
         private static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
             throw new NotImplementedException("IMPLEMENTAR FUNCION DE SELECCION EN BOSS");
+        }
+
+        // Builds a response AS A LEADER to: asking, imperative and ping request; in the same way
+        // takes into account the available resources in the microservice
+        private static Response BuildLeaderResponse(Status status, Request req)
+        {
+            // Gets the resources that are available in the Microservice 
+            var availInMicro = status.MicroService.GetAllResourcesAvailable();
+
+            Dictionary<string, bool> data = BehaviorsLib.GetAvailablesRscs(req, availInMicro);
+            var response = req.MakeResponse(data);
+            return response;
         }
     }
 
