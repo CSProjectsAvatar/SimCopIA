@@ -80,8 +80,8 @@ namespace ServersWithLayers{
             _sendToEnv.Clear();
         }
         
-        public void SetMicroservice(string microserviceID){
-            this.MicroService = MicroService.GetMS(microserviceID);
+        public void SetMicroservice(MicroService ms){
+            MicroService = ms;
         }
     }
 }
