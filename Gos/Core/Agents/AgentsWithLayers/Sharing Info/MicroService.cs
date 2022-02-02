@@ -36,7 +36,11 @@ namespace ServersWithLayers{
             if (!Services.ContainsKey(microS))
                 throw new Exception("MicroService doesn't exists");
 
-            server.Stats.SetMicroservice(microS);
+            var ms = Services[microS];
+            if (ms.LeaderId is null) // if it's the first server to be added to the microservice
+                ms.ChangeLeader(server.ID); // set the leader to the server
+                
+            server.Stats.SetMicroservice(ms);
             Services[microS].Dir.AddServer(server);
         }
 
