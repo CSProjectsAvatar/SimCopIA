@@ -13,6 +13,11 @@ namespace ServersWithLayers{
             }
         }
 
+        internal static List<Resource> GetRndFinishedRscs()
+        {
+            throw new NotImplementedException(); // @todo Omar: Implement this method
+        }
+
         public int RequiredTime { get; set; }
 
         public List<(int, string)> Requirements;

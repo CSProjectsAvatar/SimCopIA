@@ -349,7 +349,7 @@ behav foo {
             Behavior behav = ctx.GetBehav("foo");
 
             Assert.ThrowsException<GoSException>(
-                () => behav.Run(new Status("server"), new Request("fulano", "mengano", RequestType.AskSomething)));
+                () => behav.Run(new Status("server"), new Request("fulano", "mengano", ReqType.Asking)));
         }
 
         [TestMethod]
@@ -473,8 +473,8 @@ behav foo {
 
             Behavior behav = ctx.GetBehav("foo");
             var status = new Status("server");
-            var r1 = new Request("sender", "server", RequestType.AskSomething);
-            var r2 = new Request("sender", "server", RequestType.AskSomething);
+            var r1 = new Request("sender", "server", ReqType.Asking);
+            var r2 = new Request("sender", "server", ReqType.Asking);
             status.AcceptReq(r1);
             status.AcceptReq(r2);
             new Env();
@@ -533,9 +533,9 @@ behav foo {
             var serv = new Server("server");
             serv.Stats.AvailableResources.AddRange(new[] { rs1, rs2 });
 
-            var r1 = new Request("sender", "server", RequestType.AskSomething);
+            var r1 = new Request("sender", "server", ReqType.Asking);
             r1.AskingRscs.AddRange(new[] { rs1 });
-            var r2 = new Request("sender", "server", RequestType.AskSomething);
+            var r2 = new Request("sender", "server", ReqType.Asking);
             r2.AskingRscs.AddRange(new[] { rs2, rs3 });
 
             serv.Stats.AcceptReq(r1);
@@ -638,9 +638,9 @@ behav foo {
 
             #endregion
 
-            behav.Run(null, new Request("fulano", "mengano", RequestType.AskSomething));
-            behav.Run(null, new Request("fulano", "mengano", RequestType.DoSomething));
-            behav.Run(null, new Request("fulano", "mengano", RequestType.Ping));
+            behav.Run(null, new Request("fulano", "mengano", ReqType.Asking));
+            behav.Run(null, new Request("fulano", "mengano", ReqType.DoIt));
+            behav.Run(null, new Request("fulano", "mengano", ReqType.Ping));
 
             Assert.AreEqual(
                 $"[False, True, False]{_endl}" +
@@ -674,8 +674,8 @@ behav foo {
             #endregion
 
             behav.Run(null, new Observer("fulano"));
-            behav.Run(null, new Request("fulano", "mengano", RequestType.DoSomething));
-            behav.Run(null, new Response(0, "fulano", "mengano", RequestType.DoSomething, null));
+            behav.Run(null, new Request("fulano", "mengano", ReqType.DoIt));
+            behav.Run(null, new Response(0, "fulano", "mengano", ReqType.DoIt, null));
 
             Assert.AreEqual(
                 $"[False, False, True]{_endl}" +
@@ -709,8 +709,8 @@ behav foo {
             #endregion
 
             behav.Run(null, new Observer("fulano"));
-            behav.Run(null, new Request("fulano", "mengano", RequestType.DoSomething));
-            behav.Run(null, new Response(0, "fulano", "mengano", RequestType.DoSomething, null));
+            behav.Run(null, new Request("fulano", "mengano", ReqType.DoIt));
+            behav.Run(null, new Response(0, "fulano", "mengano", ReqType.DoIt, null));
 
             Assert.AreEqual(
                 $"[True, True, False]{_endl}" +
@@ -756,7 +756,7 @@ behav foo {
             #region configuran2
             Behavior behav = ctx.GetBehav("foo");
             _ = new Env();
-            var r = new Request("fulano", "mengano", RequestType.DoSomething);
+            var r = new Request("fulano", "mengano", ReqType.DoIt);
 
             #endregion
 
@@ -772,6 +772,7 @@ behav foo {
         public void Clean() {
             _lex.Dispose();
             _parser.Dispose();
+            MicroService.Services.Clear();
         }
     }
 }

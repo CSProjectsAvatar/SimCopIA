@@ -134,9 +134,9 @@ namespace DataClassHierarchy
 
         internal static Context Global() {
             var ctx = new Context();
-            ctx.DefVariable("ASK", (double)RequestType.AskSomething);
-            ctx.DefVariable("DO", (double)RequestType.DoSomething);
-            ctx.DefVariable("PING", (double)RequestType.Ping);
+            ctx.DefVariable("ASK", (double)ReqType.Asking);
+            ctx.DefVariable("DO", (double)ReqType.DoIt);
+            ctx.DefVariable("PING", (double)ReqType.Ping);
 
             return ctx;
         }

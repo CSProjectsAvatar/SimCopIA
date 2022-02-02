@@ -1,47 +1,74 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Core;
 namespace ServersWithLayers{
     public abstract class EventCreator{
 
+        Random _rnd = new Random(Environment.TickCount);
         List<Type> _eventTypes;
-        public List<Event> GetEvents(int quantity, int timeInit=1, int timeFinal=100){
-            List<Event> events = new();
-            var r = new Random();
-            while(quantity --> 0){
-                var t = r.Next(timeInit, timeFinal);
-                var eType = SelectType();
-                var newEvent = Build(eType, t);
-                events.Add(newEvent);
-            }
+        private List<double> _accProbabilities;
+
+        public EventCreator(List<Type> eventTypes, List<double> accProbabilities){
+            SetTypes(eventTypes);
+            SetProbabilities(accProbabilities);
+        }
+        internal void SetTypes(List<Type> eventTypes){
+            _eventTypes = eventTypes;
+        }
+        internal void SetProbabilities(List<double> probability){
+            if (probability.Count != _eventTypes.Count)
+                throw new GoSException("Probabylities count must be equal to event types count");
+            var sum = probability.Sum();
+            if (sum != 1)
+                throw new GoSException("Probabylities must sum up to 1");
+
+            _accProbabilities = probability.Select(
+                (x, i) => x + (i == 0 ? 0 : _accProbabilities[i - 1])).ToList();
+        }
+        
+        /// <summary>
+        /// Returns random pair of (event, arrivalTime)
+        /// </summary>
+        public List<(Event, int)> GetEvents(int quantity)
+        {// gets 'quantity' number of events from 'EventItertor' with LINQ
+            var events = EventItertor().Take(quantity).ToList();
             return events;
         }
-
-        private Event Build(Type eType, int t)
+        public IEnumerable<(Event, int)> EventItertor()
         {
-            // eType switch {
-            //     typeof(Request) => ...
-            // }
-            throw new NotImplementedException();
+            while(true){
+                var time = (int)GenTimeOffset();
+                var type = GetType(_rnd.NextDouble());
+
+                yield return (BuildEvent(type), time);
+            }
         }
 
-        private Type SelectType()
+        private Type GetType(double v)
+        {// returns type of event by probability using '_accProbabilities'
+            if(v < 0 || v > 1)
+                throw new Exception("Probability must be between 0 and 1");
+
+            var index = _accProbabilities.FindIndex(x => x > v);
+            return _eventTypes[index];
+        }
+
+        private Event BuildEvent(Type eType)
         {
-            return _eventTypes.First();
+            return eType.Name switch {
+                "Request" => Request.RndClientReq,
+
+                _ => throw new Exception("Event type not found")
+            };
+
+          
+        }
+        private double GenTimeOffset() {
+            var lambda = 1.5;
+
+            return -1 / lambda * Math.Log(_rnd.NextDouble());
         }
     }
 
 }
-
-/*
-cuando empiezo el worker:
-
-veo que tareas complete'
-agendo un response para cada una
-libero el recurso ocupado
-
-mientras tenga capacidad y hayan tareas:
-    cojo una tarea de las aceptadas pendientes
-    me pongo a hacerla
-*/

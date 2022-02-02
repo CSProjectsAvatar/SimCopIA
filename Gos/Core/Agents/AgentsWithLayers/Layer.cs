@@ -1,52 +1,35 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ServersWithLayers
 {
     public class Layer
     {
-
         internal Server server;
         internal List<Behavior> behaviors;
 
-        public Layer(List<Behavior> behavs)
+        public Layer()
         {
-            behaviors = behavs;
+            behaviors = new List<Behavior> { };
         }
-        public Layer() : this(new List<Behavior>()) { }
-        
+
         //Aqui la capa hace todo lo referente a modificar el estado de 'server'  o suscribir al environment Perceptions.
         //Esto basado en un una Perception 'p' y el estado interno de 'server'
         public void Process(Perception p)
         {
-
-            Behavior conduct = behaviors[0];
+            Behavior conduct = behaviors[0]; // @todo implementar una politica de seleccion de behaviors
             conduct.Run(server.Stats, p);
-
         }
-
-        public Layer Clone()
-        {
-            var copy = new Layer();
-
-            if (behaviors != null)
-            {
-                var tempBehaviors = new List<Behavior> { };
-                for (var i = 0; i < behaviors.Count; i++)
-                {
-                    var value = behaviors[i].Clone();
-                    tempBehaviors.Add(value);
-                }
-                copy.behaviors = tempBehaviors;
-            }
-            return copy;
-        }
-
         public Layer CloneInServer(Server server)
         {
-            var copy = this.Clone();
+            var copy = this.Clone() as Layer;
             copy.server = server;
             return copy;
+        }
+        object Clone()
+        {
+            return new Layer() { behaviors = behaviors.Select(x => x.Clone() as Behavior).ToList() };
         }
     }
 

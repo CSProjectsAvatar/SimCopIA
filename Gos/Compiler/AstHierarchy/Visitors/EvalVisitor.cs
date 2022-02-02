@@ -708,7 +708,7 @@ namespace DataClassHierarchy
             var heap = Context.GetVar(Helper.HiddenDoneReqsHeapVar) as Utils.Heap<Request>;
 
             heap.Add(Env.Time + rtime, req);  // comienzo a procesar la tarea
-            st.Subscribe(Env.Time + rtime, new Observer(st.serverID));
+            st.SubscribeIn(rtime, new Observer(st.serverID));
 
             return (true, null);
         }
@@ -742,13 +742,13 @@ namespace DataClassHierarchy
                 case GosType.Request:
                     var r = obj as Request;
                     var type = r.Type switch {
-                        RequestType.AskSomething => "ASK",
-                        RequestType.DoSomething => "DO",
-                        RequestType.Ping => "PING",
+                        ReqType.Asking => "ASK",
+                        ReqType.DoIt => "DO",
+                        ReqType.Ping => "PING",
                         _ => throw new NotImplementedException()
                     };
                     var resrcs = string.Join(", ", r.AskingRscs.Select(rs => rs.Name));
-                    return $"request {r.ID} {r.Sender} --{type}--> {r.Receiber} ({resrcs})";
+                    return $"request {r.ID} {r.Sender} --{type}--> {r.Receiver} ({resrcs})";
 
                 case GosType.Response:
                     var resp = obj as Response;
