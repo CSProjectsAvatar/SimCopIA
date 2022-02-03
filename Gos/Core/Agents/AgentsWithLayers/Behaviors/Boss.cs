@@ -29,9 +29,11 @@ namespace ServersWithLayers.Behaviors
 
 
             switch (p) {
-                case Request request when request.Type is ReqType.Asking:
+                case Request req when req.Type is ReqType.Asking 
+                            && BehaviorsLib.IsAccepted(status, req):
 
-                    BuildLeaderResponse(status, request);
+                    var resp = BuildLeaderResponse(status, req);
+                    status.Subscribe(resp);
                     break;
 
                 case Request request when request.Type is ReqType.DoIt:
@@ -93,7 +95,6 @@ namespace ServersWithLayers.Behaviors
         private static void ProcessDoItRequest(Request request, Status status, Dictionary<int, List<Response>> askResponses, Heap<int> nextReview, int reviewTime)
         {
             var resourcesToFind = FilterNotAvailableRscs(status, request.AskingRscs);
-
             var server_Request = new Dictionary<string, Request>();
 
             askResponses.Add(request.ID, new List<Response>());   
@@ -103,10 +104,8 @@ namespace ServersWithLayers.Behaviors
                 var servers = status.MicroService.GetProviders(resource.Name);
                 foreach (var s in servers)
                 {
-
                     if (!server_Request.ContainsKey(s))
                     {
-
                         server_Request[s] = new Request(status.serverID, s, ReqType.Asking);
                         status.Subscribe(server_Request[s]);  //suscribimos para el evironment
 
@@ -115,7 +114,7 @@ namespace ServersWithLayers.Behaviors
                         //lista de los responses asosciados a un request originalmente hecho a este server
                         //askResponses.Add(request.ID, new List<Response>());   
                     }
-                    server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server espesifico
+                    server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server especifico
                 }
             }
             status.SubscribeIn(reviewTime, new Observer(status.serverID));

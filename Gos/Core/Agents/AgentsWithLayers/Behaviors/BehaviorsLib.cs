@@ -15,7 +15,7 @@ namespace ServersWithLayers
       
         internal static bool Incomplete(Status st, Response response)
         {
-            var req = st.GetRequestById(response.ReqID);
+            var req = st.GetMsgById(response.ReqID) as Request;
             return response.AnswerRscs.Count < req.AskingRscs.Count;
         }
 
@@ -50,6 +50,11 @@ namespace ServersWithLayers
             return data;
         }
 
+        // Returns true if the request is accepted and encoled
+        internal static bool IsAccepted(Status st, Request req)
+        {
+            return true;
+        }
     }
 
 }
