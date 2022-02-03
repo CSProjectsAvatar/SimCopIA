@@ -16,13 +16,18 @@ namespace ServersWithLayers
 
             switch (req.Type)
             {
-                case ReqType.Asking when IsAccepted(state, req):
+                case ReqType.Asking when BehaviorsLib.IsAccepted(state, req):
 
                     Response response = BehaviorsLib.BuildResponse(state, req);
                     state.Subscribe(response);
                     break;
 
-                case ReqType.DoIt or ReqType.Ping:
+                case ReqType.Ping:
+
+                    state.Subscribe(req.MakeResponse());
+                    break;
+
+                case ReqType.DoIt:
 
                     state.AcceptReq(req);
                     break;
@@ -30,11 +35,6 @@ namespace ServersWithLayers
                 default:
                     break;
             }
-        }
-        // Accepts a request under certain conditions
-        private static bool IsAccepted(Status st, Request req)
-        {
-            return st.HasCapacity;
         }
     }
 
