@@ -18,6 +18,7 @@ namespace ServersWithLayers
         }
 
         public void HandlePerception(Perception p){
+            Stats.SaveEntry(p);
 
             foreach(var l in _layers) 
                 l.Process(p);

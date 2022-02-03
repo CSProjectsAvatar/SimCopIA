@@ -10,6 +10,10 @@ namespace ServersWithLayers{
         //  serverId -> ServerBIo
         internal Dictionary<string, ServerBio> WhitePages;
 
+        public Directory(){
+            YellowPages = new();
+            WhitePages = new();
+        }
         internal void AddServer(Server server)
         {
             if(WhitePages.ContainsKey(server.ID))
