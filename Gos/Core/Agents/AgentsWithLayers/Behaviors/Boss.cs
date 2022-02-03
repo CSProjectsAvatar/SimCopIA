@@ -254,12 +254,11 @@ namespace ServersWithLayers.Behaviors
                 Env.CurrentEnv.Run();
                 
 
-                ////IMPRIMIR EN CONSOLA :D
+                ////Imprimir en la terminal todos los eventos de llegada de cada servidor  :D 
                 //System.Console.WriteLine("Llegada a S2:");
-                //var logList = (s2.GetLayerBehaVars(0,"logList") as List<(int, string)> );
-                //logList.AddRange((s3.GetLayerBehaVars(0,"logList") as List<(int, string)>));
-                //logList.AddRange((s1.GetLayerBehaVars(1,"logList") as List<(int, string)>));
- 
+                //var logList = LoggerBehav.GetLogList(s2,0);
+                //logList.AddRange(LoggerBehav.GetLogList(s3,0));
+                //logList.AddRange(LoggerBehav.GetLogList(s1,1));
                 //logList.Sort();
                 //foreach(var s in logList)
                 //    System.Console.WriteLine(s.Item2);

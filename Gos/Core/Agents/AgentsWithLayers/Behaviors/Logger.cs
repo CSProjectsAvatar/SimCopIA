@@ -40,6 +40,11 @@ namespace ServersWithLayers{
             }
 
         }
+        public static List<(int, string)> GetLogList(Server s, int loggerLayerIndex){
+            var logList = (s.GetLayerBehaVars(loggerLayerIndex,"logList") as List<(int, string)> );
+            return logList;
+        }
+
         // no probado
         public static void PrintRequest(object requests_as_object){
             var requests =requests_as_object as List<(int,Request)>  ;
