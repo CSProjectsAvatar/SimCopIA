@@ -21,6 +21,7 @@ namespace ServersWithLayers{
             this.Name = name;
             this.Dir = new Directory();
         }
+
         internal void SetAsEntryPoint(){
             this.Type = ServiceType.EntryPoint;
         }
@@ -59,6 +60,17 @@ namespace ServersWithLayers{
         internal void ChangeLeader(string leaderID)
         {
            LeaderId =  leaderID;
+        }
+
+        internal List<string> GetServers(Status status)
+        {
+            List<string> servers = new List<string> { };
+            Dictionary<string, ServerBio> whitePages = Services[status.MicroService.Name].Dir.WhitePages;
+            foreach (var item in whitePages)
+            {
+                servers.Add(item.Key);
+            }
+            return servers;
         }
     }
 

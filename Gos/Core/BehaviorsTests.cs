@@ -23,12 +23,28 @@ namespace Core {
         private Request p2;
         private Request p3;
         private Request p4;
+        private Request p4_1;
+
         private Request p5;
+        private Request p5_1;
+
         private Request p6;
+        private Request p6_1;
+
         private Request p7;
+
+        private Response res1;
+
+        private Request p1_1;
+        private Request p2_1;
+
         private Behavior falenLeader;
+        private Behavior falenLeader2;
+
         private List<Server> servers;
-        private Layer layer;
+        private Layer fallenL;
+        private Layer fallenL2;
+
         #endregion
 
         [TestInitialize]
@@ -41,27 +57,43 @@ namespace Core {
             workerL = new Layer();
             workerL.behaviors.Add(BehaviorsLib.Worker);
 
+            falenLeader = BehaviorsLib.FallenLeader;
+            fallenL = new Layer();
+            fallenL.behaviors.Add(falenLeader);
 
-            // server2.AddLayer();
+            falenLeader2 = BehaviorsLib.FallenLeader;
+            fallenL2 = new Layer();
+            fallenL2.behaviors.Add(falenLeader2);
+
             r1 = new Resource("img1");
             r2 = new Resource("img2");
             r3 = new Resource("index");
 
             p1 = new Request("S1", "S2", ReqType.Asking);
-            p1.AskingRscs.AddRange(new[] { r1 });
+            p1.AskingRscs.AddRange(new[] { r1, r2, r3 });
+            p1_1 = new Request("S1", "S3", ReqType.Asking);
+
 
             p2 = new Request("S3", "S2", ReqType.Asking);
+            p2_1 = new Request("S2", "S3", ReqType.Asking);
             p2.AskingRscs.AddRange(new[] { r1, r2 });
 
             p3 = new Request("S3", "S2", ReqType.Asking);
             p4 = new Request("S3", "S2", ReqType.Asking);
+            p4_1 = new Request("S2", "S3", ReqType.Asking);
+
             p5 = new Request("S3", "S2", ReqType.Asking);
+            p5_1 = new Request("S2", "S3", ReqType.Asking);
+
             p6 = new Request("S3", "S2", ReqType.Asking);
-            
-            p7 = new Request("S4", "S2", ReqType.Asking);
+            p6_1 = new Request("S4", "S3", ReqType.Asking);
+
+            p7 = new Request("S1", "S2", ReqType.DoIt);
+
+            res1 = new Response(7, "s1", "s2", ReqType.Asking, new Dictionary<string, bool> { });
+
+            //p7 = new Request("S4", "S2", ReqType.Asking);
             p7.AskingRscs.AddRange(new[] { r1, r2, r3 });
-
-
 
             s1.Stats.AvailableResources.Add(r1);
             s2.Stats.AvailableResources = new List<Resource> { r1, r2 };
@@ -70,7 +102,7 @@ namespace Core {
             servers = new List<Server> { s1, s2, s3 };
 
             env = new Env();
-            env.AddServerList(servers);
+           // env.AddServerList(servers);
         }
         [TestCleanup]
         public void Clean() {
@@ -79,8 +111,10 @@ namespace Core {
         }
         
         
-       [TestMethod]
+        [TestMethod]
         public void WorkerBehavTest_1() {
+           env.AddServerList(servers);
+
             var p1Do = new Request("S1", "S2", ReqType.DoIt);
             p1Do.AskingRscs.AddRange(new[] { r1 });
             var p2Do = new Request("S3", "S2", ReqType.DoIt);
@@ -125,28 +159,22 @@ namespace Core {
         [TestMethod]
         public void ContractorBehavTest_1() {
 
-            var e = new Env();
             var contractor = BehaviorsLib.Contractor;
 
-            var server1 = new Server("S1");
-            var server2 = new Server("S2");
+            // TODO case 1
+            s2.Stats.AvailableResources.Add(r1);
+            s2.Stats.AvailableResources.Add(r3);
+            contractor.Run(s2.Stats, p1);
+            Assert.AreEqual(s1.ID, s2.Stats._sendToEnv[0].Item2.receiver);
 
-            
-            var r1 = new Resource("img1");
-            var r2 = new Resource("img2");
-            var r3 = new Resource("index");
+            // TODO case 2
+            //contractor.Run(s2.Stats, p7);
+            //Assert.AreEqual(s2.ID, s2.Stats._requestsAceptedHistory[p7.ID].receiver);
 
-            var p2 = new Request("S1", "S2", ReqType.Asking);
-            p2.AskingRscs.AddRange(new[] { r1, r2, r3 });
-
-            var p3 = new Request("S1", "S2", ReqType.DoIt);
-
-            server2.Stats.AvailableResources.Add(r1);
-            server2.Stats.AvailableResources.Add(r3);
-
-            contractor.Run(server2.Stats, p2);
-            contractor.Run(server2.Stats, p3);
-
+            // TODO if is not Request
+            //contractor.Run(s2.Stats, res1);
+            //Assert.AreEqual(0, s2.Stats._sendToEnv.Count());
+            //Assert.AreEqual(0, s2.Stats._requestsAceptedHistory.Count());
         }
 
         #region FalenLeader
@@ -156,10 +184,9 @@ namespace Core {
         {
             falenLeader = BehaviorsLib.FallenLeader;
             
-            layer.behaviors.Add(falenLeader);
 
-            s2.AddLayer(layer);
-            s3.AddLayer(layer);
+            s2.AddLayer(fallenL);
+            s3.AddLayer(fallenL);
             s2.Stats.MicroService.ChangeLeader( "S1");
 
             env.AddServerList(servers);
@@ -170,6 +197,9 @@ namespace Core {
 
             //1er if reiniciando los valores
             env.SubsribeEvent(34, p1);
+            //env.Run();
+            //Assert.AreEqual(s1.ID, s2.Stats.MicroService.LeaderId);
+
 
             //al final se convierte en jefe
             env.SubsribeEvent(42, p4);
@@ -180,12 +210,56 @@ namespace Core {
             env.Run();
 
             Assert.AreEqual(s2.ID, s2.Stats.MicroService.LeaderId);
-            ///falenLeader.Run(server2.Stats, p2);
 
         }
+
+        [TestMethod]
+        public void FalenLeaderBehavTest_2()
+        {
+            s2.AddLayer(fallenL);
+            
+            s2.Stats.MicroService.ChangeLeader("S1");
+
+            // else de mandar el request de tipo ping
+            env.SubsribeEvent(10, p2);
+            env.SubsribeEvent(18, p3);
+
+            env.Run();
+            Assert.AreEqual(2, s2._layers[0].behaviors[0].variables["countPing"]);
+
+        }
+
+
+        [TestMethod]
+        public void FalenLeaderBehavTest_3()
+        {
+            s2.AddLayer(fallenL);
+            s3.AddLayer(fallenL2);
+
+            servers = new List<Server> { s1, s2, s3, s4 };
+
+            env.AddServerList(servers);
+
+            s2.Stats.MicroService.ChangeLeader("S1");
+            s3.Stats.MicroService.ChangeLeader("S1");
+
+
+            // else de mandar el request de tipo ping
+            env.SubsribeEvent(10, p2);
+            env.SubsribeEvent(18, p2_1);
+            env.SubsribeEvent(42, p4);
+            env.SubsribeEvent(56, p4_1);
+            env.SubsribeEvent(67, p5);
+            env.SubsribeEvent(110, p5_1);
+
+            env.SubsribeEvent(121, p6);
+            env.SubsribeEvent(120, p6_1);
+
+            env.Run();
+           // Assert.AreEqual(2, s2._layers[0].behaviors[0].variables["countPing"]);
+
+        }
+
         #endregion
-
-
-
     }
 }

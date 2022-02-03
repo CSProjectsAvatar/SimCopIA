@@ -25,9 +25,13 @@ namespace ServersWithLayers{
         }
 
         Dictionary<int,Response> _notCompletdRespns { get; set; }
-        List<(int, Perception)> _sendToEnv;
+        internal List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
+
+        //internal Dictionary<int, Request> _requestsAceptedHistory;
+
         List<Message> _messagingHistory;
+
         #endregion
    
         public Status(string iD)
