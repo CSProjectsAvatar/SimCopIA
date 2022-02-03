@@ -23,8 +23,14 @@ namespace Core {
         private Request p2;
         private Request p3;
         private Request p4;
+        private Request p4_1;
+
         private Request p5;
+        private Request p5_1;
+
         private Request p6;
+        private Request p6_1;
+
         private Request p7;
 
         private Response res1;
@@ -74,8 +80,14 @@ namespace Core {
 
             p3 = new Request("S3", "S2", ReqType.Asking);
             p4 = new Request("S3", "S2", ReqType.Asking);
+            p4_1 = new Request("S2", "S3", ReqType.Asking);
+
             p5 = new Request("S3", "S2", ReqType.Asking);
+            p5_1 = new Request("S2", "S3", ReqType.Asking);
+
             p6 = new Request("S3", "S2", ReqType.Asking);
+            p6_1 = new Request("S4", "S3", ReqType.Asking);
+
             p7 = new Request("S1", "S2", ReqType.DoIt);
 
             res1 = new Response(7, "s1", "s2", ReqType.Asking, new Dictionary<string, bool> { });
@@ -90,7 +102,7 @@ namespace Core {
             servers = new List<Server> { s1, s2, s3 };
 
             env = new Env();
-            env.AddServerList(servers);
+           // env.AddServerList(servers);
         }
         [TestCleanup]
         public void Clean() {
@@ -172,6 +184,7 @@ namespace Core {
             
 
             s2.AddLayer(fallenL);
+            s3.AddLayer(fallenL);
             s2.Stats.MicroService.ChangeLeader( "S1");
 
             env.AddServerList(servers);
@@ -221,15 +234,24 @@ namespace Core {
             s2.AddLayer(fallenL);
             s3.AddLayer(fallenL2);
 
+            servers = new List<Server> { s1, s2, s3, s4 };
+
+            env.AddServerList(servers);
+
             s2.Stats.MicroService.ChangeLeader("S1");
             s3.Stats.MicroService.ChangeLeader("S1");
 
+
             // else de mandar el request de tipo ping
             env.SubsribeEvent(10, p2);
-            env.SubsribeEvent(18, p3);
-            env.SubsribeEvent(34, p1);
-            env.SubsribeEvent(34, p1_1);
+            env.SubsribeEvent(18, p2_1);
+            env.SubsribeEvent(42, p4);
+            env.SubsribeEvent(56, p4_1);
+            env.SubsribeEvent(67, p5);
+            env.SubsribeEvent(110, p5_1);
 
+            env.SubsribeEvent(121, p6);
+            env.SubsribeEvent(120, p6_1);
 
             env.Run();
            // Assert.AreEqual(2, s2._layers[0].behaviors[0].variables["countPing"]);
@@ -237,8 +259,5 @@ namespace Core {
         }
 
         #endregion
-
-
-
     }
 }

@@ -45,7 +45,10 @@ namespace ServersWithLayers
                 {
                     vars[countPingStr] = 0;
                     st.MicroService.ChangeLeader(st.serverID); //me pongo de lider
-                    //mandar un requets
+                    foreach (var item in BehaviorsLib.CreatePingRequests(st))
+                    {
+                        st.Subscribe(item);
+                    }
                     return;
                 }
                 else

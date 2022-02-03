@@ -61,6 +61,17 @@ namespace ServersWithLayers{
         {
            LeaderId =  leaderID;
         }
+
+        internal List<string> GetServers(Status status)
+        {
+            List<string> servers = new List<string> { };
+            Dictionary<string, ServerBio> whitePages = Services[status.MicroService.Name].Dir.WhitePages;
+            foreach (var item in whitePages)
+            {
+                servers.Add(item.Key);
+            }
+            return servers;
+        }
     }
 
     public enum ServiceType{

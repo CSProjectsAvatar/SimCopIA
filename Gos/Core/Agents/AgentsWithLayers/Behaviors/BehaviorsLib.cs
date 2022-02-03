@@ -55,6 +55,17 @@ namespace ServersWithLayers
         {
             return true;
         }
+
+        internal static List<Request> CreatePingRequests (Status st)
+        {
+            List<string> servers = st.MicroService.GetServers(st);
+            List<Request> requests = new List<Request> { };
+            foreach (var item in servers)
+            {
+                requests.Add(new Request(st.serverID, item, ReqType.Ping));
+            }
+            return requests;
+        }
     }
 
 }
