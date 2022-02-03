@@ -21,16 +21,15 @@ namespace ServersWithLayers
 
             while (heap.Count != 0 && heap.First.Item1 <= Env.Time)
             { // first elem is done
-
+                st.DecProcessing();
+                
                 var req = heap.RemoveMin().Item2; // Request completed
                 var response = BehaviorsLib.BuildResponse(st, req);
 
                 if (BehaviorsLib.Incomplete(st, response))
                 { // if incomplete I save it for fill it later
-                    st.AddPartialRpnse(response); // Add to dict
-                }
-                else
-                {
+                    st.AddPartialRpnse(response); // Save response
+                } else {
                     st.Subscribe(response); // Subscribe response
                 }
             }
@@ -38,10 +37,12 @@ namespace ServersWithLayers
             // Checking Tasks to do
             while (st.HasCapacity && st.HasRequests)
             {
+                st.IncProcessing(); 
+
                 var req = st.ExtractAcceptedReq(); // elijo request
                 var rtime = GetRequiredTimeToProcess(req);
 
-                heap.Add(rtime, req); // comienzo a procesar la tarea
+                heap.Add(Env.Time + rtime, req); // comienzo a procesar la tarea
                 st.SubscribeIn(rtime, new Observer(st.serverID)); // 
             }
         }

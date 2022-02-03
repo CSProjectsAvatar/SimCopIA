@@ -17,16 +17,14 @@ namespace ServersWithLayers
             req.AskingRscs = askRscs;
             return req;
         }
-        static int lastRequestID = 0; 
-        public int ID {get;}
+         
         public List<Resource> AskingRscs { get; set; }
         public Request(string sender, string receiver, ReqType type) : base(sender,receiver, type){
-            this.ID = ++lastRequestID; 
             this.MatureTime = 1;
             AskingRscs = new();
         }
         // Crea un reponse a partir del request, en sentido contrario, con el campo data
-        public Response MakeResponse(Dictionary<string, bool> data){
+        public Response MakeResponse(Dictionary<string, bool> data = null){
             return new Response(
                 this.ID,
                 this.Receiver,

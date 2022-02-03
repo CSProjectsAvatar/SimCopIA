@@ -10,10 +10,15 @@ namespace ServersWithLayers
     /// -quien lo manda (sender),
     /// -quien lo debe recibir (recieber).
     public abstract class Message : Perception{
+        static int lastMsgID = 0;
+
+        public int ID {get;}
         public string Sender {get;} 
         public string Receiver {get;}
         public ReqType Type {get;}
         public Message(string sender, string receiver, ReqType type): base(receiver){
+            this.ID = ++lastMsgID; 
+
             this.Sender = sender;
             this.Receiver = receiver;
             this.Type = type;
