@@ -41,6 +41,8 @@ namespace Core {
             workerL = new Layer();
             workerL.behaviors.Add(BehaviorsLib.Worker);
 
+
+            // server2.AddLayer();
             r1 = new Resource("img1");
             r2 = new Resource("img2");
             r3 = new Resource("index");
@@ -77,7 +79,7 @@ namespace Core {
         }
         
         
-        [TestMethod]
+       [TestMethod]
         public void WorkerBehavTest_1() {
             var p1Do = new Request("S1", "S2", ReqType.DoIt);
             p1Do.AskingRscs.AddRange(new[] { r1 });
@@ -153,7 +155,7 @@ namespace Core {
         public void FalenLeaderBehavTest_1()
         {
             falenLeader = BehaviorsLib.FallenLeader;
-
+            
             layer.behaviors.Add(falenLeader);
 
             s2.AddLayer(layer);
@@ -177,6 +179,7 @@ namespace Core {
 
             env.Run();
 
+            Assert.AreEqual(s2.ID, s2.Stats.MicroService.LeaderId);
             ///falenLeader.Run(server2.Stats, p2);
 
         }
