@@ -16,7 +16,7 @@ namespace ServersWithLayers
         private static string lastTSeeLeaderStr = "lastTimeSeeLeader";
 
 
-        private static void BehavInit(Status state, Dictionary<string, object> vars)
+        internal static void BehavInit(Status state, Dictionary<string, object> vars)
         {
             vars[initialPotenceStr] = 3;
             vars[maxPingStr] = 3;
@@ -45,6 +45,7 @@ namespace ServersWithLayers
                 {
                     vars[countPingStr] = 0;
                     st.MicroService.ChangeLeader(st.serverID); //me pongo de lider
+                    //mandar un requets
                     return;
                 }
                 else
