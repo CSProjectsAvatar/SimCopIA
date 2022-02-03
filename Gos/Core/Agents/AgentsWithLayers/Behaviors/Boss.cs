@@ -13,11 +13,13 @@ namespace ServersWithLayers.Behaviors
         private static string nextReviewB = "nextReview";
         private static string askResponsesB = "askResponses";
         private static string solutionResponsesAsocietedIDB = "solutionResponsesAsocietedID";
+        private static string askResponsesAsocietedIDB = "askResponsesAsocietedID";
 
         private static void BossAnnounceInit(Status status,Dictionary<string, object> vars){
             vars[reviewTimeB] = 5; //cambiar cualquier cosa 
             vars[nextReviewB]  = new Utils.Heap<int>(); // la proxima revision a que request pertenece
             vars[askResponsesB] = new Dictionary<int, List<Response>>();
+            vars[askResponsesAsocietedIDB] = new Dictionary<int, int>();
             vars[solutionResponsesAsocietedIDB] = new Dictionary<int, int>();
         } 
         private static void BossAnnounce(Status status, Perception p, Dictionary<string,object> variables)
@@ -25,6 +27,7 @@ namespace ServersWithLayers.Behaviors
             var askResponses = variables[askResponsesB] as Dictionary<int,List<Response>>;
             var nextReview = variables[nextReviewB] as Utils.Heap<int>;
             var solutionResponsesAsocietedID  = variables[solutionResponsesAsocietedIDB] as Dictionary<int, int>;
+            var askResponsesAsocietedID  = variables[askResponsesAsocietedIDB] as Dictionary<int, int>;
             int reviewTime = (int)variables[reviewTimeB];
 
 
@@ -39,12 +42,15 @@ namespace ServersWithLayers.Behaviors
                 case Request request when request.Type is ReqType.DoIt:
 
                     //buscamos los recursos que no puede solucionar este servidor.
-                    ProcessDoItRequest(request, status, askResponses, nextReview, reviewTime);
+                    ProcessDoItRequest(request, status, askResponses,askResponsesAsocietedID, nextReview, reviewTime);
                     break;
 
                 case Response response when response.Type is ReqType.Asking:
-                    if (askResponses.ContainsKey(response.ReqID))
-                        askResponses[response.ReqID].Add(response);  //Agregamos a el request por el cual se mando...
+                    if(!askResponsesAsocietedID.ContainsKey(response.ReqID)) 
+                        return;
+                    if (askResponses.ContainsKey(askResponsesAsocietedID[response.ReqID])){
+                        askResponses[askResponsesAsocietedID[response.ReqID]].Add(response);  //Agregamos a el request por el cual se mando...
+                    }
                     break;
 
                 case Response response when response.Type is ReqType.DoIt:
@@ -57,7 +63,7 @@ namespace ServersWithLayers.Behaviors
                     // (tiempo actual  != timepo de recogida de responses) <=> (observer no asociado a esta capa)
                     if( Env.Time != nextReview.First.Item1)
                         return;
-
+                    
                     (_,int current_request_ID) = nextReview.RemoveMin();
 
                     var responses =  askResponses[current_request_ID];
@@ -92,7 +98,7 @@ namespace ServersWithLayers.Behaviors
         /// <summary>
         /// Procesa los Request de tipo DoIt, se encarga de repartir la carga de trabajo entre los servidores del microservicio
         /// </summary>
-        private static void ProcessDoItRequest(Request request, Status status, Dictionary<int, List<Response>> askResponses, Heap<int> nextReview, int reviewTime)
+        private static void ProcessDoItRequest(Request request, Status status, Dictionary<int, List<Response>> askResponses,Dictionary<int,int> askResponseAsocietedID, Heap<int> nextReview, int reviewTime)
         {
             var resourcesToFind = FilterNotAvailableRscs(status, request.AskingRscs);
             var server_Request = new Dictionary<string, Request>();
@@ -113,6 +119,8 @@ namespace ServersWithLayers.Behaviors
 
                         //lista de los responses asosciados a un request originalmente hecho a este server
                         //askResponses.Add(request.ID, new List<Response>());   
+
+                        askResponseAsocietedID.Add(server_Request[s].ID,request.ID);
                     }
                     server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server especifico
                 }
@@ -173,15 +181,17 @@ namespace ServersWithLayers.Behaviors
             
                 var bossLayer = new Layer();
                 var loggerLayer = new Layer();
+                var contractorLayer = new Layer();
                 bossLayer.behaviors = new List<Behavior>{BossBehavior};
                 loggerLayer.behaviors = new List<Behavior>{LoggerBehav.LoggerBehavior};
-    
+                contractorLayer.behaviors = new List<Behavior>{BehaviorsLib.Contractor};
+
                 s1 = new Server("s1");
-                s1.AddLayers(new List<Layer>{bossLayer,loggerLayer});
+                s1.AddLayers(new List<Layer>{loggerLayer,bossLayer});
                 s2 = new Server("s2");
-                s2.AddLayers(new List<Layer>{loggerLayer});
+                s2.AddLayers(new List<Layer>{loggerLayer,contractorLayer});
                 s3 = new Server("s3");
-                s3.AddLayers(new List<Layer>{loggerLayer});
+                s3.AddLayers(new List<Layer>{loggerLayer,contractorLayer});
     
                 s2.SetResources(new List<Resource>{
                     new Resource("img"),              
@@ -206,27 +216,49 @@ namespace ServersWithLayers.Behaviors
             //Envio de requests tipo DoIt (ejemplo super simple)
 
             [TestMethod]
-            public void ProcessDoItRequestTest(){                
-    
+            public void ProcessDoItRequestTest(){ 
+                
                 Request req1= new Request("0", "s1", ReqType.DoIt);                                
                 req1.AskingRscs = new List<Resource>{
                     Resource.Resources["img"],
-                    Resource.Resources["index"]
+                    Resource.Resources["index"],
+                    Resource.Resources["database"],
                 };
-    
-    
+
+
                 Env.CurrentEnv.SubsribeEvent(0,req1);
                 //Env.CurrentEnv.SubsribeEvent(0,req2);
                 
                 Env.CurrentEnv.Run();
-                    
-                var requestsS2 = LoggerBehav.GetRequestList(s2,0);
-                var requestsS3 = LoggerBehav.GetRequestList(s3,0);
+                 
+                List<(int,string)> logList =new();
+                var logList1 = LoggerBehav.GetLogList(s1,0);
+                var logList2 = LoggerBehav.GetLogList(s2,0);
+                var logList3 = LoggerBehav.GetLogList(s3,0);
 
-    
-                Assert.AreEqual(1,requestsS2?.Count);
-    
-    
+                if(logList1 != null)
+                    logList.AddRange(logList1);
+                if(logList2 != null)
+                    logList.AddRange(logList2); 
+                if(logList3 != null)
+                    logList.AddRange(logList3);
+                
+
+                logList.Sort();
+                System.Console.WriteLine("EVENTOS:");
+                foreach(var s in logList)
+                    System.Console.WriteLine(s.Item2);
+
+
+                var responsesS1 = LoggerBehav.GetResponseList(s1,0);
+                var requestsS2 = LoggerBehav.GetRequestList(s2,0);
+                var requestsS3 = LoggerBehav.GetResponseList(s3,0);
+                
+
+                Assert.AreEqual(2,requestsS2?.Count);
+                Assert.AreEqual(2,requestsS2?.Count);
+                Assert.AreEqual(2,responsesS1?.Count);
+
             }
             //Envio de requests tipo DoIt  (ejemplo super simple)
             [TestMethod]
@@ -253,21 +285,23 @@ namespace ServersWithLayers.Behaviors
                 Env.CurrentEnv.Run();
                 
 
-                ////Imprimir en la terminal todos los eventos de llegada de cada servidor  :D 
-                //System.Console.WriteLine("Llegada a S2:");
-                //var logList = LoggerBehav.GetLogList(s2,0);
-                //logList.AddRange(LoggerBehav.GetLogList(s3,0));
-                //logList.AddRange(LoggerBehav.GetLogList(s1,1));
-                //logList.Sort();
-                //foreach(var s in logList)
-                //    System.Console.WriteLine(s.Item2);
+                //Imprimir en la terminal todos los eventos de llegada de cada servidor  :D 
+                System.Console.WriteLine("\nEventos de llegada:");
+                var logList = LoggerBehav.GetLogList(s2,0);
+                logList.AddRange(LoggerBehav.GetLogList(s3,0));
+                logList.AddRange(LoggerBehav.GetLogList(s1,0));
+                logList.Sort();
+                foreach(var s in logList)
+                    System.Console.WriteLine(s.Item2);
 
 
+                var responsesS1 = LoggerBehav.GetResponseList(s1,0);
                 var requestsS2 = LoggerBehav.GetRequestList(s2,0);
                 var requestsS3 = LoggerBehav.GetRequestList(s3,0);
                 
-                Assert.AreEqual((int)n/3,requestsS2?.Count);
-                Assert.AreEqual(n-(int)n/3,requestsS3?.Count);
+                Assert.AreEqual(2*(int)n/3,requestsS2?.Count);
+                Assert.AreEqual(2*(n-(int)n/3),requestsS3?.Count);
+                Assert.AreEqual(n,responsesS1?.Count);
             }
         }
     }    
