@@ -45,6 +45,15 @@ namespace ServersWithLayers{
             return logList;
         }
 
+        public static List<(int, Request)> GetRequestList(Server s, int loggerLayerIndex){
+            var requests = (s.GetLayerBehaVars(loggerLayerIndex,"requests") as List<(int, Request)> );
+            return requests;
+        }
+        public static List<(int, Response)> GetResponseList(Server s, int loggerLayerIndex){
+            var responses = (s.GetLayerBehaVars(loggerLayerIndex,"responses") as List<(int, Response)> );
+            return responses;
+        }
+
         // no probado
         public static void PrintRequest(object requests_as_object){
             var requests =requests_as_object as List<(int,Request)>  ;

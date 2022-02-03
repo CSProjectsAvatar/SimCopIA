@@ -221,9 +221,9 @@ namespace ServersWithLayers.Behaviors
                 
                 Env.CurrentEnv.Run();
                     
-                var requestsS2 = s2.GetLayerBehaVars(0,"requests") as List<(int, Request)>;
-                var requestsS3 = s3.GetLayerBehaVars(0,"requests") as List<(int, Request)>;
-                
+                var requestsS2 = LoggerBehav.GetRequestList(s2,0);
+                var requestsS3 = LoggerBehav.GetRequestList(s3,0);
+
     
                 Assert.AreEqual(1,requestsS2?.Count);
     
@@ -264,8 +264,8 @@ namespace ServersWithLayers.Behaviors
                 //    System.Console.WriteLine(s.Item2);
 
 
-                var requestsS2 = s2.GetLayerBehaVars(0,"requests") as List<(int, Request)>;
-                var requestsS3 = s3.GetLayerBehaVars(0,"requests") as List<(int, Request)>;
+                var requestsS2 = LoggerBehav.GetRequestList(s2,0);
+                var requestsS3 = LoggerBehav.GetRequestList(s3,0);
                 
                 Assert.AreEqual((int)n/3,requestsS2?.Count);
                 Assert.AreEqual(n-(int)n/3,requestsS3?.Count);
