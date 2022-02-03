@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ServersWithLayers{
     public class Status{
@@ -11,14 +12,26 @@ namespace ServersWithLayers{
         #endregion
 
         #region  Server State
-        internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
+        private int processedAtOnce;
+        internal bool HasCapacity => processedAtOnce < MaxCapacity;
         internal bool HasRequests => aceptedRequests.Count > 0;
 
         Queue<Request> aceptedRequests;
+
+        internal void SaveEntry(Perception p)
+        {
+            if (p is Message msg)
+                _messagingHistory.Add(msg);
+        }
+
         Dictionary<int,Response> _notCompletdRespns { get; set; }
         internal List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
-        internal Dictionary<int, Request> _requestsAceptedHistory;
+
+        //internal Dictionary<int, Request> _requestsAceptedHistory;
+
+        List<Message> _messagingHistory;
+
         #endregion
    
         public Status(string iD)
@@ -31,7 +44,8 @@ namespace ServersWithLayers{
             aceptedRequests = new();
             serverID = iD;
 
-            _requestsAceptedHistory = new();
+            _messagingHistory = new();
+            _notCompletdRespns = new();
         }
 
         internal void AddPartialRpnse(Response resp)
@@ -48,6 +62,27 @@ namespace ServersWithLayers{
             }
         }
 
+        internal bool IncProcessing()
+        {
+            if (HasCapacity)
+            {
+                processedAtOnce++;
+                return true;
+            }
+            return false;
+        }
+        internal bool DecProcessing()
+        {
+            if (processedAtOnce > 0)
+            {
+                processedAtOnce--;
+                return true;
+            }
+            return false;
+        }
+
+
+
         //Suscribe Perceptions en un tiempo 'time'
         public void SubscribeAt(int time, Perception p)
         {
@@ -63,12 +98,14 @@ namespace ServersWithLayers{
 
         public void AcceptReq(Request req)
         {
+            if (req.Type is not ReqType.DoIt)
+                throw new Exception("Only DoIt requests are accepted for processing later");
             aceptedRequests.Enqueue(req);
-            _requestsAceptedHistory.Add(req.ID, req);
         }
         public Request ExtractAcceptedReq() => aceptedRequests.Dequeue();
-        public Request GetRequestById(int id) => _requestsAceptedHistory[id];
-
+        public List<Message> GetMsgBySender(string sender)
+            => _messagingHistory.Where(m => m.Sender == sender).ToList();
+        public Message GetMsgById(int id) => _messagingHistory.First(m => m.ID == id);
         public void SetVariable(string name, object value) => _variables[name] = value;
         public object GetVariable(string name) => _variables.ContainsKey(name) ? _variables[name] : null;
         
