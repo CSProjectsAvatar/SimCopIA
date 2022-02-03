@@ -39,6 +39,15 @@ namespace ServersWithLayers
             copy._init += this._init;
             return copy;
         }
+
+        /// Retorna el object asociado a la variable `name`.
+        public object GetVariables(string name){
+            if(!variables.ContainsKey(name))
+                return null;
+            return variables[name];
+        } 
+
+
     }
 } 
 /*

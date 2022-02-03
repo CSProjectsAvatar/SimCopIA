@@ -55,5 +55,12 @@ namespace ServersWithLayers
             Stats.AvailableResources = new();
             Stats.AvailableResources.AddRange(resources);
         }
+
+        ///retorna el object asociado a una variable `varName` de el primer comportamiento asociado a la capa en la posicion `layerIndex`
+        internal object GetLayerBehaVars(int layerIndex,string varName){
+            if(_layers.Count > layerIndex)
+                return _layers[layerIndex].behaviors[0].GetVariables(varName);
+            throw new System.Exception("Indice capa mayor que la cantidad de capas.");
+        }
     }
 }

@@ -8,6 +8,7 @@ namespace ServersWithLayers.Behaviors
 {
     public static class BossBehav
     {
+        public static Behavior BossBehavior = new Behavior(BossAnnounce,BossAnnounceInit);
         private static string reviewTimeB = "reviewTime";
         private static string nextReviewB = "nextReview";
         private static string askResponsesB = "askResponses";
@@ -95,6 +96,8 @@ namespace ServersWithLayers.Behaviors
 
             var server_Request = new Dictionary<string, Request>();
 
+            askResponses.Add(request.ID, new List<Response>());   
+
             foreach (var resource in resourcesToFind)
             {
                 var servers = status.MicroService.GetProviders(resource.Name);
@@ -110,7 +113,7 @@ namespace ServersWithLayers.Behaviors
                         //askResponses.Add(server_Request[s].ID, new List<Response>()); // error
 
                         //lista de los responses asosciados a un request originalmente hecho a este server
-                        askResponses.Add(request.ID, new List<Response>());   
+                        //askResponses.Add(request.ID, new List<Response>());   
                     }
                     server_Request[s].AskingRscs.Add(resource);   // agregamos a los recursos que se van a pedir a un server espesifico
                 }
@@ -128,7 +131,16 @@ namespace ServersWithLayers.Behaviors
         }
 
         private static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
-            throw new NotImplementedException("IMPLEMENTAR FUNCION DE SELECCION EN BOSS");
+            //throw new NotImplementedException("IMPLEMENTAR FUNCION DE SELECCION EN BOSS");
+
+            ////funcion por defecto momentaniamente.
+            var sol = new List<Request>();
+            foreach(var r in responses){
+                Request req=new Request(status.serverID,r.Sender,ReqType.DoIt);
+                sol.Add(req);
+            }
+            return sol;
+
         }
 
         // Builds a response AS A LEADER to: asking, imperative and ping request; in the same way
@@ -142,59 +154,124 @@ namespace ServersWithLayers.Behaviors
             var response = req.MakeResponse(data);
             return response;
         }
-    }
 
-    [TestClass]
-    public class BossAuxiliarMethodsTests {
-        #region  vars
-        private Server s1;
-        private Server s2;
-        private Resource r1;
-        private Resource r2;
-        private Resource r3;
-        private Request p1;
-        private Request p2;
-        private Request p3;
-        #endregion
-
-        [TestInitialize]
-        public void Init() {
-            s1 = new Server("S1");
-            s2 = new Server("S2");
+        // No ejecutar los tests al mismo tiempo :D
+        [TestClass]
+        public class BossDoItRequestTests {
+            #region  vars
+            private Server s1;
+            private Server s2;
+            private Server s3;
+            private Resource r1;
+            private Resource r2;
+            private Resource r3;
             
-            // server2.AddLayer();
-            r1 = new Resource("img1");
-            r2 = new Resource("img2");
-            r3 = new Resource("index");
+            #endregion
+    
+            [TestInitialize]
+            public void Init() {                
+                Env env = new Env();
+            
+                var bossLayer = new Layer();
+                var loggerLayer = new Layer();
+                bossLayer.behaviors = new List<Behavior>{BossBehavior};
+                loggerLayer.behaviors = new List<Behavior>{LoggerBehav.LoggerBehavior};
+    
+                s1 = new Server("s1");
+                s1.AddLayers(new List<Layer>{bossLayer,loggerLayer});
+                s2 = new Server("s2");
+                s2.AddLayers(new List<Layer>{loggerLayer});
+                s3 = new Server("s3");
+                s3.AddLayers(new List<Layer>{loggerLayer});
+    
+                s2.SetResources(new List<Resource>{
+                    new Resource("img"),              
+                    new Resource("index"),              
+                    new Resource("random"),              
+                });
+    
+                s3.SetResources(new List<Resource>{
+                    new Resource("database"),              
+                    new Resource("random2"),              
+                });
+    
+                new Resource("gold"); //nadie lo tiene :D
+                
+    
+                env.AddServerList(new List<Server>{s1,s2,s3});
+    
+    
+            }
+            
+    
+            //Envio de requests tipo DoIt (ejemplo super simple)
 
-            p1 = new Request("S1", "S2", ReqType.Asking);
-            p1.AskingRscs.AddRange(new[] { r1 });
+            [TestMethod]
+            public void ProcessDoItRequestTest(){                
+    
+                Request req1= new Request("0", "s1", ReqType.DoIt);                                
+                req1.AskingRscs = new List<Resource>{
+                    Resource.Resources["img"],
+                    Resource.Resources["index"]
+                };
+    
+    
+                Env.CurrentEnv.SubsribeEvent(0,req1);
+                //Env.CurrentEnv.SubsribeEvent(0,req2);
+                
+                Env.CurrentEnv.Run();
+                    
+                var requestsS2 = s2.GetLayerBehaVars(0,"requests") as List<(int, Request)>;
+                var requestsS3 = s3.GetLayerBehaVars(0,"requests") as List<(int, Request)>;
+                
+    
+                Assert.AreEqual(1,requestsS2?.Count);
+    
+    
+            }
+            //Envio de requests tipo DoIt  (ejemplo super simple)
+            [TestMethod]
+            public void ProcessNDoItRequestTest(){                
 
-            p2 = new Request("S1", "S2", ReqType.Asking);
-            p2.AskingRscs.AddRange(new[] { r1, r2 });
+                int n = 10;
 
-            p3 = new Request("S1", "S2", ReqType.Asking);
-            p3.AskingRscs.AddRange(new[] { r1, r2, r3 });
+                for(var i=1; i<= n;i++){
+                    
+                    Request req1= new Request("0", "s1", ReqType.DoIt);                                
+                    if(i%3 == 0)
+                        req1.AskingRscs = new List<Resource>{
+                            Resource.Resources["img"],
+                            Resource.Resources["index"]
+                        };
+                    else
+                        req1.AskingRscs = new List<Resource>{
+                            Resource.Resources["database"],
+                        };      
+
+                    Env.CurrentEnv.SubsribeEvent(i*10,req1);
+                }
+                    
+                Env.CurrentEnv.Run();
+                
+
+                ////IMPRIMIR EN CONSOLA :D
+                //System.Console.WriteLine("Llegada a S2:");
+                //var logList = (s2.GetLayerBehaVars(0,"logList") as List<(int, string)> );
+                //logList.AddRange((s3.GetLayerBehaVars(0,"logList") as List<(int, string)>));
+                //logList.AddRange((s1.GetLayerBehaVars(1,"logList") as List<(int, string)>));
+ 
+                //logList.Sort();
+                //foreach(var s in logList)
+                //    System.Console.WriteLine(s.Item2);
+
+
+                var requestsS2 = s2.GetLayerBehaVars(0,"requests") as List<(int, Request)>;
+                var requestsS3 = s3.GetLayerBehaVars(0,"requests") as List<(int, Request)>;
+                
+                Assert.AreEqual((int)n/3,requestsS2?.Count);
+                Assert.AreEqual(n-(int)n/3,requestsS3?.Count);
+            }
         }
-        
-      
-        [TestMethod]
-        public void FilterResourcesTest() {
-            s2.SetResources(new[] { r1, r2 });
-            var resList = BossBehav.FilterNotAvailableRscs(s2.Stats, p3.AskingRscs);
-
-            Assert.AreEqual(1, resList.Count);
-            Assert.AreEqual(r3, resList[0]);
-
-            s1.SetResources(new[] { r2 });
-            resList = BossBehav.FilterNotAvailableRscs(s1.Stats, p3.AskingRscs);
-
-            Assert.AreEqual(2, resList.Count);
-            Assert.IsTrue(resList.Contains(r1));
-            Assert.IsTrue(resList.Contains(r3));
-        }
-      
-
-    }
+    }    
 
 } 
