@@ -58,6 +58,8 @@ namespace ServersWithLayers
 
                     st.SubscribeIn(time, pingRequest); // Envio PING
                     vars[countPingStr] = countPing + 1;
+
+                    st.SubscribeIn(waitTime, new Observer(st.serverID));  // pa repetir el PING si el li'der sigue cai'2
                 }
             }
 
