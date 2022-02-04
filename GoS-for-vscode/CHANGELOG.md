@@ -11,12 +11,19 @@ El formato se basa en [*Keep a Changelog*](https://keepachangelog.com/en/1.0.0/)
 - Palabras claves `forever`, `break`, `for` e `in`.
 - Palabras claves `and` y `or`.
 - Palabras claves `true` y `false`.
-- Palabra clave `server`.
-- Palablas claves `behav` e `init`.
+- Posibles valores para el token CLASS: `server`, `request`, `response` y `alarm`.
+- Palabras claves `behav` e `init`.
 - *Highlight* para el nombre de los comportamientos.
+- Palabras claves `is` y `not`.
+- Palabras claves `respond`, `respond_or_save`, `accept` y `process`.
+- Variables m&aacute;gicas `status`, `percep` y `done_reqs` en negrita.
+- Tratamiento diferenciado a VARIABLES_QUE_ESTEN_ASI_EN_MAYUSCULAS.
 
 ### Removed
 - Palabras claves `distw` y `simplew`.
+
+### Fixed
+- Expresi&oacute;n regular para los identificadores.
 
 ## 0.2.0
 ### Added
