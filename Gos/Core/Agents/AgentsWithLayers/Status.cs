@@ -109,6 +109,7 @@ namespace ServersWithLayers{
         
         //Se llama cuando se recorrieron todas las capas, retorna un enumerable con todas las persepciones acumuladas de las capas y luego borra el historial de ellas.
         public IEnumerable<(int, Perception)> EnumerateAndClear() {
+            
             RemoveDuplicatesBeforeSending();
             
             foreach(var x in _sendToEnv){
@@ -118,8 +119,30 @@ namespace ServersWithLayers{
         }
 
         private void RemoveDuplicatesBeforeSending()
-        {
-            throw new NotImplementedException();
+        {   // Allow the first respond to the same request, it delete the rest 
+            List<int> seens = new();
+            // Allow only one Observer in a time t
+            List<int> times = new();
+
+            for (int i = 0; i < _sendToEnv.Count; i++) {
+                var p = _sendToEnv[i];
+                if (p.Item2 is Response resp){ // Response
+                    if (seens.Contains(resp.ReqID)) {
+                        _sendToEnv.RemoveAt(i);
+                        i--;
+                    }
+                    else
+                        seens.Add(resp.ReqID);
+                }
+                else if (p.Item2 is Observer obs){ // Observer
+                    if (times.Contains(p.Item1)){
+                        _sendToEnv.RemoveAt(i);
+                        i--;
+                    }
+                    else
+                        times.Add(p.Item1);
+                }
+            }
         }
 
         public void SetMicroservice(MicroService ms){

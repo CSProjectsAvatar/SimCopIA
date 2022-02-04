@@ -8,6 +8,7 @@ namespace ServersWithLayers
 
         public static Env CurrentEnv {get; private set;}
         public static int Time => CurrentEnv.currentTime;
+        internal int GetEventCount => turn.Count;
         Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
         public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
