@@ -37,14 +37,12 @@ namespace ServersWithLayers{
 
     public class ServerBio{
         public string ID {get;}
-        public int Reputation {get; private set;}
+        public double Reputation {get; internal set;}
         public int ParallelProcessors { get; }
-        public string Leader {get; private set;}
 
         public ServerBio(Server server){
             this.ID = server.ID;
-            this.Reputation = 0;
-            this.Leader = null;
+            this.Reputation = 1;
             this.ParallelProcessors = server.Stats.MaxCapacity;
         }
 

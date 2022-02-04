@@ -45,9 +45,46 @@ namespace ServersWithLayers{
             Services[microS].Dir.AddServer(server);
         }
 
-        internal List<string> GetProviders(string resName)
+        ///<summary>
+        /// Asigna una recompensa en reputacion a todos los servidores que dieron respuestas
+        /// </summary>
+        public void SetReward(List<Response> responses)
         {
-            return Dir.YellowPages[resName];
+            var servers = responses.Select(r => r.Sender).Distinct();
+            var it = DecresingPercents();
+            foreach (var server in servers) {
+                it.MoveNext();
+                AddRep(server, it.Current);
+            }
+        }
+        private IEnumerator<double> DecresingPercents(double init = 0.2, double next = 0.8){
+            while(true){
+                yield return init;
+                init *= next;
+            }
+        }
+        private void AddRep(string server, double percent)
+        {
+            var bio = Dir.WhitePages[server];
+            bio.Reputation *= percent;
+        }
+
+        internal List<string> GetProviders(string resourceName) 
+        {
+            List<string> res = new();
+            // Getting the leaders of others MicroServices with the asked resource
+            var othersGoodServices = Services
+                .Values
+                .Where(m => m.Name != this.Name)
+                .Where(m => m.GetAllResourcesAvailable()
+                    .Contains(Resource.Resources[resourceName]))
+                .Select(m => m.LeaderId);
+            // my providers
+            if(Dir.YellowPages.TryGetValue(resourceName, out List<string> providers))
+                res.AddRange(providers);
+
+            res.AddRange(othersGoodServices);
+            return res;
         }
         internal ServerBio GetBio(string serverID)
         {
@@ -61,15 +98,9 @@ namespace ServersWithLayers{
         {
            LeaderId =  leaderID;
         }
-
-        internal List<string> GetServers(Status status)
+        internal List<string> GetServers()
         {
-            List<string> servers = new List<string> { };
-            Dictionary<string, ServerBio> whitePages = Services[status.MicroService.Name].Dir.WhitePages;
-            foreach (var item in whitePages)
-            {
-                servers.Add(item.Key);
-            }
+            var servers = Dir.WhitePages.Select(pair => pair.Key).ToList();
             return servers;
         }
     }
@@ -78,9 +109,9 @@ namespace ServersWithLayers{
         Private,
         EntryPoint
     }
-    public enum ServerStatus{
-        Active,
-        Inactive,
-        Dead
-    }
+    // public enum ServerStatus{
+    //     Active,
+    //     Inactive,
+    //     Dead
+    // }
 }
