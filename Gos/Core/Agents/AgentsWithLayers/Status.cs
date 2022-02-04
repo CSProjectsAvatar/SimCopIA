@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ServersWithLayers{
     public class Status{
@@ -11,14 +12,26 @@ namespace ServersWithLayers{
         #endregion
 
         #region  Server State
-        internal bool HasCapacity => aceptedRequests.Count < MaxCapacity;
+        private int processedAtOnce;
+        internal bool HasCapacity => processedAtOnce < MaxCapacity;
         internal bool HasRequests => aceptedRequests.Count > 0;
 
         Queue<Request> aceptedRequests;
+
+        internal void SaveEntry(Perception p)
+        {
+            if (p is Message msg)
+                _messagingHistory.Add(msg);
+        }
+
         Dictionary<int,Response> _notCompletdRespns { get; set; }
-        List<(int, Perception)> _sendToEnv;
+        internal List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
-        Dictionary<int, Request> _requestsAceptedHistory;
+
+        //internal Dictionary<int, Request> _requestsAceptedHistory;
+
+        List<Message> _messagingHistory;
+
         #endregion
    
         public Status(string iD)
@@ -30,6 +43,9 @@ namespace ServersWithLayers{
             AvailableResources = new();
             aceptedRequests = new();
             serverID = iD;
+
+            _messagingHistory = new();
+            _notCompletdRespns = new();
         }
 
         internal void AddPartialRpnse(Response resp)
@@ -40,36 +56,74 @@ namespace ServersWithLayers{
                 var actualRep = _notCompletdRespns[resp.ReqID];
                 _notCompletdRespns[resp.ReqID] = Response.Union(actualRep, resp);
             }
+            var possbComplete = _notCompletdRespns[resp.ReqID];
+            if (!BehaviorsLib.Incomplete(this, possbComplete)) {
+                this.Subscribe(possbComplete);
+                _notCompletdRespns.Remove(possbComplete.ReqID);
+            }
         }
 
-        //Suscribe Perceptions en un tiempo 'time' en '_sendToEnv'.
-        public void Subscribe(int time, Perception p)
+        internal bool IncProcessing()
+        {
+            if (HasCapacity)
+            {
+                processedAtOnce++;
+                return true;
+            }
+            return false;
+        }
+        internal bool DecProcessing()
+        {
+            if (processedAtOnce > 0)
+            {
+                processedAtOnce--;
+                return true;
+            }
+            return false;
+        }
+
+
+
+        //Suscribe Perceptions en un tiempo 'time'
+        public void SubscribeAt(int time, Perception p)
         {
             _sendToEnv.Add((time, p));
         }
-        public void Subscribe(Perception p) => Subscribe(Env.Time, p);
+        //Suscribe Perceptions dentro de un tiempo 'time'
+        public void SubscribeIn(int time, Perception p) => SubscribeAt(Env.Time + time, p);
+        //Suscribe Perceptions para ya
+        public void Subscribe(Perception p) => SubscribeIn(0, p);
 
         public void AcceptReq(Request req)
         {
+            if (req.Type is not ReqType.DoIt)
+                throw new ArgumentException("Only DoIt requests are accepted for processing later", nameof(req));
             aceptedRequests.Enqueue(req);
-            _requestsAceptedHistory.Add(req.ID, req);
         }
         public Request ExtractAcceptedReq() => aceptedRequests.Dequeue();
-        public Request GetRequestById(int id) => _requestsAceptedHistory[id];
-
+        public List<Message> GetMsgBySender(string sender)
+            => _messagingHistory.Where(m => m.Sender == sender).ToList();
+        public Message GetMsgById(int id) => _messagingHistory.First(m => m.ID == id);
         public void SetVariable(string name, object value) => _variables[name] = value;
         public object GetVariable(string name) => _variables.ContainsKey(name) ? _variables[name] : null;
         
         //Se llama cuando se recorrieron todas las capas, retorna un enumerable con todas las persepciones acumuladas de las capas y luego borra el historial de ellas.
         public IEnumerable<(int, Perception)> EnumerateAndClear() {
+            RemoveDuplicatesBeforeSending();
+            
             foreach(var x in _sendToEnv){
                 yield return x;
             }
             _sendToEnv.Clear();
         }
-        
-        public void SetMicroservice(string microserviceID){
-            this.MicroService = MicroService.Get(microserviceID);
+
+        private void RemoveDuplicatesBeforeSending()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetMicroservice(MicroService ms){
+            MicroService = ms;
         }
     }
 }

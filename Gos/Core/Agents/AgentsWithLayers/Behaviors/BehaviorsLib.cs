@@ -9,83 +9,22 @@ namespace ServersWithLayers
 
     public static class BehaviorsLib
     {
-        #region Worker
-        public static Behavior Worker = new Behavior(WorkerBehav, WorkerBehavInit);
-
-        private static string inProcessRequests_Worker = "inProcessRequests";
-
-        private static void WorkerBehavInit(Status state, Dictionary<string, object> vars){
-            vars[inProcessRequests_Worker] = new Utils.Heap<Request>();
-        }
-        private static void WorkerBehav(Status st, Perception perce, Dictionary<string, object> vars){
-            // Checking Tasks Done
-            var heap = vars[inProcessRequests_Worker] as Utils.Heap<Request>;
-
-            while(heap.Count != 0 && heap.First.Item1 <= Env.Time) { // first elem is done
-
-                var req = heap.RemoveMin().Item2; // Request completed
-                var response = BuildResponse(st, req);
-
-                if(Incomplete(st, response)){ // if incomplete I save it for fill it later
-                    st.AddPartialRpnse(response); // Add to dict
-                }
-                else{
-                    st.Subscribe(response); // Subscribe response
-                }
-            }
-
-            // Checking Tasks to do
-            while(st.HasCapacity && st.HasRequests){
-                
-                var req = st.ExtractAcceptedReq(); // elijo request
-                var rtime = GetRequiredTimeToProcess(req);
-                
-                heap.Add(rtime, req); // comienzo a procesar la tarea
-                st.Subscribe(Env.Time + rtime, new Observer(st.serverID)); // 
-            }
-        }
-
-        private static bool Incomplete(Status st, Response response)
+        public static Behavior Worker = new Behavior(WorkerBehav.Behavior, WorkerBehav.BehavInit);
+        public static Behavior Contractor = new Behavior(ContractorBehav.Behavior);
+        public static Behavior FallenLeader = new Behavior(FallenLeaderBehav.Behavior, FallenLeaderBehav.BehavInit);
+      
+        internal static bool Incomplete(Status st, Response response)
         {
-            var req = st.GetRequestById(response.ReqID);
+            var req = st.GetMsgById(response.ReqID) as Request;
             return response.AnswerRscs.Count < req.AskingRscs.Count;
         }
 
         private static int GetRequiredTimeToProcess(Request req)
         {// Returns the sum of all the required time to process the resources of the request
             var sum = 0;
-            foreach(var r in req.AskingRscs)
+            foreach (var r in req.AskingRscs)
                 sum += r.RequiredTime;
             return sum;
-        }
-
-        #endregion
-
-        #region Contractor
-        public static Behavior Contractor = new Behavior(ContractorBehav);
-
-        private static void ContractorBehav(Status state, Perception r, Dictionary<string, object> vars)
-        {
-            if (r is not Request)
-                return;
-            Request req = r as Request;
-
-            switch (req.Type)
-            {
-                case ReqType.Asking when IsAccepted(state, req):
-
-                    Response response = BuildResponse(state, req);
-                    state.Subscribe(response);
-                    break;
-
-                case ReqType.DoIt or ReqType.Ping:
-
-                    state.AcceptReq(req);
-                    break;
-
-                default:
-                    break;
-            }
         }
 
         // Builds a response to: asking, imperative and ping request; in the same way
@@ -95,18 +34,7 @@ namespace ServersWithLayers
             var response = req.MakeResponse(data);
             return response;
         }
-        // Builds a response AS A LEADER to: asking, imperative and ping request; in the same way
-        // takes into account the available resources in the microservice
-        internal static Response BuildLeaderResponse(Status status, Request req)
-        {
-            // Gets the resources that are available in the Microservice 
-            var availInMicro = status.MicroService.GetAllResourcesAvailable();
-
-            Dictionary<string, bool> data = GetAvailablesRscs(req, availInMicro);
-            var response = req.MakeResponse(data);
-            return response;
-        }
-
+        
         internal static Dictionary<string, bool> GetAvailablesRscs(Request req, List<Resource> availableResources)
         {
             Dictionary<string, bool> data = new();
@@ -119,20 +47,25 @@ namespace ServersWithLayers
                 }
                 // data[item.Name] = false; // Comentado para no estorbar con el Jefe recibiendo recursos que no tiene
             }
-
             return data;
         }
 
-        // Accepts a request under certain conditions
-        private  static bool IsAccepted(Status st, Request req)
+        // Returns true if the request is accepted and encoled
+        internal static bool IsAccepted(Status st, Request req)
         {
-            return st.HasCapacity;
+            return true;
         }
-        #endregion
 
-
-        // public static Behavior BossAnnounceBehievor = new Behavior(BossAnnounce,BossAnnounceInit);
-
+        internal static List<Request> CreatePingRequests (Status st)
+        {
+            List<string> servers = st.MicroService.GetServers(st);
+            List<Request> requests = new List<Request> { };
+            foreach (var item in servers)
+            {
+                requests.Add(new Request(st.serverID, item, ReqType.Ping));
+            }
+            return requests;
+        }
     }
 
-} 
+}
