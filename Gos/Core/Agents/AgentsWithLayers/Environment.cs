@@ -9,7 +9,8 @@ namespace ServersWithLayers
         public static Env CurrentEnv {get; private set;}
         public static int Time => CurrentEnv.currentTime;
         Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
-        public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
+        public List<Response> solutionResponses 
+        => (from tR in GetClientResponses() select tR.Item2).ToList();
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
 
@@ -21,7 +22,6 @@ namespace ServersWithLayers
             currentTime = 0;
             this.servers = new();
             turn = new();
-            solutionResponses = new();
              
             new MicroService(main); // crea el microservicio principal
 
@@ -85,10 +85,16 @@ namespace ServersWithLayers
         }
 
         public IEnumerable<(int,Response)> GetClientResponses() {
-                return LoggerBehav.GetResponseList(this._clientServer,0);
+            var l=LoggerBehav.GetResponseList(this._clientServer,0);
+            if(l == null) 
+                return new List<(int,Response)>();
+            return l;
         }
         public IEnumerable<(int,string)> GetClientReciveLog() {
-                return LoggerBehav.GetLogList(this._clientServer,0);
+            var l = LoggerBehav.GetLogList(this._clientServer,0);
+            if(l == null) 
+                return new List<(int,string)>();
+            return l;
         } 
 
     }

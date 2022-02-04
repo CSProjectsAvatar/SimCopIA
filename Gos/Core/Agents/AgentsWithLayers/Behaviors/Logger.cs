@@ -31,7 +31,7 @@ namespace ServersWithLayers{
                 break;
                 case Response res:
                     responses.Add((currentTime,res));
-                    logList.Add((currentTime,"(s:" + status.serverID + "  t:"+currentTime+") Llega response al request" + res.ReqID + " desde " + res.Sender));
+                    logList.Add((currentTime,"(s:" + status.serverID + "  t:"+currentTime+") Llega response al request " + res.ReqID + " desde " + res.Sender));
                 break;
                 case Observer o:
                     observers.Add((Env.Time,o));
@@ -42,15 +42,21 @@ namespace ServersWithLayers{
         }
         public static List<(int, string)> GetLogList(Server s, int loggerLayerIndex){
             var logList = (s.GetLayerBehaVars(loggerLayerIndex,logListB) as List<(int, string)> );
+            if(logList == null) 
+                return new List<(int,string)>();
             return logList;
         }
 
         public static List<(int, Request)> GetRequestList(Server s, int loggerLayerIndex){
             var requests = (s.GetLayerBehaVars(loggerLayerIndex,requestsB) as List<(int, Request)> );
+            if(requests == null) 
+                return new List<(int,Request)>();
             return requests;
         }
         public static List<(int, Response)> GetResponseList(Server s, int loggerLayerIndex){
             var responses = (s.GetLayerBehaVars(loggerLayerIndex,responsesB) as List<(int, Response)> );
+            if(responses == null) 
+                return new List<(int,Response)>();
             return responses;
         }
 
