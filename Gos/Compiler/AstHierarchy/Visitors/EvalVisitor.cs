@@ -36,7 +36,7 @@ namespace DataClassHierarchy
         }
         
         public (bool, object) Visiting(AstNode node) {
-            throw new Exception("Se llego por el visitor a la raiz, falta implementacion de Visiting"); // @remind esto es para probar, comentar
+            throw new EntryPointNotFoundException("Se llego por el visitor a la raiz, falta implementacio'n de Visiting");
         }  
     
          public (bool, object) Visiting(BinaryExpr node) {  
@@ -584,6 +584,7 @@ namespace DataClassHierarchy
                         DefDoneReqs();
 
                         var (succ, _) = Visiting(node.Code.Where(st => st is not InitAst));  // ejecutan2 co'digo principal (obvian2 bloke init)
+                        _returnFlag = default;
 
                         if (!succ) {
                             stackC.Pop();
@@ -672,19 +673,59 @@ namespace DataClassHierarchy
             }
             var req = rval as Request;
             var status = Context.GetVar(Helper.StatusVar) as Status;
+            if (!TryRemoveFromProcessing(req, node.Request.Token, status)) {
+                return default;
+            }
             Response response = BehaviorsLib.BuildResponse(status, req);
 
             if (BehaviorsLib.Incomplete(status, response)) {
-                _log.LogDebug("Incomplete response: {r}", GosObjToString(response));
+                _log.LogInformation("Incomplete {r}", GosObjToString(response));
 
                 status.AddPartialRpnse(response);
             } else {
                 status.Subscribe(response);
             }
-            var heap = Context.GetVar(Helper.HiddenDoneReqsHeapVar) as Utils.Heap<Request>;
-            heap.RemoveMin();
-
             return (true, null);
+        }
+
+        /// <summary>
+        /// Retorna si lo pudo eliminar del heap de pedi2 en procesamiento.
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
+        private bool TryRemoveFromProcessing(Request req, Token reqToken, Status status) {
+            if (!status.DecProcessing()) {
+                _log.LogError(
+                    Helper.LogPref + "there aren't requests in the processing state.",
+                    reqToken.Line,
+                    reqToken.Column
+                    );
+                return false;
+            }
+            var heap = Context.GetVar(Helper.HiddenDoneReqsHeapVar) as Utils.Heap<Request>;
+            var toReturn = new List<(int, Request)>();
+            var found = false;
+            for ((int, Request) pair; heap.Count != 0; ) {
+                pair = heap.RemoveMin();
+
+                if (pair.Item2.ID == req.ID) {
+                    found = true;
+                    break;
+                }
+                toReturn.Add(pair);
+            }
+            toReturn.ForEach(elem => heap.Add(elem.Item1, elem.Item2));  // reinsertan2 los pedid2 !=s a req
+
+            if (!found) {
+                status.IncProcessing();
+                _log.LogError(
+                    Helper.LogPref + "only a request in the processing state can be removed.",
+                    reqToken.Line,
+                    reqToken.Column
+                    );
+                return false;
+            }
+            return true;
         }
 
         public (bool, object) Visiting(ProcessAst node) {
@@ -703,12 +744,76 @@ namespace DataClassHierarchy
             }
             var req = rval as Request;
             var st = Context.GetVar(Helper.StatusVar) as Status;
-            st.ExtractAcceptedReq();  // saco el pedi2 d la cola
+
+            if (!st.IncProcessing()) {
+                _log.LogError(
+                    Helper.LogPref + "server capacity exceeded, no more requests can be processed.",
+                    node.Token.Line,
+                    node.Token.Column);
+                return default;
+            }
+            st.EnsureExtractedFromAccepted(req);
+
             int rtime = BehaviorsLib.GetRequiredTimeToProcess(req);
             var heap = Context.GetVar(Helper.HiddenDoneReqsHeapVar) as Utils.Heap<Request>;
 
             heap.Add(Env.Time + rtime, req);  // comienzo a procesar la tarea
             st.SubscribeIn(rtime, new Observer(st.serverID));
+
+            return (true, null);
+        }
+
+        public (bool, object) Visiting(RespondAst node) {
+            var (rsucc, rval) = Visit(node.Request);
+            if (!rsucc) {
+                return default;
+            }
+            var rtype = Helper.GetType(rval);
+            if (rtype != GosType.Request) {
+                _log.LogError(
+                    Helper.LogPref + "expected type: Request, actual type: {type}.",
+                    node.Request.Token.Line,
+                    node.Request.Token.Column,
+                    rtype);
+                return default;
+            }
+            var req = rval as Request;
+            var status = Context.GetVar(Helper.StatusVar) as Status;
+
+            Response response = BehaviorsLib.BuildResponse(status, req);
+
+            _log.LogInformation("Subscribing {r}", GosObjToString(response));
+            status.Subscribe(response);
+
+            return (true, null);
+        }
+
+        public (bool, object) Visiting(AcceptAst node) {
+            var (rsucc, rval) = Visit(node.Request);
+            if (!rsucc) {
+                return default;
+            }
+            var rtype = Helper.GetType(rval);
+            if (rtype != GosType.Request) {
+                _log.LogError(
+                    Helper.LogPref + "expected type: Request, actual type: {type}.",
+                    node.Request.Token.Line,
+                    node.Request.Token.Column,
+                    rtype);
+                return default;
+            }
+            var req = rval as Request;
+            if (req.Type is not ReqType.DoIt) {
+                _log.LogError(
+                    Helper.LogPref + "only DO requests are accepted for processing later.",
+                    node.Request.Token.Line,
+                    node.Request.Token.Column);
+                return default;
+            }
+            var status = Context.GetVar(Helper.StatusVar) as Status;
+
+            _log.LogInformation("Accepting {r}", GosObjToString(req));
+            status.AcceptReq(req);
 
             return (true, null);
         }

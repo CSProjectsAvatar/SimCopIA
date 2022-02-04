@@ -19,7 +19,7 @@ namespace ServersWithLayers{
 
         Queue<Request> aceptedRequests;
 
-        internal void SaveEntry(Perception p)
+        public void SaveEntry(Perception p)
         {
             if (p is Message msg)
                 _messagingHistory.Add(msg);
@@ -59,7 +59,7 @@ namespace ServersWithLayers{
             }
         }
 
-        internal bool IncProcessing()
+        public bool IncProcessing()
         {
             if (HasCapacity)
             {
@@ -68,7 +68,7 @@ namespace ServersWithLayers{
             }
             return false;
         }
-        internal bool DecProcessing()
+        public bool DecProcessing()
         {
             if (processedAtOnce > 0)
             {
@@ -116,6 +116,20 @@ namespace ServersWithLayers{
         
         public void SetMicroservice(MicroService ms){
             MicroService = ms;
+        }
+
+        /// <summary>
+        /// Se asegura que <paramref name="req"/> no este' en la cola.
+        /// </summary>
+        /// <param name="req"></param>
+        public void EnsureExtractedFromAccepted(Request req) {
+            var l = aceptedRequests.ToList();
+            
+            if (l.RemoveAll(r => r.ID == req.ID) > 1) {
+                throw new Exception("Two requests with the same ID.");
+            }
+            aceptedRequests.Clear();
+            l.ForEach(r => aceptedRequests.Enqueue(r));
         }
     }
 }

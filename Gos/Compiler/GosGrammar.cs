@@ -85,6 +85,8 @@ namespace Compiler {
         private static readonly TokenType process = Token.TypeEnum.Process;
         private static readonly TokenType @is = Token.TypeEnum.Is;
         private static readonly TokenType @not = Token.TypeEnum.Not;
+        private static readonly TokenType respond = Token.TypeEnum.Respond;
+        private static readonly TokenType accept = Token.TypeEnum.Accept;
 
         #endregion
         public GosGrammar() : base(
@@ -122,6 +124,8 @@ namespace Compiler {
             Stat > MethodCall,
             Stat > (respondOrSave, Expr),
             Stat > (process, Expr),
+            Stat > (respond, Expr),
+            Stat > (accept, Expr),
 
             LetVar > (let, id, eq, Expr),
 

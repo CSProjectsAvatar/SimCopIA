@@ -252,6 +252,8 @@ graph LR
         | <method-call>
         | "respond_or_save" <expr>
         | "process" <expr>
+        | "respond" <expr>
+        | "accept" <expr>
 
 <let-var> := "let" ID "=" <expr>
 
@@ -481,4 +483,20 @@ Ahora el ejecutable del proyecto interpreta un archivo con c&oacute;digo en GoS 
 En la entrega se encuentra un archivo `distrb.gos` en la carpeta `Sources/`. Este se puede ejecutar de la siguiente manera:
 ```console
 $ gos Sources/distrb.gos
+```
+
+## 3ra Entrega
+### Flujo de un Pedido
+```mermaid
+graph TD
+    A[Pedido] --> C{Es ra'pido?}
+    C -->|Si'| D(respond)
+    C -->|No| E{Lo acepto?}
+    E -->|Si'| F(accept)
+    E -->|Si'| K
+    E -->|No| H(No hago na)
+    F --> I[Aceptado]
+    I -->|Cuando quiera| K(process)
+    K -->|Después de un tiempo en el heap...| L[procesa2]
+    L --> J(respond_or_save)
 ```

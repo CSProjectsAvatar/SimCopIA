@@ -13,9 +13,9 @@ namespace Compiler {
                 builder
                     .AddFilter("Microsoft", LogLevel.Warning)
                     .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("Core", LogLevel.Information)
-                    .AddFilter("Compiler", LogLevel.Information)
-                    .AddFilter("DataClassHierarchy", LogLevel.Information)
+                    .AddFilter("Core", LogLevel.Warning)
+                    .AddFilter("Compiler", LogLevel.Warning)
+                    .AddFilter("DataClassHierarchy", LogLevel.Warning)
                     .AddConsole();
             });
             ILogger<Lr1Dfa> logLr1Dfa = loggerFactory.CreateLogger<Lr1Dfa>();

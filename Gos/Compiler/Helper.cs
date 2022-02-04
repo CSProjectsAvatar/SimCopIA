@@ -30,6 +30,8 @@ namespace Compiler {
             ("init", Token.TypeEnum.InitBehav),
             ("respond_or_save", Token.TypeEnum.RespondOrSave),
             ("process", Token.TypeEnum.Process),
+            ("respond", Token.TypeEnum.Respond),
+            ("accept", Token.TypeEnum.Accept),
             ("is", Token.TypeEnum.Is),
             ("not", Token.TypeEnum.Not),
 

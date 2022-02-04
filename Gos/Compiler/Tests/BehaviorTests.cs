@@ -417,29 +417,19 @@ behav foo {
             Assert.IsFalse(ast.Validate(new Context()));
         }
 
-        [TestMethod]
-        public void RespondOrSaveOutside() {
+        [DataTestMethod]
+        [DataRow("respond_or_save")]
+        [DataRow("process")]
+        [DataRow("respond")]
+        [DataRow("accept")]
+        public void RequestCommandOutsideBehavior(string command) {
             var tokens = _lex.Tokenize(
                 @"
 behav foo {
     print 3
 }
 let r = 3
-respond_or_save r
-" + _dslSuf);
-            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
-            Assert.IsFalse(ast.Validate(new Context()));
-        }
-
-        [TestMethod]
-        public void ProcessOutside() {
-            var tokens = _lex.Tokenize(
-                @"
-behav foo {
-    print 3
-}
-let r = 3
-process r
+" + command + @" r
 " + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
             Assert.IsFalse(ast.Validate(new Context()));
@@ -473,8 +463,8 @@ behav foo {
 
             Behavior behav = ctx.GetBehav("foo");
             var status = new Status("server");
-            var r1 = new Request("sender", "server", ReqType.Asking);
-            var r2 = new Request("sender", "server", ReqType.Asking);
+            var r1 = new Request("sender", "server", ReqType.DoIt);
+            var r2 = new Request("sender", "server", ReqType.DoIt);
             status.AcceptReq(r1);
             status.AcceptReq(r2);
             new Env();
@@ -533,11 +523,13 @@ behav foo {
             var serv = new Server("server");
             serv.Stats.AvailableResources.AddRange(new[] { rs1, rs2 });
 
-            var r1 = new Request("sender", "server", ReqType.Asking);
+            var r1 = new Request("sender", "server", ReqType.DoIt);
             r1.AskingRscs.AddRange(new[] { rs1 });
-            var r2 = new Request("sender", "server", ReqType.Asking);
+            var r2 = new Request("sender", "server", ReqType.DoIt);
             r2.AskingRscs.AddRange(new[] { rs2, rs3 });
 
+            serv.Stats.SaveEntry(r1);
+            serv.Stats.SaveEntry(r2);
             serv.Stats.AcceptReq(r1);
             serv.Stats.AcceptReq(r2);
 
@@ -768,11 +760,239 @@ behav foo {
                 @out.ToString());
         }
 
+        [TestMethod]
+        public void HiredCorrectness() {
+            var tokens = _lex.Tokenize(
+                @"
+fun i_accept(status, req) {
+    return status.can_process
+}
+behav foo {
+    init {
+        call = 1
+    }
+    print call
+    call = call + 1
+    print status.accepted_reqs
+
+    if percep is not request req {
+        return
+    }
+    if req.type == ASK and i_accept(status, req) {
+        respond req
+    } else_if req.type == DO or req.type == PING {
+        accept req
+    }
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            #region configuran2
+            var rs1 = new Resource("img1");
+            var rs2 = new Resource("img2");
+            var rs3 = new Resource("index");
+
+            var serv = new Server("server");
+            serv.Stats.AvailableResources.AddRange(new[] { rs1, rs2 });
+
+            var r1 = new Request("sender", "server", ReqType.Asking);
+            r1.AskingRscs.AddRange(new[] { rs1 });
+            var r2 = new Request("sender", "server", ReqType.DoIt);
+            r2.AskingRscs.AddRange(new[] { rs2, rs3 });
+            Behavior behav = ctx.GetBehav("foo");
+            _ = new Env();
+
+            #endregion
+
+            behav.Run(serv.Stats, r1);
+            behav.Run(serv.Stats, r2);
+            behav.Run(serv.Stats, new Observer("fulano"));
+            behav.Run(serv.Stats, new Observer("fulano"));
+
+            Assert.AreEqual(
+                    $"1{_endl}" +
+                    $"[]{_endl}" +
+                    $"2{_endl}" +
+                    $"[]{_endl}" +
+                    $"3{_endl}" +
+                    $"[{EvalVisitor.GosObjToString(r2)}]{_endl}" +
+                    $"4{_endl}" +
+                    $"[{EvalVisitor.GosObjToString(r2)}]{_endl}",
+                @out.ToString());
+        }
+
+        [TestMethod]
+        public void AcceptANotDoItRequest() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    init {
+        call = 1
+    }
+    accept percep
+
+    if call == 2 {
+        print status.accepted_reqs
+    }
+    call = call + 1
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            #region configuran2
+            var serv = new Server("server");
+            var r1 = new Request("fulano", "server", ReqType.DoIt);
+            var r2 = new Request("fulano", "server", ReqType.DoIt);
+            var r3 = new Request("fulano", "server", ReqType.Asking);
+
+            Behavior behav = ctx.GetBehav("foo");
+            _ = new Env();
+
+            #endregion
+
+            behav.Run(serv.Stats, r1);
+            behav.Run(serv.Stats, r2);
+            Assert.ThrowsException<GoSException>(() => behav.Run(serv.Stats, r3));
+
+            Assert.AreEqual(
+                $"[{EvalVisitor.GosObjToString(r1)}, {EvalVisitor.GosObjToString(r2)}]{_endl}",
+                @out.ToString());
+        }
+
+        [TestMethod]
+        public void RequestsInProcessOutOfRange() {
+            var tokens = _lex.Tokenize(
+                @"
+behav p {
+    init {
+        ask_call = 1
+    }
+    if percep.type == ASK {
+        if ask_call == 6 {
+            respond_or_save percep
+        } else {
+            respond_or_save done_reqs[1]
+        }
+        ask_call = ask_call+1
+    } else {
+        process percep
+    }
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            #region configuran2
+            var serv = new Server("server");
+            var r1 = new Request("fulano", "server", ReqType.DoIt);
+            serv.Stats.SaveEntry(r1);
+            var r2 = new Request("fulano", "server", ReqType.Asking);
+            serv.Stats.SaveEntry(r2);
+
+            Behavior behavP = ctx.GetBehav("p");
+            _ = new Env();
+
+            #endregion
+
+            behavP.Run(serv.Stats, r1);
+            behavP.Run(serv.Stats, r1);
+            behavP.Run(serv.Stats, r1);
+            behavP.Run(serv.Stats, r1);
+            behavP.Run(serv.Stats, r1);
+            Assert.ThrowsException<GoSException>(() => behavP.Run(serv.Stats, r1));
+
+            behavP.Run(serv.Stats, r2);
+            behavP.Run(serv.Stats, r2);
+            behavP.Run(serv.Stats, r2);
+            behavP.Run(serv.Stats, r2);
+            behavP.Run(serv.Stats, r2);
+            Assert.ThrowsException<GoSException>(() => behavP.Run(serv.Stats, r2));
+        }
+
+        [TestMethod]
+        public void RemovingRequestFromMiddleOfAcceptedQueue() {
+            var tokens = _lex.Tokenize(
+                @"
+behav p {
+    init {
+        fst_ask = true
+    }
+    if percep.type == ASK {
+        if fst_ask {
+            process status.accepted_reqs[2]
+            fst_ask = false
+        } else {
+            print status.accepted_reqs
+        }
+    } else {
+        accept percep
+    }
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            #region configuran2
+            var serv = new Server("server");
+            var r1 = new Request("fulano", "server", ReqType.DoIt);
+            var r2 = new Request("king-kong", "server", ReqType.DoIt);
+            var r3 = new Request("godzilla", "server", ReqType.DoIt);
+            serv.Stats.SaveEntry(r1);
+            var r4 = new Request("pepe-grillo", "server", ReqType.Asking);
+            serv.Stats.SaveEntry(r2);
+
+            Behavior behavP = ctx.GetBehav("p");
+            _ = new Env();
+
+            #endregion
+
+            behavP.Run(serv.Stats, r1);
+            behavP.Run(serv.Stats, r2);
+            behavP.Run(serv.Stats, r3);
+            behavP.Run(serv.Stats, r4);
+            behavP.Run(serv.Stats, r4);
+
+            Assert.AreEqual(
+                $"[{EvalVisitor.GosObjToString(r1)}, {EvalVisitor.GosObjToString(r3)}]{_endl}",
+                @out.ToString());
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();
             _parser.Dispose();
             MicroService.Services.Clear();
+            Resource.Resources.Clear();
         }
     }
 }

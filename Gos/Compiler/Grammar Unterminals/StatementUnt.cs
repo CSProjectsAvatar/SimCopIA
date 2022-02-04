@@ -21,6 +21,8 @@ namespace Compiler.Grammar_Unterminals {
                      | <method-call>
                      | "respond_or_save" <expr>
                      | "process" <expr>
+                     | "respond" <expr>
+                     | "accept" <expr>
             */
             return derivation[0] switch {
                 Token { Type: Token.TypeEnum.Id } id when derivation[1] is RightConnUnt rc
@@ -50,6 +52,16 @@ namespace Compiler.Grammar_Unterminals {
                     },
                 Token { Type: Token.TypeEnum.Process } t when derivation[1] is ExpressionUnt exprUnt
                     => new ProcessAst(Helper.Logger<ProcessAst>()) {
+                        Token = t,
+                        Request = exprUnt.Ast as Expression
+                    },
+                Token { Type: Token.TypeEnum.Respond } t when derivation[1] is ExpressionUnt exprUnt
+                    => new RespondAst(Helper.Logger<RespondAst>()) {
+                        Token = t,
+                        Request = exprUnt.Ast as Expression
+                    },
+                Token { Type: Token.TypeEnum.Accept } t when derivation[1] is ExpressionUnt exprUnt
+                    => new AcceptAst(Helper.Logger<AcceptAst>()) {
                         Token = t,
                         Request = exprUnt.Ast as Expression
                     },

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ServersWithLayers{
     public class Resource {
-        internal static Dictionary<string, Resource> Resources = new();
+        public static Dictionary<string, Resource> Resources = new();
         public string Name {get => _name; 
             set {
                 if (Resources.ContainsKey(value))
