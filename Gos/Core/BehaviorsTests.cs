@@ -5,9 +5,10 @@ using System.Collections.Generic;
 using ServersWithLayers;
 using System.Linq;
 
+
 namespace Core {
     [TestClass]
-    public class BehaviorsTests {
+    public class BehaviorsTests :BaseTest{
         #region  vars
         private Env env;
         private Server s1;
@@ -45,14 +46,26 @@ namespace Core {
         private Layer fallenL;
         private Layer fallenL2;
 
+
+        private ILogger<Server> loggerServer;
+        private ILogger<Status> loggerStatus ;
+        private ILogger<MicroService> loggerMS;
+        private ILogger<Env> loggerEnv;
+
         #endregion
 
         [TestInitialize]
         public void Init() {
-            s1 = new Server("S1");
-            s2 = new Server("S2");
-            s3 = new Server("S3");
-            s4 = new Server("S4");
+
+            loggerServer= LoggerFact.CreateLogger<Server>();
+            loggerStatus = LoggerFact.CreateLogger<Status>();
+            loggerMS = LoggerFact.CreateLogger<MicroService>();
+            loggerEnv = LoggerFact.CreateLogger<Env>();
+
+            s1 = new Server("S1", loggerServer, loggerStatus);
+            s2 = new Server("S2", loggerServer, loggerStatus);
+            s3 = new Server("S3", loggerServer, loggerStatus);
+            s4 = new Server("S4", loggerServer, loggerStatus);
 
             workerL = new Layer();
             workerL.behaviors.Add(BehaviorsLib.Worker);
@@ -101,7 +114,7 @@ namespace Core {
 
             servers = new List<Server> { s1, s2, s3 };
 
-            env = new Env();
+            env = new Env(loggerEnv,loggerMS);
            // env.AddServerList(servers);
         }
         [TestCleanup]
