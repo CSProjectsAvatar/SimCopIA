@@ -13,6 +13,11 @@ using Core;
 namespace Compiler.Tests {
     [TestClass]
     public class BehaviorTests : LangTest {
+        private static ILogger<Status> _logStat = LoggerFact.CreateLogger<Status>();
+        private static ILogger<Env> _logEnv = LoggerFact.CreateLogger<Env>();
+        private static ILogger<MicroService> _logMicroS = LoggerFact.CreateLogger<MicroService>();
+        private static ILogger<Server> _logServ = LoggerFact.CreateLogger<Server>();
+
         [TestMethod]
         public void PercepNotDefinedInInit() {
             var tokens = _lex.Tokenize(
@@ -134,7 +139,7 @@ behav foo {
             Assert.IsTrue(success);
 
             Behavior behav = ctx.GetBehav("foo");
-            behav.Run(new Status("server"), null);
+            behav.Run(new Status("server", _logStat), null);
 
             Assert.AreEqual($"3{_endl}[1, 2, 3]{Environment.NewLine}17{_endl}", @out.ToString());
         }
@@ -265,7 +270,7 @@ behav foo {
             Assert.IsTrue(success);
 
             Behavior behav = ctx.GetBehav("foo");
-            behav.Run(new Status("server"), null);
+            behav.Run(new Status("server", _logStat), null);
 
             Assert.AreEqual($"[]{_endl}[]{Environment.NewLine}True{_endl}", @out.ToString());
         }
@@ -293,8 +298,8 @@ behav foo {
             Assert.IsTrue(success);
 
             Behavior behav = ctx.GetBehav("foo");
-            behav.Run(new Status("server"), null);
-            behav.Run(new Status("server"), null);
+            behav.Run(new Status("server", _logStat), null);
+            behav.Run(new Status("server", _logStat), null);
 
             Assert.AreEqual($"3{_endl}4{Environment.NewLine}", @out.ToString());
         }
@@ -322,7 +327,7 @@ behav foo {
 
             Behavior behav = ctx.GetBehav("foo");
 
-            Assert.ThrowsException<GoSException>(() => behav.Run(new Status("server"), null));
+            Assert.ThrowsException<GoSException>(() => behav.Run(new Status("server", _logStat), null));
         }
 
         [TestMethod]
@@ -349,7 +354,7 @@ behav foo {
             Behavior behav = ctx.GetBehav("foo");
 
             Assert.ThrowsException<GoSException>(
-                () => behav.Run(new Status("server"), new Request("fulano", "mengano", ReqType.Asking)));
+                () => behav.Run(new Status("server", _logStat), new Request("fulano", "mengano", ReqType.Asking)));
         }
 
         [TestMethod]
@@ -375,8 +380,8 @@ behav foo {
             Assert.IsTrue(success);
 
             Behavior behav = ctx.GetBehav("foo");
-            behav.Run(new Status("server"), null);
-            behav.Run(new Status("server"), null);
+            behav.Run(new Status("server", _logStat), null);
+            behav.Run(new Status("server", _logStat), null);
 
             Assert.AreEqual($"3{_endl}3{Environment.NewLine}", @out.ToString());
         }
@@ -462,12 +467,12 @@ behav foo {
             Assert.IsTrue(success);
 
             Behavior behav = ctx.GetBehav("foo");
-            var status = new Status("server");
+            var status = new Status("server", _logStat);
             var r1 = new Request("sender", "server", ReqType.DoIt);
             var r2 = new Request("sender", "server", ReqType.DoIt);
             status.AcceptReq(r1);
             status.AcceptReq(r2);
-            new Env();
+            new Env(_logEnv, _logMicroS);
 
             behav.Run(status, null);
             behav.Run(status, null);
@@ -520,7 +525,7 @@ behav foo {
             var rs2 = new Resource("img2");
             var rs3 = new Resource("index");
 
-            var serv = new Server("server");
+            var serv = new Server("server", _logServ, _logStat);
             serv.Stats.AvailableResources.AddRange(new[] { rs1, rs2 });
 
             var r1 = new Request("sender", "server", ReqType.DoIt);
@@ -534,7 +539,7 @@ behav foo {
             serv.Stats.AcceptReq(r2);
 
             Behavior behav = ctx.GetBehav("foo");
-            _ = new Env();
+            _ = new Env(_logEnv, _logMicroS);
 
             #endregion
 
@@ -626,7 +631,7 @@ behav foo {
 
             #region configuran2
             Behavior behav = ctx.GetBehav("foo");
-            _ = new Env();
+            _ = new Env(_logEnv, _logMicroS);
 
             #endregion
 
@@ -661,7 +666,7 @@ behav foo {
 
             #region configuran2
             Behavior behav = ctx.GetBehav("foo");
-            _ = new Env();
+            _ = new Env(_logEnv, _logMicroS);
 
             #endregion
 
@@ -696,7 +701,7 @@ behav foo {
 
             #region configuran2
             Behavior behav = ctx.GetBehav("foo");
-            _ = new Env();
+            _ = new Env(_logEnv, _logMicroS);
 
             #endregion
 
@@ -747,7 +752,7 @@ behav foo {
 
             #region configuran2
             Behavior behav = ctx.GetBehav("foo");
-            _ = new Env();
+            _ = new Env(_logEnv, _logMicroS);
             var r = new Request("fulano", "mengano", ReqType.DoIt);
 
             #endregion
@@ -800,7 +805,7 @@ behav foo {
             var rs2 = new Resource("img2");
             var rs3 = new Resource("index");
 
-            var serv = new Server("server");
+            var serv = new Server("server", _logServ, _logStat);
             serv.Stats.AvailableResources.AddRange(new[] { rs1, rs2 });
 
             var r1 = new Request("sender", "server", ReqType.Asking);
@@ -808,7 +813,7 @@ behav foo {
             var r2 = new Request("sender", "server", ReqType.DoIt);
             r2.AskingRscs.AddRange(new[] { rs2, rs3 });
             Behavior behav = ctx.GetBehav("foo");
-            _ = new Env();
+            _ = new Env(_logEnv, _logMicroS);
 
             #endregion
 
@@ -856,13 +861,13 @@ behav foo {
             Assert.IsTrue(success);
 
             #region configuran2
-            var serv = new Server("server");
+            var serv = new Server("server", _logServ, _logStat);
             var r1 = new Request("fulano", "server", ReqType.DoIt);
             var r2 = new Request("fulano", "server", ReqType.DoIt);
             var r3 = new Request("fulano", "server", ReqType.Asking);
 
             Behavior behav = ctx.GetBehav("foo");
-            _ = new Env();
+            _ = new Env(_logEnv, _logMicroS);
 
             #endregion
 
@@ -906,14 +911,14 @@ behav p {
             Assert.IsTrue(success);
 
             #region configuran2
-            var serv = new Server("server");
+            var serv = new Server("server", _logServ, _logStat);
             var r1 = new Request("fulano", "server", ReqType.DoIt);
             serv.Stats.SaveEntry(r1);
             var r2 = new Request("fulano", "server", ReqType.Asking);
             serv.Stats.SaveEntry(r2);
 
             Behavior behavP = ctx.GetBehav("p");
-            _ = new Env();
+            _ = new Env(_logEnv, _logMicroS);
 
             #endregion
 
@@ -963,7 +968,7 @@ behav p {
             Assert.IsTrue(success);
 
             #region configuran2
-            var serv = new Server("server");
+            var serv = new Server("server", _logServ, _logStat);
             var r1 = new Request("fulano", "server", ReqType.DoIt);
             var r2 = new Request("king-kong", "server", ReqType.DoIt);
             var r3 = new Request("godzilla", "server", ReqType.DoIt);
@@ -972,7 +977,7 @@ behav p {
             serv.Stats.SaveEntry(r2);
 
             Behavior behavP = ctx.GetBehav("p");
-            _ = new Env();
+            _ = new Env(_logEnv, _logMicroS);
 
             #endregion
 

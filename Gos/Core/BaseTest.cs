@@ -12,7 +12,7 @@ namespace Core {
         public ServiceProvider Container =>
             services.BuildServiceProvider();
 
-        public IConfiguration Configuration;
+        //public IConfiguration Configuration;
         protected static ILoggerFactory LoggerFact;
 
         [TestCleanup]
@@ -24,19 +24,19 @@ namespace Core {
         public void PrimaryInitializer() {
             services = new ServiceCollection();
 
-            Configuration = new ConfigurationBuilder()
+            /*Configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.Development.json")
-                .Build();
+                .Build();*/
 
-            services.AddTransient(c => Configuration);
+            //services.AddTransient(c => Configuration);
             services.AddLogging();
 
             LoggerFact = LoggerFactory.Create(builder => {
                 builder
                     .AddFilter("Microsoft", LogLevel.Warning)
                     .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("Core", LogLevel.Information)
+                    .AddFilter("Core", LogLevel.Debug)
                     .AddFilter("Compiler", LogLevel.Information)
                     .AddFilter("DataClassHierarchy", LogLevel.Information)
                     .AddConsole();

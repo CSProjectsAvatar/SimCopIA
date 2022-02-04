@@ -152,8 +152,8 @@ namespace ServersWithLayers.Behaviors
 
         [TestInitialize]
         public void Init() {
-            s1 = new Server("S1");
-            s2 = new Server("S2");
+           // s1 = new Server("S1");
+           // s2 = new Server("S2");
             
             // server2.AddLayer();
             r1 = new Resource("img1");

@@ -1,25 +1,30 @@
 using System.Collections.Generic;
 using Core;
+using Microsoft.Extensions.Logging;
 
 namespace ServersWithLayers
 {
     public class Server{
         public string ID {get;}
         public Status Stats {get;}
-        private List<Layer> _layers; 
-        public Server(string ID){
+        internal List<Layer> _layers;
+        private ILogger<Status> _loggerS;
+        private ILogger<Server> _logger;
+        public Server(string ID, ILogger<Server> logger, ILogger<Status> loggerS)
+        {
             if (ID.Equals("0"))
                 throw new GoSException("Server ID can't be 0, thats reserver for clients");
                 
             this.ID = ID;
-            this.Stats = new(ID);
+            this.Stats = new(ID,loggerS);
             
             this._layers = new();
+            _logger = logger;
         }
 
         public void HandlePerception(Perception p){
             Stats.SaveEntry(p);
-
+            _logger.LogDebug("Pasa por todas las capas del Server {id} y ejecuta un comportamiento de cada una elegido por un protocolo de selección", ID);
             foreach(var l in _layers) 
                 l.Process(p);
                         

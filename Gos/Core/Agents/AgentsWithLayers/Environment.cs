@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace ServersWithLayers
 {
@@ -12,16 +13,19 @@ namespace ServersWithLayers
         public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
+        private ILogger<MicroService> _loggerMS;
+        private ILogger<Env> _loggerEnv;
 
         private static string main = "Main";
-        public Env(){
+        public Env(ILogger<Env> loggerEnv, ILogger<MicroService> loggerMS)
+        {
             Env.CurrentEnv = this;
             currentTime = 0;
             this.servers = new();
             turn = new();
             solutionResponses = new();
-             
-            new MicroService(main); // crea el microservicio principal
+            _loggerEnv = loggerEnv;
+            new MicroService(main,loggerMS); // crea el microservicio principal
         }
         public void AddServerList(List<Server> servers){
             foreach(var server in servers){
@@ -33,7 +37,8 @@ namespace ServersWithLayers
         private void AddServer(Server s){
             servers.Add(s.ID, s);
         }
-        public IEnumerable<Action> EnumerateActions(){  // @remind esto so'lo puede ser enumera2 una vez, debi2 al turn.RemoveMin()
+        public IEnumerable<Action> EnumerateActions() {  // @remind esto so'lo puede ser enumera2 una vez, debi2 al turn.RemoveMin()
+            _loggerEnv.LogInformation("Se va devolviendo el próximo evento a ejecutar");
             while (turn.Count != 0){
                 (int time, Event exe ) = this.turn.RemoveMin();
                 this.currentTime = time;

@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace ServersWithLayers{
     public class MicroService{
         public static Dictionary<string, MicroService> Services = new();
+        private ILogger<MicroService> _logger;
+
         private string _name;
         internal ServiceType Type {get; private set;}
         public string Name {get => _name; 
@@ -17,10 +20,13 @@ namespace ServersWithLayers{
         }   
         internal string LeaderId { get; set; }
         private Directory Dir { get; set; }
-        public MicroService(string name){
+        public MicroService(string name, ILogger<MicroService> logger)
+        {
             this.Name = name;
             this.Dir = new Directory();
+            _logger = logger;
         }
+
         internal void SetAsEntryPoint(){
             this.Type = ServiceType.EntryPoint;
         }
@@ -58,7 +64,19 @@ namespace ServersWithLayers{
         }
         internal void ChangeLeader(string leaderID)
         {
+            _logger.LogInformation("Los empleados del microservicio cambian de lider");
            LeaderId =  leaderID;
+        }
+
+        internal List<string> GetServers(Status status)
+        {
+            List<string> servers = new List<string> { };
+            Dictionary<string, ServerBio> whitePages = Services[status.MicroService.Name].Dir.WhitePages;
+            foreach (var item in whitePages)
+            {
+                servers.Add(item.Key);
+            }
+            return servers;
         }
     }
 

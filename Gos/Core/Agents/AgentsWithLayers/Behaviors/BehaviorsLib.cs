@@ -11,7 +11,7 @@ namespace ServersWithLayers
     {
         public static Behavior Worker = new Behavior(WorkerBehav.Behavior, WorkerBehav.BehavInit);
         public static Behavior Contractor = new Behavior(ContractorBehav.Behavior);
-        public static Behavior FallenLeader = new Behavior(FallenLeaderBehav.Behavior);
+        public static Behavior FallenLeader = new Behavior(FallenLeaderBehav.Behavior, FallenLeaderBehav.BehavInit);
       
         public static bool Incomplete(Status st, Response response)
         {
@@ -54,6 +54,17 @@ namespace ServersWithLayers
         internal static bool IsAccepted(Status st, Request req)
         {
             return true;
+        }
+
+        internal static List<Request> CreatePingRequests (Status st)
+        {
+            List<string> servers = st.MicroService.GetServers(st);
+            List<Request> requests = new List<Request> { };
+            foreach (var item in servers)
+            {
+                requests.Add(new Request(st.serverID, item, ReqType.Ping));
+            }
+            return requests;
         }
     }
 
