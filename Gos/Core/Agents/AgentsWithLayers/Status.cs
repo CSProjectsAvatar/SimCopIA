@@ -52,9 +52,10 @@ namespace ServersWithLayers{
                 var actualRep = _notCompletdRespns[resp.ReqID];
                 _notCompletdRespns[resp.ReqID] = Response.Union(actualRep, resp);
             }
-            if (!BehaviorsLib.Incomplete(this, resp)) {
-                this.Subscribe(resp);
-                _notCompletdRespns.Remove(resp.ReqID);
+            var possbComplete = _notCompletdRespns[resp.ReqID];
+            if (!BehaviorsLib.Incomplete(this, possbComplete)) {
+                this.Subscribe(possbComplete);
+                _notCompletdRespns.Remove(possbComplete.ReqID);
             }
         }
 

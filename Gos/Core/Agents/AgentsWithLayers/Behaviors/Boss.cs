@@ -182,16 +182,18 @@ namespace ServersWithLayers.Behaviors
                 var bossLayer = new Layer();
                 var loggerLayer = new Layer();
                 var contractorLayer = new Layer();
+                var workerLayer = new Layer();
                 bossLayer.behaviors = new List<Behavior>{BossBehavior};
                 loggerLayer.behaviors = new List<Behavior>{LoggerBehav.LoggerBehavior};
                 contractorLayer.behaviors = new List<Behavior>{BehaviorsLib.Contractor};
+                workerLayer.behaviors = new List<Behavior>{BehaviorsLib.Worker};
 
                 s1 = new Server("s1");
                 s1.AddLayers(new List<Layer>{loggerLayer,bossLayer});
                 s2 = new Server("s2");
-                s2.AddLayers(new List<Layer>{loggerLayer,contractorLayer});
+                s2.AddLayers(new List<Layer>{loggerLayer,contractorLayer,workerLayer});
                 s3 = new Server("s3");
-                s3.AddLayers(new List<Layer>{loggerLayer,contractorLayer});
+                s3.AddLayers(new List<Layer>{loggerLayer,contractorLayer,workerLayer});
     
                 s2.SetResources(new List<Resource>{
                     new Resource("img"),              
@@ -216,8 +218,8 @@ namespace ServersWithLayers.Behaviors
             //Envio de requests tipo DoIt (ejemplo super simple)
 
             [TestMethod]
-            public void ProcessDoItRequestTest(){ 
-                
+            public void ProcessDoItRequestTest(){
+   
                 Request req1= new Request("0", "s1", ReqType.DoIt);                                
                 req1.AskingRscs = new List<Resource>{
                     Resource.Resources["img"],
@@ -227,11 +229,13 @@ namespace ServersWithLayers.Behaviors
 
 
                 Env.CurrentEnv.SubsribeEvent(0,req1);
-                //Env.CurrentEnv.SubsribeEvent(0,req2);
                 
                 Env.CurrentEnv.Run();
                  
+                LoggerBehav.PrintResponses(s1,0);
+
                 List<(int,string)> logList =new();
+
                 var logList1 = LoggerBehav.GetLogList(s1,0);
                 var logList2 = LoggerBehav.GetLogList(s2,0);
                 var logList3 = LoggerBehav.GetLogList(s3,0);
@@ -242,22 +246,22 @@ namespace ServersWithLayers.Behaviors
                     logList.AddRange(logList2); 
                 if(logList3 != null)
                     logList.AddRange(logList3);
+                if(Env.CurrentEnv.GetClientReciveLog() != null)
+                    logList.AddRange(Env.CurrentEnv.GetClientReciveLog());
                 
-
                 logList.Sort();
                 System.Console.WriteLine("EVENTOS:");
                 foreach(var s in logList)
                     System.Console.WriteLine(s.Item2);
 
-
                 var responsesS1 = LoggerBehav.GetResponseList(s1,0);
                 var requestsS2 = LoggerBehav.GetRequestList(s2,0);
                 var requestsS3 = LoggerBehav.GetResponseList(s3,0);
                 
-
                 Assert.AreEqual(2,requestsS2?.Count);
                 Assert.AreEqual(2,requestsS2?.Count);
-                Assert.AreEqual(2,responsesS1?.Count);
+                Assert.AreEqual(4,responsesS1?.Count);
+                //Assert.AreEqual(1,Env.CurrentEnv.GetClientResponses.Count());
 
             }
             //Envio de requests tipo DoIt  (ejemplo super simple)

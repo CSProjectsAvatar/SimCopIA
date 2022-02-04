@@ -29,9 +29,9 @@ namespace ServersWithLayers{
                     requests.Add((currentTime,r));
                     logList.Add((currentTime,"(s:" + status.serverID + "  t:"+ currentTime +") Llega request "+r.ID+" desde " + r.Sender));
                 break;
-                case Response r:
-                    responses.Add((Env.Time,r));
-                    logList.Add((currentTime,"(s:" + status.serverID + "  t:"+currentTime+") Llega response al request" + r.ReqID + " desde " + r.Sender));
+                case Response res:
+                    responses.Add((currentTime,res));
+                    logList.Add((currentTime,"(s:" + status.serverID + "  t:"+currentTime+") Llega response al request" + res.ReqID + " desde " + res.Sender));
                 break;
                 case Observer o:
                     observers.Add((Env.Time,o));
@@ -41,33 +41,41 @@ namespace ServersWithLayers{
 
         }
         public static List<(int, string)> GetLogList(Server s, int loggerLayerIndex){
-            var logList = (s.GetLayerBehaVars(loggerLayerIndex,"logList") as List<(int, string)> );
+            var logList = (s.GetLayerBehaVars(loggerLayerIndex,logListB) as List<(int, string)> );
             return logList;
         }
 
         public static List<(int, Request)> GetRequestList(Server s, int loggerLayerIndex){
-            var requests = (s.GetLayerBehaVars(loggerLayerIndex,"requests") as List<(int, Request)> );
+            var requests = (s.GetLayerBehaVars(loggerLayerIndex,requestsB) as List<(int, Request)> );
             return requests;
         }
         public static List<(int, Response)> GetResponseList(Server s, int loggerLayerIndex){
-            var responses = (s.GetLayerBehaVars(loggerLayerIndex,"responses") as List<(int, Response)> );
+            var responses = (s.GetLayerBehaVars(loggerLayerIndex,responsesB) as List<(int, Response)> );
             return responses;
         }
 
-        // no probado
-        public static void PrintRequest(object requests_as_object){
-            var requests =requests_as_object as List<(int,Request)>  ;
+        public static void PrintRequests(Server s, int loggerLayerIndex){
+            var requests = (s.GetLayerBehaVars(loggerLayerIndex,requestsB) as List<(int, Request)> );
             System.Console.WriteLine("Requests:");
-            foreach(var r in requests) 
-                System.Console.WriteLine(" t:"+r.Item1+" req:"+r.Item2.ID+"  ("+r.Item2.Sender+" --> "+r.Item2.Receiver+")");
+            foreach(var r in requests) {
+                System.Console.WriteLine("("+r.Item2.Type+") t:"+r.Item1+" req:"+r.Item2.ID+"  ("+r.Item2.Sender+" --> "+r.Item2.Receiver+")");
+                System.Console.Write("ASKING: ");
+                foreach( var ask in r.Item2.AskingRscs)
+                    System.Console.Write(ask.Name + "  ");
+                System.Console.WriteLine("\n----------");
+            }
         }
-        // no probado
-        public static void PrintResponse(object responses_as_object){
-            var responses =responses_as_object  as List<(int,Response)>  ;
+        public static void PrintResponses(Server s, int loggerLayerIndex){
+            var responses = (s.GetLayerBehaVars(loggerLayerIndex,responsesB) as List<(int, Response)> );
             System.Console.WriteLine("Responses:");
-            foreach(var r in responses) 
-                System.Console.WriteLine(" t:"+r.Item1+" req:"+r.Item2.ReqID+"  ("+r.Item2.Sender+" --> "+r.Item2.Receiver+")");
+            foreach(var r in responses){
+                System.Console.WriteLine("("+r.Item2.Type+") t:"+r.Item1+" req:"+r.Item2.ReqID+"  ("+r.Item2.Sender+" --> "+r.Item2.Receiver+")");
+                System.Console.Write("ANSWERS: ");
+                foreach( var a in r.Item2.AnswerRscs)
+                    System.Console.Write("("+a.Value+", "+a.Key+ ")  ");
+                System.Console.WriteLine("\n----------");
+                
+            }
         }
-
     }
 }

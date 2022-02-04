@@ -8,8 +8,8 @@ namespace ServersWithLayers
         public Status Stats {get;}
         private List<Layer> _layers; 
         public Server(string ID){
-            if (ID.Equals("0"))
-                throw new GoSException("Server ID can't be 0, thats reserver for clients");
+            //if (ID.Equals("0"))
+            //    throw new GoSException("Server ID can't be 0, thats reserver for clients");
                 
             this.ID = ID;
             this.Stats = new(ID);

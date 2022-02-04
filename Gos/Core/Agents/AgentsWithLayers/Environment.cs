@@ -13,6 +13,8 @@ namespace ServersWithLayers
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
 
+        private Server _clientServer;
+
         private static string main = "Main";
         public Env(){
             Env.CurrentEnv = this;
@@ -22,7 +24,20 @@ namespace ServersWithLayers
             solutionResponses = new();
              
             new MicroService(main); // crea el microservicio principal
+
+            InitializeClientServer();
+
         }
+        private void InitializeClientServer(){
+            this._clientServer = new("0");
+            new MicroService("CLIENTE");
+            this._clientServer.SetMService("CLIENTE");
+            Layer l = new Layer();
+            l.behaviors = new List<Behavior>{LoggerBehav.LoggerBehavior};
+            this._clientServer.AddLayer(l);
+            this.AddServer(this._clientServer);
+        }
+
         public void AddServerList(List<Server> servers){
             foreach(var server in servers){
                 server.SetMServiceIfNull(main);
@@ -68,6 +83,14 @@ namespace ServersWithLayers
 
             return entryPoints.ElementAt(new Random().Next(entryPoints.Count()));
         }
+
+        public IEnumerable<(int,Response)> GetClientResponses() {
+                return LoggerBehav.GetResponseList(this._clientServer,0);
+        }
+        public IEnumerable<(int,string)> GetClientReciveLog() {
+                return LoggerBehav.GetLogList(this._clientServer,0);
+        } 
+
     }
 }
 /*
