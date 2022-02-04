@@ -65,8 +65,9 @@ namespace ServersWithLayers{
         }
         private void AddRep(string server, double percent)
         {
+            if(percent > 1) throw new ArgumentException("Percent has to be less than 1", nameof(percent));
             var bio = Dir.WhitePages[server];
-            bio.Reputation *= percent;
+            bio.Reputation *= 1 + percent;
         }
 
         internal List<string> GetProviders(string resourceName) 
