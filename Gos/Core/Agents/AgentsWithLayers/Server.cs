@@ -6,7 +6,7 @@ namespace ServersWithLayers
     public class Server{
         public string ID {get;}
         public Status Stats {get;}
-        private List<Layer> _layers; 
+        internal List<Layer> _layers; 
         public Server(string ID){
             //if (ID.Equals("0"))
             //    throw new GoSException("Server ID can't be 0, thats reserver for clients");

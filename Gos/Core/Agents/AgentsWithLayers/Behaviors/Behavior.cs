@@ -6,7 +6,7 @@ namespace ServersWithLayers
 
     public class Behavior : ICloneable
     {
-        Dictionary<string, object> variables;
+        internal Dictionary<string, object> variables;
         private Action<Status, Dictionary<string, object>> _init;
         Action<Status, Perception, Dictionary<string, object>> action;
         

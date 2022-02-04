@@ -25,9 +25,13 @@ namespace ServersWithLayers{
         }
 
         Dictionary<int,Response> _notCompletdRespns { get; set; }
-        List<(int, Perception)> _sendToEnv;
+        internal List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
+
+        //internal Dictionary<int, Request> _requestsAceptedHistory;
+
         List<Message> _messagingHistory;
+
         #endregion
    
         public Status(string iD)
@@ -86,17 +90,14 @@ namespace ServersWithLayers{
             _sendToEnv.Add((time, p));
         }
         //Suscribe Perceptions dentro de un tiempo 'time'
-        public void SubscribeIn(int time, Perception p)
-        {
-            _sendToEnv.Add((Env.Time + time, p));
-        }
+        public void SubscribeIn(int time, Perception p) => SubscribeAt(Env.Time + time, p);
         //Suscribe Perceptions para ya
         public void Subscribe(Perception p) => SubscribeIn(0, p);
 
         public void AcceptReq(Request req)
         {
             if (req.Type is not ReqType.DoIt)
-                throw new Exception("Only DoIt requests are accepted for processing later");
+                throw new ArgumentException("Only DoIt requests are accepted for processing later", nameof(req));
             aceptedRequests.Enqueue(req);
         }
         public Request ExtractAcceptedReq() => aceptedRequests.Dequeue();
@@ -108,12 +109,19 @@ namespace ServersWithLayers{
         
         //Se llama cuando se recorrieron todas las capas, retorna un enumerable con todas las persepciones acumuladas de las capas y luego borra el historial de ellas.
         public IEnumerable<(int, Perception)> EnumerateAndClear() {
+            RemoveDuplicatesBeforeSending();
+            
             foreach(var x in _sendToEnv){
                 yield return x;
             }
             _sendToEnv.Clear();
         }
-        
+
+        private void RemoveDuplicatesBeforeSending()
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetMicroservice(MicroService ms){
             MicroService = ms;
         }
