@@ -325,6 +325,44 @@ namespace ServersWithLayers.Behaviors
                 Assert.AreEqual(2*n,responsesS1?.Count);
                 Assert.AreEqual(n,Env.CurrentEnv.GetClientResponses().Count());
             }
+
+            [TestMethod]
+            public void TestAskRequest(){
+                Request req1= new Request("0", "s1", ReqType.Asking);                                
+                req1.AskingRscs = new List<Resource>{
+                    Resource.Resources["img"],
+                    Resource.Resources["index"],
+                    Resource.Resources["database"],
+                   // Resource.Resources["gold"],   // de ser asi el request no llega al cliente.
+                };                    
+                Request req2= new Request("0", "s1", ReqType.Asking);                                
+                req2.AskingRscs = new List<Resource>{
+                    Resource.Resources["img"],
+                    Resource.Resources["index"],
+                    Resource.Resources["database"],
+                    Resource.Resources["gold"],   // de ser asi el request no llega al cliente.
+                };       
+
+                Env.CurrentEnv.SubsribeEvent(10,req1);
+                Env.CurrentEnv.SubsribeEvent(20,req2);
+
+                Env.CurrentEnv.Run();
+                 
+                var sortedEvents = Env.CurrentEnv.GetAllServersLogs().ToList();
+
+                System.Console.WriteLine("Logs:");
+                sortedEvents.Sort();
+                foreach (var item in sortedEvents)
+                    System.Console.WriteLine(item.Item2);             
+
+                System.Console.WriteLine("Responses:");
+                foreach(var s in Env.CurrentEnv.solutionResponses){
+                    foreach(var k in s.AnswerRscs.Keys)
+                        System.Console.WriteLine("  "+k+": "+s.AnswerRscs[k]);
+                    System.Console.WriteLine();
+                }
+                
+            }
         }
     }    
 

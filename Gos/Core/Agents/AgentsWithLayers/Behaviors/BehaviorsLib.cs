@@ -45,7 +45,7 @@ namespace ServersWithLayers
                     data[item.Name] = true;
                     continue;
                 }
-                // data[item.Name] = false; // Comentado para no estorbar con el Jefe recibiendo recursos que no tiene
+                data[item.Name] = false; // Comentado para no estorbar con el Jefe recibiendo recursos que no tiene
             }
             return data;
         }

@@ -84,18 +84,30 @@ namespace ServersWithLayers
             return entryPoints.ElementAt(new Random().Next(entryPoints.Count()));
         }
 
+        // todas los responses enviados al cliente
         public IEnumerable<(int,Response)> GetClientResponses() {
             var l=LoggerBehav.GetResponseList(this._clientServer,0);
             if(l == null) 
                 return new List<(int,Response)>();
             return l;
         }
+        // el string log del cliente
         public IEnumerable<(int,string)> GetClientReciveLog() {
             var l = LoggerBehav.GetLogList(this._clientServer,0);
             if(l == null) 
                 return new List<(int,string)>();
             return l;
         } 
+        // el string log de todos los servidores
+        public IEnumerable<(int,string)> GetAllServersLogs(){
+            List<(int,string)> logList = new();
+            logList.AddRange(GetClientReciveLog());
+            foreach (var item in servers)
+                logList.AddRange(LoggerBehav.GetLogList(item.Value,0));
+            return logList;
+        }
+  
+
 
     }
 }
