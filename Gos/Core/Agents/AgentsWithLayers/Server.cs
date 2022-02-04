@@ -6,6 +6,8 @@ namespace ServersWithLayers
     public class Server{
         public string ID {get;}
         public Status Stats {get;}
+        public bool ServerDown { get; private set; }
+
         internal List<Layer> _layers; 
         public Server(string ID){
             if (ID.Equals("0"))
@@ -18,6 +20,8 @@ namespace ServersWithLayers
         }
 
         public void HandlePerception(Perception p){
+            if (ServerDown) return;
+            
             Stats.SaveEntry(p);
 
             foreach(var l in _layers) 
@@ -44,6 +48,11 @@ namespace ServersWithLayers
         internal void SetMService(string mService) //Note: the server can't have been in a microS before
         {
             MicroService.AddServer(this, mService);
+        }
+
+        internal void Failure()
+        {
+            ServerDown = true;
         }
 
         public void AddLayer(Layer layer){

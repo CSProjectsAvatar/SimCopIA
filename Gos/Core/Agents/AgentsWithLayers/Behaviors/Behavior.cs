@@ -56,8 +56,39 @@ Priorizar:
 - Usar el DSL
 
 Cosas a hacer
-- Terminar el EventCreator
 - Implementar comunicacion entre microservicios
 
 Task de IA
+
+Task1 (C)
+Delegado decisor del Behavior
+Hacer un delegado en layer que decida que behavior usar, por defecto el 1ro
+
+Task2 (O)
+Sumar reputacion a los servers que den una respuesta aceptable al Boss(en el BossBehav)
+- aceptable es que me respondiste en el tiempo que yo estuve esperando
+- se le sumara a la reputacion una cantidad en funcion de el orden en que proveyo la respuesta
+- hay una listica ahi de %s bajando de 20 -> 0, con -10% en cada elemento
+
+Task3 (C)
+Hacer funcion de reseteo ResetServersReputation
+Hacer una funcion en MicroService que llame a Reset en la reputacion de todos los servers en el microservicio
+Reset es una funcion de int a int(un lambda x ej) que puede ser:
+x => 1
+o
+x => max (int)log x y 1
+
+Task4 (M)
+Hacer Funcion que prioriza entre Servers
+Dado una lista de Servidores Devuelve una lista ordenada "Mejor" para pedirle una tarea, dado el valor que devuelva la funcion Credibility: reputacion*parallelProcesors
+
+Credibility: reputacion * parallelProcessors
+
+Task5 (M)
+Dado una lista ordenada de Servers o servers name por prioridad y una lista de pares 
+<recurso, list<servidores>) devolver los request a mandar, donde un recurso solo aparezca en un request, y a un server se le mande a lo sumo un request.
+
+
+Cosas que se pueden Buscar con metaheuristica despues:
+- Cuanta reputacion dar
 */

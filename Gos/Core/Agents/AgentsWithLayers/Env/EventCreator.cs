@@ -4,7 +4,7 @@ using System.Linq;
 using Core;
 using Utils;
 namespace ServersWithLayers{
-    public abstract class EventCreator{
+    public class EventCreator{
 
         List<Type> _eventTypes;
         private List<double> _accProbabilities;
@@ -28,8 +28,12 @@ namespace ServersWithLayers{
             if (sum != 1)
                 throw new GoSException("Probabylities must sum up to 1");
 
-            _accProbabilities = probability.Select(
-                (x, i) => x + (i == 0 ? 0 : _accProbabilities[i - 1])).ToList();
+            _accProbabilities = new List<double>();
+            var acc = 0.0;
+            foreach (var p in probability) {
+                acc += p;
+                _accProbabilities.Add(acc);
+            }
         }
         
         /// <summary>
@@ -63,6 +67,7 @@ namespace ServersWithLayers{
         {
             return eType.Name switch {
                 "Request" => Request.RndClientReq,
+                "CritFailure" => new CritFailure(),
 
                 _ => throw new Exception("Event type not found")
             };

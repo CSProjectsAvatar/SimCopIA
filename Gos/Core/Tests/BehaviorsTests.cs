@@ -103,7 +103,7 @@ namespace Core {
             servers = new List<Server> { s1, s2, s3 };
 
             env = new Env();
-           // env.AddServerList(servers);
+            env.AddServerList(servers);
         }
         [TestCleanup]
         public void Clean() {
@@ -130,7 +130,6 @@ namespace Core {
         
         [TestMethod]
         public void WorkerBehavTest_1() {
-           env.AddServerList(servers);
 
             var p1Do = new Request("S1", "S2", ReqType.DoIt);
             p1Do.AskingRscs.AddRange(new[] { r1 });
@@ -200,13 +199,11 @@ namespace Core {
         public void FalenLeaderBehavTest_1()
         {
             falenLeader = BehaviorsLib.FallenLeader;
-            
 
             s2.AddLayer(fallenL);
             s3.AddLayer(fallenL);
-            s2.Stats.MicroService.ChangeLeader( "S1");
 
-            env.AddServerList(servers);
+            s2.Stats.MicroService.ChangeLeader( "S1");
 
             //2do if sin convertirse en lider
             env.SubsribeEvent(10, p2);
@@ -217,7 +214,6 @@ namespace Core {
             //env.Run();
             //Assert.AreEqual(s1.ID, s2.Stats.MicroService.LeaderId);
 
-
             //al final se convierte en jefe
             env.SubsribeEvent(42, p4);
             env.SubsribeEvent(56, p5);
@@ -227,7 +223,6 @@ namespace Core {
             env.Run();
 
             Assert.AreEqual(s2.ID, s2.Stats.MicroService.LeaderId);
-
         }
 
         [TestMethod]
@@ -253,9 +248,8 @@ namespace Core {
             s2.AddLayer(fallenL);
             s3.AddLayer(fallenL2);
 
-            servers = new List<Server> { s1, s2, s3, s4 };
-
-            env.AddServerList(servers);
+            // servers = new List<Server> { s1, s2, s3, s4 };
+            // env.AddServerList(servers);
 
             s2.Stats.MicroService.ChangeLeader("S1");
             s3.Stats.MicroService.ChangeLeader("S1");

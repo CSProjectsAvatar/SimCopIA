@@ -23,6 +23,17 @@ namespace ServersWithLayers
              
             new MicroService(main).SetAsEntryPoint(); // crea el microservicio principal
         }
+
+        internal List<Server> GetServers(Func<Server, bool> filter = null)
+        {
+            return servers.Select(s => s.Value).Where(filter ?? (s => true)).ToList();
+        }
+        internal void FailureInServer(string serverName)
+        {
+            var server = servers[serverName];
+            server.Failure();
+        }
+
         public void AddServerList(List<Server> servers){
             foreach(var server in servers){
                 server.SetMServiceIfNull(main);

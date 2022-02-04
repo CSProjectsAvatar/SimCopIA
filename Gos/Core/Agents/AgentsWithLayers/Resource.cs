@@ -29,11 +29,10 @@ namespace ServersWithLayers{
         internal static List<Resource> GetRndFinishedRscs()
         {
             var finR = GetFinishedRscs;
-            var rndCount = UtilsT.Rand.Next(finR.Count);
+            var rndCount = UtilsT.Rand.Next(1, finR.Count + 1);
             // returns rndCount items from finR randomly
             return finR.OrderBy(x => UtilsT.Rand.Next()).Take(rndCount).ToList();
         }
-
         public int RequiredTime { get; internal set; }
         public bool IsRequired { get; private set; }
 

@@ -52,12 +52,13 @@ namespace ServersWithLayers.Behaviors
                     ProcessDoItResp(response, status, askResponses, solutionResponsesAsocietedID);
                     break;
 
-                case Observer observer:
+                case Observer observer: // @todo aki hay que poner: Env.time > waitingT
 
                     (_,int current_request_ID) = nextReview.RemoveMin();
 
                     var responses =  askResponses[current_request_ID];
-
+                    status.MicroService.SetReward(responses);
+                    
                     var finalResponses = ResponseSelectionFunction(status,responses);
 
                     foreach(var r in finalResponses){
