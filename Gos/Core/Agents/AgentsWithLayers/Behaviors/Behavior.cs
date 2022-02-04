@@ -43,10 +43,21 @@ namespace ServersWithLayers
 } 
 /*
 Donde IA:
-- Eleccion cantidad de reputacion que se les otorga a los agentes luego de completar un task
+- Eleccion cantidad de reputacion que se les otorga a los agentes luego de completar un task 
 - Ponderacion de los parametros que importan a los Jefes para elegir un contratista(reputacion entre ellos)
 - Distribucion de la arquitectura(esto requiere una biyeccion a una gramatica o algo asi)
 - Como repartir los recursos
 - Seleccionar que comportamiento se ejecuta en la capa
 - Algo relacionado con la cache
+
+
+Priorizar:
+- Layer Decisor Function
+- Usar el DSL
+
+Cosas a hacer
+- Terminar el EventCreator
+- Implementar comunicacion entre microservicios
+
+Task de IA
 */

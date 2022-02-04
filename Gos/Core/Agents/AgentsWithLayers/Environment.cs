@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Utils;
 namespace ServersWithLayers
 {
     public class Env {
@@ -21,7 +21,7 @@ namespace ServersWithLayers
             turn = new();
             solutionResponses = new();
              
-            new MicroService(main); // crea el microservicio principal
+            new MicroService(main).SetAsEntryPoint(); // crea el microservicio principal
         }
         public void AddServerList(List<Server> servers){
             foreach(var server in servers){
@@ -66,7 +66,7 @@ namespace ServersWithLayers
                 .Where(pair => pair.Value.Type is ServiceType.EntryPoint)
                 .Select(pair => pair.Value.LeaderId);
 
-            return entryPoints.ElementAt(new Random().Next(entryPoints.Count()));
+            return entryPoints.ElementAt(UtilsT.Rand.Next(entryPoints.Count()));
         }
     }
 }
@@ -84,5 +84,8 @@ Event:
 Resource:
 - Unidad principal pedida y transferida entre agentes. (i.e una pagina web, un archivo, una imagen, etc)
 
+
+Expo: ///////////////////
+- Hablar de la versatilidad de Eventos y percepciones (si lo hacemos)
 
 */

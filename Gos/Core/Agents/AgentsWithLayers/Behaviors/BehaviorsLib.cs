@@ -19,11 +19,13 @@ namespace ServersWithLayers
             return response.AnswerRscs.Count < req.AskingRscs.Count;
         }
 
-        private static int GetRequiredTimeToProcess(Request req)
+        internal static int GetRequiredTimeToProcess(Request req)
         {// Returns the sum of all the required time to process the resources of the request
             var sum = 0;
             foreach (var r in req.AskingRscs)
                 sum += r.RequiredTime;
+
+            sum += (int)Utils.UtilsT.GenTimeOffset(lambda: 0.2); // Random Noise, prom: 4
             return sum;
         }
 

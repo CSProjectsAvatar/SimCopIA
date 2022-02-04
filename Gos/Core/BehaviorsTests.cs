@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using ServersWithLayers;
 using System.Linq;
-
+using Utils;
 namespace Core {
     [TestClass]
     public class BehaviorsTests {
+        
         #region  vars
         private Env env;
         private Server s1;
@@ -110,6 +111,22 @@ namespace Core {
             Resource.Resources.Clear();
         }
         
+        [TestMethod]
+        public void TestingGenTimeOffset(){
+            // With for
+            double lambda = 0.2;
+            // for (double lambda = 0; lambda < 10; lambda += 0.1)
+            {  
+                double sum = 0;
+                for (int i = 0; i < 20; i++)
+                {
+                    sum += UtilsT.GenTimeOffset(lambda);
+                    System.Console.WriteLine((int)UtilsT.GenTimeOffset(lambda));
+                }
+                // System.Console.WriteLine("Para lambda: " + lambda + ": " + sum/20.0);
+            }
+
+        }
         
         [TestMethod]
         public void WorkerBehavTest_1() {

@@ -40,24 +40,12 @@ namespace ServersWithLayers
                 st.IncProcessing(); 
 
                 var req = st.ExtractAcceptedReq(); // elijo request
-                var rtime = GetRequiredTimeToProcess(req);
+                var rtime = BehaviorsLib.GetRequiredTimeToProcess(req);
 
                 heap.Add(Env.Time + rtime, req); // comienzo a procesar la tarea
                 st.SubscribeIn(rtime, new Observer(st.serverID)); // 
             }
         }
-
-        
-
-        private static int GetRequiredTimeToProcess(Request req)
-        {// Returns the sum of all the required time to process the resources of the request
-            var sum = 0;
-            foreach (var r in req.AskingRscs)
-                sum += r.RequiredTime;
-            return sum;
-        }
-
-
     
     }
 
