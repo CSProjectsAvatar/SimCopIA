@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace ServersWithLayers{
     public class Status{
         #region Server Properties
         public int MaxCapacity { get; private set; }
+        private ILogger<Status> _logger;
+
         internal MicroService MicroService;
         internal string serverID;
         internal List<Resource> AvailableResources;
@@ -34,7 +37,7 @@ namespace ServersWithLayers{
 
         #endregion
    
-        public Status(string iD)
+        public Status(string iD, ILogger<Status> logger)
         {
             _sendToEnv = new();
             _variables = new();
@@ -46,6 +49,8 @@ namespace ServersWithLayers{
 
             _messagingHistory = new();
             _notCompletdRespns = new();
+
+            _logger= logger;
         }
 
         internal void AddPartialRpnse(Response resp)
@@ -53,12 +58,15 @@ namespace ServersWithLayers{
             if (!_notCompletdRespns.ContainsKey(resp.ReqID)) // Si no esta lo agrego
                 _notCompletdRespns.Add(resp.ReqID, resp);
             else{ // Si esta hago: actual U resp
+                _logger.LogDebug("Union de los responses obtenidos hasta el momento");
                 var actualRep = _notCompletdRespns[resp.ReqID];
                 _notCompletdRespns[resp.ReqID] = Response.Union(actualRep, resp);
             }
-            if (!BehaviorsLib.Incomplete(this, resp)) {
-                this.Subscribe(resp);
-                _notCompletdRespns.Remove(resp.ReqID);
+            var possbComplete = _notCompletdRespns[resp.ReqID];
+            if (!BehaviorsLib.Incomplete(this, possbComplete)) {
+                _logger.LogDebug("La respuesta está completada, subscribimos el evento");
+                this.Subscribe(possbComplete);
+                _notCompletdRespns.Remove(possbComplete.ReqID);
             }
         }
 
@@ -86,20 +94,18 @@ namespace ServersWithLayers{
         //Suscribe Perceptions en un tiempo 'time'
         public void SubscribeAt(int time, Perception p)
         {
+            _logger.LogDebug("Susbcribiendo el evento que se ejecutará en el tiempo {id}",time);
             _sendToEnv.Add((time, p));
         }
         //Suscribe Perceptions dentro de un tiempo 'time'
-        public void SubscribeIn(int time, Perception p)
-        {
-            _sendToEnv.Add((Env.Time + time, p));
-        }
+        public void SubscribeIn(int time, Perception p) => SubscribeAt(Env.Time + time, p);
         //Suscribe Perceptions para ya
         public void Subscribe(Perception p) => SubscribeIn(0, p);
 
         public void AcceptReq(Request req)
         {
             if (req.Type is not ReqType.DoIt)
-                throw new Exception("Only DoIt requests are accepted for processing later");
+                throw new ArgumentException("Only DoIt requests are accepted for processing later", nameof(req));
             aceptedRequests.Enqueue(req);
         }
         public Request ExtractAcceptedReq() => aceptedRequests.Dequeue();
@@ -111,13 +117,21 @@ namespace ServersWithLayers{
         
         //Se llama cuando se recorrieron todas las capas, retorna un enumerable con todas las persepciones acumuladas de las capas y luego borra el historial de ellas.
         public IEnumerable<(int, Perception)> EnumerateAndClear() {
+            RemoveDuplicatesBeforeSending();
+            _logger.LogInformation("Devuelve todos los eventos que se han subscrito en es Status del server {id} para subcribirlos en el Enviroment, se envia en evento y el tiempo en que tiene que subscribir y luego se eliminan del status", serverID);
             foreach(var x in _sendToEnv){
                 yield return x;
             }
             _sendToEnv.Clear();
         }
-        
+
+        private void RemoveDuplicatesBeforeSending()
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetMicroservice(MicroService ms){
+            _logger.LogDebug("setea el MicroServicio");
             MicroService = ms;
         }
     }
