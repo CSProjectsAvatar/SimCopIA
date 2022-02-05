@@ -81,7 +81,7 @@ namespace ServersWithLayers{
 
         private void ResetReputation(ServerBio biography)
         {
-            biography.Reputation = (int)ServerBio.constant;
+            biography.Reputation = ServerBio.constant;
         }
 
         internal void ForAllBiography()
@@ -91,6 +91,12 @@ namespace ServersWithLayers{
             {
                 ResetReputation(item.Value);
             }
+        }
+
+        internal double Reputation (string serverID)
+        {
+            ServerBio sb = this.Dir.WhitePages[serverID];
+            return sb.Reputation;
         }
     }
 

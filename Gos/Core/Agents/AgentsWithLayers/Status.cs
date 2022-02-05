@@ -115,7 +115,7 @@ namespace ServersWithLayers{
         
         //Se llama cuando se recorrieron todas las capas, retorna un enumerable con todas las persepciones acumuladas de las capas y luego borra el historial de ellas.
         public IEnumerable<(int, Perception)> EnumerateAndClear() {
-            RemoveDuplicatesBeforeSending();
+            //RemoveDuplicatesBeforeSending();
             _logger.LogInformation("Devuelve todos los eventos que se han subscrito en es Status del server {id} para subcribirlos en el Enviroment, se envia en evento y el tiempo en que tiene que subscribir y luego se eliminan del status", serverID);
             foreach(var x in _sendToEnv){
                 yield return x;
@@ -141,6 +141,11 @@ namespace ServersWithLayers{
         public Perception GetRequestSentToEnv()
         {
             return _sendToEnv[_sendToEnv.Count-1].Item2;
+        }
+
+        internal int CountMessagingHistory()
+        {
+            return _messagingHistory.Count();
         }
     }
 }

@@ -91,7 +91,7 @@ namespace Core {
             fallenL2 = new Layer();
             fallenL2.behaviors.Add(falenLeader2);
 
-            listBehavior = new List<Behavior> {falenLeader, workerB, contractor};
+            listBehavior = new List<Behavior> {falenLeader, contractor};
 
             r1 = new Resource("img1");
             r2 = new Resource("img2");
@@ -294,7 +294,6 @@ namespace Core {
             env.SubsribeEvent(34, p1);
             env.Run();
             Assert.AreEqual(env.currentTime, s2.Layers()[0].behaviors[0].LastTSeeLeader());
-
         }
 
         #endregion
@@ -310,11 +309,14 @@ namespace Core {
             s2.AddLayer(fallenL);
             s2.Stats.MicroService.ChangeLeader("S1");
 
+            s2.Stats.MicroService.ForAllBiography();
+
             env.SubsribeEvent(10, p2);
 
             env.Run();
 
-            //Assert.AreEqual(, s2.Stats.MicroService.LeaderId);
+            Assert.AreEqual(0.01, s2.Stats.MicroService.Reputation(s2.ID));
+            Assert.AreEqual(1, s2.Stats.CountMessagingHistory());
 
         }
 
