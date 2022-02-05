@@ -17,10 +17,16 @@ namespace ServersWithLayers{
         }   
         internal string LeaderId { get; set; }
         private Directory Dir { get; set; }
-        public MicroService(string name){
-            this.Name = name;
+
+        internal Func<ServerBio,double> credibilityFunction;
+        public MicroService(string name) : this(name,defaultCredibility) {
             this.Dir = new Directory();
         }
+        public MicroService(string name,Func<ServerBio,double> credibilityFunction) {
+            this.Name = name;
+            this.credibilityFunction = credibilityFunction; 
+        }
+        
 
         internal void SetAsEntryPoint(){
             this.Type = ServiceType.EntryPoint;
@@ -71,6 +77,45 @@ namespace ServersWithLayers{
                 servers.Add(item.Key);
             }
             return servers;
+        }
+
+        static double defaultCredibility(ServerBio bio){
+            var reputation = bio.Reputation;
+            var pProcessors = bio.ParallelProcessors;
+            return  reputation * pProcessors;
+        }
+
+        public IEnumerable<string> SortedByCredibility(string resName){
+
+            var listServers=GetProviders(resName);
+
+            listServers.OrderByDescending(
+                (string s)=>credibilityFunction(this.GetBio(s))
+            );
+
+            return listServers;
+        } 
+    }
+//borrar :(
+    class CredibilityComparer : IComparer<string>{
+        MicroService microService;
+        bool greaterFirst;
+        Func<ServerBio, double> creditibilityFunction => microService.credibilityFunction;
+        public CredibilityComparer(MicroService microService, bool greaterFirst =true){
+            this.microService = microService;
+            this.greaterFirst = greaterFirst;
+        }
+        public int Compare(string s1, string s2){
+            ServerBio sb1 = microService.GetBio(s1);
+            ServerBio sb2 = microService.GetBio(s2);
+
+            int direction = greaterFirst ? -1 : 1;            
+
+            if(this.creditibilityFunction(sb1) > this.creditibilityFunction(sb2))
+                return 1 * direction;
+            if(this.creditibilityFunction(sb1) < this.creditibilityFunction(sb2))
+                return -1 * direction;
+            return 0;
         }
     }
 
