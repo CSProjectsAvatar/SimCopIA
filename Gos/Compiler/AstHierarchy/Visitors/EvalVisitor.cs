@@ -504,6 +504,13 @@ namespace DataClassHierarchy
             return true;
         }
 
+        /// <summary>
+        /// Visita <paramref name="node"/> y se asegura de que el tipo del resultado obtenido sea <paramref name="expected"/>.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="expected"></param>
+        /// <param name="newVal">El resultado obtenido de la evaluacio'n.</param>
+        /// <returns>Si pudo ejecutar y el resultado obtenido es del tipo esperado.</returns>
         private bool TryEval(AstNode node, GosType expected, out object newVal) {
             bool vsucc;
             (vsucc, newVal) = Visit(node);
@@ -598,7 +605,7 @@ namespace DataClassHierarchy
                     return (true, status.HasCapacity);
                 case GosType.ServerStatus when node.Property == "leader":
                     return (true, (tval as Status).LeaderId());
-                case GosType.ServerStatus when node.Property == "server":
+                case GosType.ServerStatus when node.Property == "my_server":
                     return (true, (tval as Status).ServerId);
                 case GosType.ServerStatus when node.Property == "neighbors":
                     return (
@@ -882,6 +889,37 @@ namespace DataClassHierarchy
             _log.LogInformation("Accepting {r}", GosObjToString(req));
             status.AcceptReq(req);
 
+            return (true, null);
+        }
+
+        public (bool, object) Visiting(PingAst node) {
+            if (!TryEval(node.Target, GosType.String, out var target)) {
+                return default;
+            }
+            var toArrival = 0;
+            if (node.AfterNow != null && TryEval(node.AfterNow, GosType.Number, out var afterNow)) {
+                var afterNowDouble = (double)afterNow;
+                if (!Helper.IsInteger(afterNowDouble)) {
+                    _log.LogError(
+                        Helper.LogPref + "time until PING arrival can't be a fractional number.",
+                        node.AfterNow.Token.Line,
+                        node.AfterNow.Token.Column);
+                    return default;
+                }
+                toArrival = (int)afterNowDouble;
+
+            } else if (node.AfterNow != null) {  // error en la evaluacio'n del afterNow
+                return default;
+            }
+            var targetId = target as string;
+            var status = Context.GetVar(Helper.StatusVar) as Status;
+            var ping = new Request(status.ServerId, targetId, ReqType.Ping);
+
+            if (toArrival == 0) {
+                status.Subscribe(ping);
+            } else {
+                status.SubscribeIn(toArrival, ping);
+            }
             return (true, null);
         }
 

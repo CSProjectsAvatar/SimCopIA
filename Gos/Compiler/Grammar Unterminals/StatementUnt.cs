@@ -23,6 +23,7 @@ namespace Compiler.Grammar_Unterminals {
                      | "process" <expr>
                      | "respond" <expr>
                      | "accept" <expr>
+                     | <ping>
             */
             return derivation[0] switch {
                 Token { Type: Token.TypeEnum.Id } id when derivation[1] is RightConnUnt rc
@@ -65,6 +66,7 @@ namespace Compiler.Grammar_Unterminals {
                         Token = t,
                         Request = exprUnt.Ast as Expression
                     },
+                PingUnt p => p.Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

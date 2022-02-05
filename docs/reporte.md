@@ -254,6 +254,10 @@ graph LR
         | "process" <expr>
         | "respond" <expr>
         | "accept" <expr>
+        | <ping>
+
+<ping> := "ping" <expr> "in" <expr>
+        | "ping" <expr>
 
 <let-var> := "let" ID "=" <expr>
 

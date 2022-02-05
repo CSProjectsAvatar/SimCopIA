@@ -429,6 +429,7 @@ behav foo {
         [DataRow("process")]
         [DataRow("respond")]
         [DataRow("accept")]
+        [DataRow("ping")]
         public void RequestCommandOutsideBehavior(string command) {
             var tokens = _lex.Tokenize(
                 @"
@@ -440,6 +441,102 @@ let r = 3
 " + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
             Assert.IsFalse(ast.Validate(new Context()));
+        }
+
+        [TestMethod]
+        public void PingANonString() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    ping 3
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var ctx = new Context();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("foo");
+            _ = new Env(_logEnv, _logMicroS);
+
+            Assert.ThrowsException<GoSException>(() => behavP.Run(null, null));
+        }
+
+        [TestMethod]
+        public void PingTimeNonNumber() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    ping status.my_server in [1, 2]
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var ctx = new Context();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("foo");
+            _ = new Env(_logEnv, _logMicroS);
+
+            Assert.ThrowsException<GoSException>(() => behavP.Run(new Status("me", _logStat), null));
+        }
+
+        [TestMethod]
+        public void PingTimeNonInteger() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    ping status.my_server in 3.7
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var ctx = new Context();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("foo");
+            _ = new Env(_logEnv, _logMicroS);
+
+            Assert.ThrowsException<GoSException>(() => behavP.Run(new Status("me", _logStat), null));
+        }
+
+        [TestMethod]
+        public void PingTimeCorrectness() {
+            var tokens = _lex.Tokenize(
+                @"
+behav foo {
+    ping status.my_server in 3.00
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(new Context()));
+
+            var @out = new StringWriter();
+            var ctx = new Context();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("foo");
+            _ = new Env(_logEnv, _logMicroS);
+
+            behavP.Run(new Status("me", _logStat), null);
         }
 
         [TestMethod]

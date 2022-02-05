@@ -34,6 +34,7 @@ namespace Compiler {
             ("accept", Token.TypeEnum.Accept),
             ("is", Token.TypeEnum.Is),
             ("not", Token.TypeEnum.Not),
+            ("ping", Token.TypeEnum.Ping),
 
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("_*[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
@@ -129,6 +130,10 @@ namespace Compiler {
                 called = true;
                 action(t);
             };
+        }
+
+        internal static bool IsInteger(double x) {
+            return !(x - (int)x > double.Epsilon);
         }
     }
 }

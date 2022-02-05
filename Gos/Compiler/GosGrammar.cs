@@ -40,6 +40,7 @@ namespace Compiler {
         private static readonly UntType IsType = new UntType(typeof(IsTypeUnt));
         private static readonly UntType AfterIs = new UntType(typeof(AfterIsUnt));
         private static readonly UntType IsTypeEnd = new UntType(typeof(IsTypeEndUnt));
+        private static readonly UntType Ping = new UntType(typeof(PingUnt));
 
         #region terminales
         private static readonly TokenType n = TokenType.Number;
@@ -87,6 +88,7 @@ namespace Compiler {
         private static readonly TokenType @not = Token.TypeEnum.Not;
         private static readonly TokenType respond = Token.TypeEnum.Respond;
         private static readonly TokenType accept = Token.TypeEnum.Accept;
+        private static readonly TokenType ping = Token.TypeEnum.Ping;
 
         #endregion
         public GosGrammar() : base(
@@ -126,6 +128,10 @@ namespace Compiler {
             Stat > (process, Expr),
             Stat > (respond, Expr),
             Stat > (accept, Expr),
+            Stat > Ping,
+
+            Ping > (ping, Expr, @in, Expr),
+            Ping > (ping, Expr),
 
             LetVar > (let, id, eq, Expr),
 
