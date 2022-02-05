@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core;
+using Microsoft.Extensions.Logging;
 
 namespace ServersWithLayers
 {
@@ -8,23 +9,27 @@ namespace ServersWithLayers
         public Status Stats {get;}
         public bool ServerDown { get; private set; }
 
-        internal List<Layer> _layers;
         internal Layer FirstLayer => _layers[0];
-        public Server(string ID){
+        // public Server(string ID){
+        private List<Layer> _layers;
+        private ILogger<Server> _logger;
+        public Server(string ID, ILogger<Server> logger=null, ILogger<Status> loggerS=null)
+        {
             if (ID.Equals("0"))
                 throw new GoSException("Server ID can't be 0, thats reserver for clients");
                 
             this.ID = ID;
-            this.Stats = new(ID);
+            this.Stats = new(ID,loggerS);
             
             this._layers = new();
+            _logger = logger;
         }
 
         public void HandlePerception(Perception p){
             if (ServerDown) return;
             
             Stats.SaveEntry(p);
-
+            _logger?.LogDebug("Pasa por todas las capas del Server {id} y ejecuta un comportamiento de cada una elegido por un protocolo de selección", ID);
             foreach(var l in _layers) 
                 l.Process(p);
                         
@@ -65,6 +70,11 @@ namespace ServersWithLayers
         {
             Stats.AvailableResources = new();
             Stats.AvailableResources.AddRange(resources);
+        }
+
+        internal void ClearLayers()
+        {
+            _layers.Clear();
         }
     }
 }

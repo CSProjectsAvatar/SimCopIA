@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Utils;
+using Microsoft.Extensions.Logging;
+
 namespace ServersWithLayers
 {
     public class Env {
@@ -13,16 +15,19 @@ namespace ServersWithLayers
         public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
+        private ILogger<Env> _loggerEnv;
 
         private static string main = "Main";
-        public Env(){
+        public Env(ILogger<Env> loggerEnv = null, ILogger<MicroService> loggerMS = null)
+        {
             Env.CurrentEnv = this;
             currentTime = 0;
             this.servers = new();
             turn = new();
             solutionResponses = new();
              
-            new MicroService(main).SetAsEntryPoint(); // crea el microservicio principal
+            _loggerEnv = loggerEnv;
+            new MicroService(main,loggerMS).SetAsEntryPoint(); // crea el microservicio principal
         }
 
         /// <summary>
@@ -56,6 +61,8 @@ namespace ServersWithLayers
             while (turn.Count != 0){
                 (int time, Event exe ) = this.turn.RemoveMin();
                 this.currentTime = time;
+                
+                _loggerEnv?.LogInformation("Ejecutando evento {exe} en el tiempo {time}", exe.GetType().Name, time);
                 yield return exe.ExecuteInTime;
             }
         }

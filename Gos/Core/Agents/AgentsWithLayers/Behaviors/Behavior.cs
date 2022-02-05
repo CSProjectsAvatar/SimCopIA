@@ -6,7 +6,7 @@ namespace ServersWithLayers
 
     public class Behavior : ICloneable
     {
-        internal Dictionary<string, object> variables;
+        Dictionary<string, object> variables;
         private Action<Status, Dictionary<string, object>> _init;
         Action<Status, Perception, Dictionary<string, object>> action;
         
@@ -38,6 +38,13 @@ namespace ServersWithLayers
             copy.action += this.action;
             copy._init += this._init;
             return copy;
+        }
+        internal bool TryGetVar(string v, out object countPing)
+        {
+            if (variables.TryGetValue(v, out countPing))
+                return true;
+            countPing = null;
+            return false;
         }
     }
 } 
