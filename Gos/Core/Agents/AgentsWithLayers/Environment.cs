@@ -13,7 +13,6 @@ namespace ServersWithLayers
         public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
-        private ILogger<MicroService> _loggerMS;
         private ILogger<Env> _loggerEnv;
 
         private static string main = "Main";

@@ -78,6 +78,20 @@ namespace ServersWithLayers{
             }
             return servers;
         }
+
+        private void ResetReputation(ServerBio biography)
+        {
+            biography.Reputation = (int)ServerBio.constant;
+        }
+
+        internal void ForAllBiography()
+        {
+            Dictionary<string, ServerBio> whitePages = Services[this.Name].Dir.WhitePages;
+            foreach (var item in whitePages)
+            {
+                ResetReputation(item.Value);
+            }
+        }
     }
 
     public enum ServiceType{

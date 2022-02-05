@@ -28,10 +28,8 @@ namespace ServersWithLayers{
         }
 
         Dictionary<int,Response> _notCompletdRespns { get; set; }
-        internal List<(int, Perception)> _sendToEnv;
+        List<(int, Perception)> _sendToEnv;
         Dictionary<string, object> _variables;
-
-        //internal Dictionary<int, Request> _requestsAceptedHistory;
 
         List<Message> _messagingHistory;
 
@@ -133,6 +131,16 @@ namespace ServersWithLayers{
         public void SetMicroservice(MicroService ms){
             _logger.LogDebug("setea el MicroServicio");
             MicroService = ms;
+        }
+
+        public Request GetRequest()
+        {
+            return aceptedRequests.Peek();
+        }
+
+        public Perception GetRequestSentToEnv()
+        {
+            return _sendToEnv[_sendToEnv.Count-1].Item2;
         }
     }
 }

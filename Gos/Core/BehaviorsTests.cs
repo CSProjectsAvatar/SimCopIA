@@ -33,13 +33,19 @@ namespace Core {
         private Request p6_1;
 
         private Request p7;
+        private Request p8;
 
         private Response res1;
 
         private Request p1_1;
         private Request p2_1;
 
+
+        private Behavior workerB;
         private Behavior falenLeader;
+
+
+        private Behavior contractor;
         private Behavior falenLeader2;
 
         private List<Server> servers;
@@ -52,12 +58,13 @@ namespace Core {
         private ILogger<MicroService> loggerMS;
         private ILogger<Env> loggerEnv;
 
+        private List<Behavior> listBehavior;
         #endregion
 
         [TestInitialize]
         public void Init() {
 
-            loggerServer= LoggerFact.CreateLogger<Server>();
+            loggerServer = LoggerFact.CreateLogger<Server>();
             loggerStatus = LoggerFact.CreateLogger<Status>();
             loggerMS = LoggerFact.CreateLogger<MicroService>();
             loggerEnv = LoggerFact.CreateLogger<Env>();
@@ -68,15 +75,23 @@ namespace Core {
             s4 = new Server("S4", loggerServer, loggerStatus);
 
             workerL = new Layer();
-            workerL.behaviors.Add(BehaviorsLib.Worker);
+            workerB = BehaviorsLib.Worker;
+            workerL.behaviors.Add(workerB);
 
+            contractor = BehaviorsLib.Contractor;
             falenLeader = BehaviorsLib.FallenLeader;
+
             fallenL = new Layer();
             fallenL.behaviors.Add(falenLeader);
+            fallenL.behaviors.Add(workerB);
+            fallenL.behaviors.Add(contractor);
+
 
             falenLeader2 = BehaviorsLib.FallenLeader;
             fallenL2 = new Layer();
             fallenL2.behaviors.Add(falenLeader2);
+
+            listBehavior = new List<Behavior> {falenLeader, workerB, contractor};
 
             r1 = new Resource("img1");
             r2 = new Resource("img2");
@@ -102,20 +117,21 @@ namespace Core {
             p6_1 = new Request("S4", "S3", ReqType.Asking);
 
             p7 = new Request("S1", "S2", ReqType.DoIt);
+            p8 = new Request("S1", "S2", ReqType.Ping);
 
             res1 = new Response(7, "s1", "s2", ReqType.Asking, new Dictionary<string, bool> { });
 
             //p7 = new Request("S4", "S2", ReqType.Asking);
             p7.AskingRscs.AddRange(new[] { r1, r2, r3 });
 
-            s1.Stats.AvailableResources.Add(r1);
-            s2.Stats.AvailableResources = new List<Resource> { r1, r2 };
-            s3.Stats.AvailableResources = new List<Resource> { r1, r2, r3 };
+            s1.SetResources(new List<Resource> { r1});
+            s2.SetResources(new List<Resource> { r1, r2 });
+            s3.SetResources(new List<Resource> { r1, r2, r3 });
 
             servers = new List<Server> { s1, s2, s3 };
 
             env = new Env(loggerEnv,loggerMS);
-           // env.AddServerList(servers);
+            env.AddServerList(servers);
         }
         [TestCleanup]
         public void Clean() {
@@ -172,26 +188,23 @@ namespace Core {
 
             var contractor = BehaviorsLib.Contractor;
 
-            // TODO case 1
-            s2.Stats.AvailableResources.Add(r1);
-            s2.Stats.AvailableResources.Add(r3);
+            // TODO case Asking
             contractor.Run(s2.Stats, p1);
-            Assert.AreEqual(s1.ID, s2.Stats._sendToEnv[0].Item2.receiver);
+            Assert.AreEqual(s1.ID, s2.Stats.GetRequestSentToEnv().receiver);
 
-            // TODO case 2
-            //contractor.Run(s2.Stats, p7);
-            //Assert.AreEqual(s2.ID, s2.Stats._requestsAceptedHistory[p7.ID].receiver);
+            // TODO case DoIt
+            contractor.Run(s2.Stats, p7);
+            Assert.AreEqual(p7, s2.Stats.GetRequest());
 
-            // TODO if is not Request
-            //contractor.Run(s2.Stats, res1);
-            //Assert.AreEqual(0, s2.Stats._sendToEnv.Count());
-            //Assert.AreEqual(0, s2.Stats._requestsAceptedHistory.Count());
+            // TODO case Ping
+            contractor.Run(s2.Stats, p8);
+            Assert.AreEqual(s1.ID, s2.Stats.GetRequestSentToEnv().receiver);
         }
 
         #region FalenLeader
 
         [TestMethod]
-        public void FalenLeaderBehavTest_1()
+        public void FalenLeaderBehavTest_1()// al final se convierte en jefe
         {
             falenLeader = BehaviorsLib.FallenLeader;
             
@@ -199,8 +212,6 @@ namespace Core {
             s2.AddLayer(fallenL);
             s3.AddLayer(fallenL);
             s2.Stats.MicroService.ChangeLeader( "S1");
-
-            env.AddServerList(servers);
 
             //2do if sin convertirse en lider
             env.SubsribeEvent(10, p2);
@@ -225,7 +236,7 @@ namespace Core {
         }
 
         [TestMethod]
-        public void FalenLeaderBehavTest_2()
+        public void FalenLeaderBehavTest_2() //enviando Ping Request
         {
             s2.AddLayer(fallenL);
             
@@ -236,20 +247,15 @@ namespace Core {
             env.SubsribeEvent(18, p3);
 
             env.Run();
-            Assert.AreEqual(2, s2._layers[0].behaviors[0].variables["countPing"]);
+            Assert.AreEqual(2, s2.Layers()[0].behaviors[0].CountPing());
 
         }
-
 
         [TestMethod]
         public void FalenLeaderBehavTest_3()
         {
             s2.AddLayer(fallenL);
             s3.AddLayer(fallenL2);
-
-            servers = new List<Server> { s1, s2, s3, s4 };
-
-            env.AddServerList(servers);
 
             s2.Stats.MicroService.ChangeLeader("S1");
             s3.Stats.MicroService.ChangeLeader("S1");
@@ -263,14 +269,60 @@ namespace Core {
             env.SubsribeEvent(67, p5);
             env.SubsribeEvent(110, p5_1);
 
-            env.SubsribeEvent(121, p6);
             env.SubsribeEvent(120, p6_1);
+            env.SubsribeEvent(121, p6);
 
             env.Run();
-           // Assert.AreEqual(2, s2._layers[0].behaviors[0].variables["countPing"]);
+           Assert.AreEqual(s3.ID, s2.Stats.MicroService.LeaderId);
+           Assert.AreEqual(s3.ID, s1.Stats.MicroService.LeaderId);
 
         }
 
+        [TestMethod]
+        public void FalenLeaderBehavTest_4()// El jefe aparecio se reinician los valores
+        {
+
+            s2.AddLayer(fallenL);
+            s3.AddLayer(fallenL);
+            s2.Stats.MicroService.ChangeLeader("S1");
+
+            //2do if sin convertirse en lider
+            env.SubsribeEvent(10, p2);
+            env.SubsribeEvent(18, p3);
+
+            //1er if reiniciando los valores
+            env.SubsribeEvent(34, p1);
+            env.Run();
+            Assert.AreEqual(env.currentTime, s2.Layers()[0].behaviors[0].LastTSeeLeader());
+
+        }
+
+        #endregion
+
+        #region Decision de behavior
+
+        [TestMethod]
+        public void BehaviorSelector()
+        {
+            Func<IEnumerable<Behavior>, int> behaviorSelector = index => FuncionTest(listBehavior);
+            fallenL.SetBehaviourSelector(behaviorSelector);
+
+            s2.AddLayer(fallenL);
+            s2.Stats.MicroService.ChangeLeader("S1");
+
+            env.SubsribeEvent(10, p2);
+
+            env.Run();
+
+            //Assert.AreEqual(, s2.Stats.MicroService.LeaderId);
+
+        }
+
+        public int FuncionTest(List<Behavior>b)
+        {
+            Random r = new Random();
+            return r.Next(b.Count-1);
+        }
         #endregion
     }
 }
