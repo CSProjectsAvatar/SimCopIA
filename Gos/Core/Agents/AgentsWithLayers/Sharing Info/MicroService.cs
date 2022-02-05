@@ -75,6 +75,10 @@ namespace ServersWithLayers{
                 AddRep(server, it.Current);
             }
         }
+        public void SetReward(Response response, int time){
+            // set reward 
+        }
+
         private IEnumerator<double> DecresingPercents(double init = 0.2, double next = 0.8){
             while(true){
                 yield return init;
