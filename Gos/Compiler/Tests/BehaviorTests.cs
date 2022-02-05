@@ -430,6 +430,7 @@ behav foo {
         [DataRow("respond")]
         [DataRow("accept")]
         [DataRow("ping")]
+        [DataRow("alarm_me in")]
         public void RequestCommandOutsideBehavior(string command) {
             var tokens = _lex.Tokenize(
                 @"
@@ -467,12 +468,14 @@ behav foo {
             Assert.ThrowsException<GoSException>(() => behavP.Run(null, null));
         }
 
-        [TestMethod]
-        public void PingTimeNonNumber() {
+        [DataTestMethod]
+        [DataRow("ping status.my_server")]
+        [DataRow("alarm_me")]
+        public void ReqTypeTimeNonNumber(string beforeIn) {
             var tokens = _lex.Tokenize(
                 @"
 behav foo {
-    ping status.my_server in [1, 2]
+    " + beforeIn + @" in [1, 2]
 }
 " + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
@@ -491,12 +494,14 @@ behav foo {
             Assert.ThrowsException<GoSException>(() => behavP.Run(new Status("me", _logStat), null));
         }
 
-        [TestMethod]
-        public void PingTimeNonInteger() {
+        [DataTestMethod]
+        [DataRow("ping status.my_server")]
+        [DataRow("alarm_me")]
+        public void ReqTypeTimeNonInteger(string beforeIn) {
             var tokens = _lex.Tokenize(
                 @"
 behav foo {
-    ping status.my_server in 3.7
+    " + beforeIn + @" in 3.7
 }
 " + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
@@ -515,12 +520,14 @@ behav foo {
             Assert.ThrowsException<GoSException>(() => behavP.Run(new Status("me", _logStat), null));
         }
 
-        [TestMethod]
-        public void PingTimeCorrectness() {
+        [DataTestMethod]
+        [DataRow("ping status.my_server")]
+        [DataRow("alarm_me")]
+        public void ReqTypeTimeCorrectness(string beforeIn) {
             var tokens = _lex.Tokenize(
                 @"
 behav foo {
-    ping status.my_server in 3.00
+    " + beforeIn + @" in 3.00
 }
 " + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));

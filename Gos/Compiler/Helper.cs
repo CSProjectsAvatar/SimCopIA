@@ -35,6 +35,7 @@ namespace Compiler {
             ("is", Token.TypeEnum.Is),
             ("not", Token.TypeEnum.Not),
             ("ping", Token.TypeEnum.Ping),
+            ("alarm_me", Token.TypeEnum.AlarmMe),
 
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("_*[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),

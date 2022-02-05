@@ -215,6 +215,7 @@ namespace Compiler {
         }
 
         public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
+            AlarmMe,
             Ping,
             Respond,
             Accept,

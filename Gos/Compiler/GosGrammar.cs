@@ -89,6 +89,7 @@ namespace Compiler {
         private static readonly TokenType respond = Token.TypeEnum.Respond;
         private static readonly TokenType accept = Token.TypeEnum.Accept;
         private static readonly TokenType ping = Token.TypeEnum.Ping;
+        private static readonly TokenType alarmMe = Token.TypeEnum.AlarmMe;
 
         #endregion
         public GosGrammar() : base(
@@ -129,6 +130,7 @@ namespace Compiler {
             Stat > (respond, Expr),
             Stat > (accept, Expr),
             Stat > Ping,
+            Stat > (alarmMe, @in, Expr),
 
             Ping > (ping, Expr, @in, Expr),
             Ping > (ping, Expr),

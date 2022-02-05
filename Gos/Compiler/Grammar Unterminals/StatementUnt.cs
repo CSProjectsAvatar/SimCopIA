@@ -24,6 +24,7 @@ namespace Compiler.Grammar_Unterminals {
                      | "respond" <expr>
                      | "accept" <expr>
                      | <ping>
+                     | "alarm_me" "in" <expr>
             */
             return derivation[0] switch {
                 Token { Type: Token.TypeEnum.Id } id when derivation[1] is RightConnUnt rc
@@ -67,6 +68,11 @@ namespace Compiler.Grammar_Unterminals {
                         Request = exprUnt.Ast as Expression
                     },
                 PingUnt p => p.Ast,
+                Token { Type: Token.TypeEnum.AlarmMe } t when derivation[^1] is ExpressionUnt exprUnt
+                    => new AlarmMeAst(Helper.Logger<AlarmMeAst>()) {
+                        Token = t,
+                        AfterNow = exprUnt.Ast as Expression
+                    },
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

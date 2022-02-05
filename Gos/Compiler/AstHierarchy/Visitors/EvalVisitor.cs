@@ -929,6 +929,24 @@ namespace DataClassHierarchy
             return (true, null);
         }
 
+        public (bool, object) Visiting(AlarmMeAst node) {
+            if (!TryEval(node.AfterNow, GosType.Number, out var afterNow)) {
+                return default;
+            }
+            var afterNowDouble = (double)afterNow;
+            if (!Helper.IsInteger(afterNowDouble)) {
+                _log.LogError(
+                    Helper.LogPref + "time until ALARM arrival can't be a fractional number.",
+                    node.AfterNow.Token.Line,
+                    node.AfterNow.Token.Column);
+                return default;
+            }
+            var status = Context.GetVar(Helper.StatusVar) as Status;
+            status.SubscribeIn((int)afterNowDouble, new Observer(status.ServerId));
+
+            return (true, null);
+        }
+
         public (bool, object) Visiting(Variable node){
             var result = Context.GetVar(node.Identifier);
             if(result is null){

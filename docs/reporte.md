@@ -255,6 +255,7 @@ graph LR
         | "respond" <expr>
         | "accept" <expr>
         | <ping>
+        | "alarm_me" "in" <expr>
 
 <ping> := "ping" <expr> "in" <expr>
         | "ping" <expr>
