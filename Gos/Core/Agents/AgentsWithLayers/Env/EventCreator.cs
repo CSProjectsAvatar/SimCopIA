@@ -2,17 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core;
+using Utils;
 namespace ServersWithLayers{
-    public abstract class EventCreator{
+    public class EventCreator{
 
-        Random _rnd = new Random(Environment.TickCount);
         List<Type> _eventTypes;
         private List<double> _accProbabilities;
 
-        public EventCreator(List<Type> eventTypes, List<double> accProbabilities){
+        public EventCreator(List<Type> eventTypes, List<double> probabilities){
             SetTypes(eventTypes);
-            SetProbabilities(accProbabilities);
+            SetProbabilities(probabilities);
         }
+        public EventCreator(List<Type> eventTypes) : this(eventTypes,
+            // set 1/eventTypes.count in each element of the prob list
+            Enumerable.Repeat(1.0/eventTypes.Count, eventTypes.Count).ToList()
+        ){}
+
         internal void SetTypes(List<Type> eventTypes){
             _eventTypes = eventTypes;
         }
@@ -23,8 +28,12 @@ namespace ServersWithLayers{
             if (sum != 1)
                 throw new GoSException("Probabylities must sum up to 1");
 
-            _accProbabilities = probability.Select(
-                (x, i) => x + (i == 0 ? 0 : _accProbabilities[i - 1])).ToList();
+            _accProbabilities = new List<double>();
+            var acc = 0.0;
+            foreach (var p in probability) {
+                acc += p;
+                _accProbabilities.Add(acc);
+            }
         }
         
         /// <summary>
@@ -38,8 +47,8 @@ namespace ServersWithLayers{
         public IEnumerable<(Event, int)> EventItertor()
         {
             while(true){
-                var time = (int)GenTimeOffset();
-                var type = GetType(_rnd.NextDouble());
+                var time = (int)UtilsT.GenTimeOffset();
+                var type = GetType(UtilsT.Rand.NextDouble());
 
                 yield return (BuildEvent(type), time);
             }
@@ -58,17 +67,13 @@ namespace ServersWithLayers{
         {
             return eType.Name switch {
                 "Request" => Request.RndClientReq,
+                "CritFailure" => new CritFailure(),
 
                 _ => throw new Exception("Event type not found")
             };
-
-          
         }
-        private double GenTimeOffset() {
-            var lambda = 1.5;
-
-            return -1 / lambda * Math.Log(_rnd.NextDouble());
-        }
+        
+        
     }
 
 }

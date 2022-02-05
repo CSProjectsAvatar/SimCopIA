@@ -24,12 +24,6 @@ namespace Core {
         public void PrimaryInitializer() {
             services = new ServiceCollection();
 
-            /*Configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.Development.json")
-                .Build();*/
-
-            //services.AddTransient(c => Configuration);
             services.AddLogging();
 
             LoggerFact = LoggerFactory.Create(builder => {

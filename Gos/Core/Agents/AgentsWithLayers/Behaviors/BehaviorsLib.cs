@@ -24,13 +24,19 @@ namespace ServersWithLayers
             var sum = 0;
             foreach (var r in req.AskingRscs)
                 sum += r.RequiredTime;
+
+            sum += (int)Utils.UtilsT.GenTimeOffset(lambda: 0.2); // Random Noise, prom: 4
             return sum;
         }
 
         // Builds a response to: asking, imperative and ping request; in the same way
         public static Response BuildResponse(Status status, Request req)
         {
-            Dictionary<string, bool> data = GetAvailablesRscs(req, status.AvailableResources);
+            Dictionary<string, bool> data = new();
+            
+            if (req.Type is not ReqType.Ping)
+                data = GetAvailablesRscs(req, status.AvailableResources);
+
             var response = req.MakeResponse(data);
             return response;
         }
@@ -45,7 +51,7 @@ namespace ServersWithLayers
                     data[item.Name] = true;
                     continue;
                 }
-                // data[item.Name] = false; // Comentado para no estorbar con el Jefe recibiendo recursos que no tiene
+                //data[item.Name] = false; // Comentado para no estorbar con el Jefe recibiendo recursos que no tiene
             }
             return data;
         }
@@ -58,14 +64,15 @@ namespace ServersWithLayers
 
         internal static List<Request> CreatePingRequests (Status st)
         {
-            List<string> servers = st.MicroService.GetServers(st);
-            List<Request> requests = new List<Request> { };
-            foreach (var item in servers)
-            {
+            List<string> servers = st.MicroService.GetServers();
+
+            List<Request> requests = new();
+            foreach (var item in servers) {
                 requests.Add(new Request(st.serverID, item, ReqType.Ping));
             }
             return requests;
         }
+
     }
 
 }

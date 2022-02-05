@@ -1,9 +1,22 @@
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
+using Utils;
 namespace ServersWithLayers{
     public class Resource {
-        public static Dictionary<string, Resource> Resources = new();
+        internal static Dictionary<string, Resource> Resources = new();
+        private static int _amount;
+        private static List<Resource> finishers = new();
+        internal static List<Resource> GetFinishedRscs { 
+            get 
+            { 
+                if (_amount == Resources.Count)
+                    return finishers;
+                
+                _amount = Resources.Count;
+                finishers = Resources.Values.Where(r => !r.IsRequired).ToList();
+                return finishers;
+            }}
         public string Name {get => _name; 
             set {
                 if (Resources.ContainsKey(value))
@@ -15,13 +28,15 @@ namespace ServersWithLayers{
 
         internal static List<Resource> GetRndFinishedRscs()
         {
-            throw new NotImplementedException(); // @todo Omar: Implement this method
+            var finR = GetFinishedRscs;
+            var rndCount = UtilsT.Rand.Next(1, finR.Count + 1);
+            // returns rndCount items from finR randomly
+            return finR.OrderBy(x => UtilsT.Rand.Next()).Take(rndCount).ToList();
         }
+        public int RequiredTime { get; internal set; }
+        public bool IsRequired { get; private set; }
 
-        public int RequiredTime { get; set; }
-
-        public List<(int, string)> Requirements;
-        
+        List<string> Requirements;
         private string _name;
 
         public Resource(string name){
@@ -30,11 +45,23 @@ namespace ServersWithLayers{
             this.Requirements = new();
         }
 
-        public void AddReq(string resource, int quantity=1){
+        private void AddReq(string resource){
             if(!Resources.ContainsKey(resource))
                 throw new Exception("Resource doesn't exists");
                 
-            this.Requirements.Add((quantity,resource));
+            this.Requirements.Add(resource);
+            Resources[resource].IsRequired = true;
+        }
+        public void AddReq(Resource resource){
+            AddReq(resource.Name);
+        }
+        public void AddReqList(List<Resource> resources){
+            foreach(var r in resources)
+                AddReq(r);
+        }
+
+        public static void Dispose() {
+            Resources.Clear();
         }
     }
 

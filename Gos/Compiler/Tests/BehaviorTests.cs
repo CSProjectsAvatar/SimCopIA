@@ -589,86 +589,6 @@ behav foo {
                 $"0{_endl}", @out.ToString());
         }
 
-        [TestMethod]
-        public void RespondOrSaveRemovesFromDoneReqs() {
-            var tokens = _lex.Tokenize(
-                @"
-behav foo {
-    init {
-        call = 1
-    }
-    print call
-    print true
-
-    for req in done_reqs {
-        print req
-        respond_or_save req
-    }
-    print false
-
-    for req in status.accepted_reqs {
-        if status.can_process == false {
-            break
-        }
-        print req
-        process req
-    }
-    call = call + 1
-}
-" + _dslSuf);
-            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
-            Assert.IsTrue(ast.Validate(new Context()));
-
-            var @out = new StringWriter();
-            var ctx = new Context();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
-            var (success, _) = vis.Visit(ast);
-
-            Assert.IsTrue(success);
-
-            #region configuran2
-            var rs1 = new Resource("img1");
-            var rs2 = new Resource("img2");
-            var rs3 = new Resource("index");
-
-            var serv = new Server("server", _logServ, _logStat);
-            serv.Stats.AvailableResources.AddRange(new[] { rs1, rs2 });
-
-            var r1 = new Request("sender", "server", ReqType.DoIt);
-            r1.AskingRscs.AddRange(new[] { rs1 });
-            var r2 = new Request("sender", "server", ReqType.DoIt);
-            r2.AskingRscs.AddRange(new[] { rs2, rs3 });
-
-            serv.Stats.SaveEntry(r1);
-            serv.Stats.SaveEntry(r2);
-            serv.Stats.AcceptReq(r1);
-            serv.Stats.AcceptReq(r2);
-
-            Behavior behav = ctx.GetBehav("foo");
-            _ = new Env(_logEnv, _logMicroS);
-
-            #endregion
-
-            behav.Run(serv.Stats, null);
-            behav.Run(serv.Stats, null);
-            behav.Run(serv.Stats, null);
-
-            Assert.AreEqual(
-                $"1{_endl}" +
-                $"True{_endl}" +
-                $"False{_endl}" +
-                $"{EvalVisitor.GosObjToString(r1)}{_endl}" +
-                $"{EvalVisitor.GosObjToString(r2)}{_endl}" +
-                $"2{_endl}" +
-                $"True{_endl}" +
-                $"{EvalVisitor.GosObjToString(r1)}{_endl}" +
-                $"{EvalVisitor.GosObjToString(r2)}{_endl}" +
-                $"False{_endl}" +
-                $"3{_endl}" +
-                $"True{_endl}" +
-                $"False{_endl}", @out.ToString());
-        }
-
         [DataTestMethod]
         [DataRow(Helper.StatusVar)]
         [DataRow(Helper.PercepVar)]
@@ -990,63 +910,6 @@ behav foo {
         }
 
         [TestMethod]
-        public void RequestsInProcessOutOfRange() {
-            var tokens = _lex.Tokenize(
-                @"
-behav p {
-    init {
-        ask_call = 1
-    }
-    if percep.type == ASK {
-        if ask_call == 6 {
-            respond_or_save percep
-        } else {
-            respond_or_save done_reqs[1]
-        }
-        ask_call = ask_call+1
-    } else {
-        process percep
-    }
-}
-" + _dslSuf, _builtinCode);
-            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
-            Assert.IsTrue(ast.Validate(Context.Global()));
-
-            var @out = new StringWriter();
-            var ctx = Context.Global();
-            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
-            var (success, _) = vis.Visit(ast);
-
-            Assert.IsTrue(success);
-
-            #region configuran2
-            var serv = new Server("server", _logServ, _logStat);
-            var r1 = new Request("fulano", "server", ReqType.DoIt);
-            serv.Stats.SaveEntry(r1);
-            var r2 = new Request("fulano", "server", ReqType.Asking);
-            serv.Stats.SaveEntry(r2);
-
-            Behavior behavP = ctx.GetBehav("p");
-            _ = new Env(_logEnv, _logMicroS);
-
-            #endregion
-
-            behavP.Run(serv.Stats, r1);
-            behavP.Run(serv.Stats, r1);
-            behavP.Run(serv.Stats, r1);
-            behavP.Run(serv.Stats, r1);
-            behavP.Run(serv.Stats, r1);
-            Assert.ThrowsException<GoSException>(() => behavP.Run(serv.Stats, r1));
-
-            behavP.Run(serv.Stats, r2);
-            behavP.Run(serv.Stats, r2);
-            behavP.Run(serv.Stats, r2);
-            behavP.Run(serv.Stats, r2);
-            behavP.Run(serv.Stats, r2);
-            Assert.ThrowsException<GoSException>(() => behavP.Run(serv.Stats, r2));
-        }
-
-        [TestMethod]
         public void RemovingRequestFromMiddleOfAcceptedQueue() {
             var tokens = _lex.Tokenize(
                 @"
@@ -1237,7 +1100,7 @@ behav fallen_leader {
             _lex.Dispose();
             _parser.Dispose();
             MicroService.Services.Clear();
-            Resource.Resources.Clear();
+            Resource.Dispose();
         }
     }
 }
