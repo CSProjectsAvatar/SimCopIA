@@ -67,7 +67,7 @@ namespace ServersWithLayers.Behaviors
                     (_,Request currentOriginalRequest) = nextReview.RemoveMin();
 
                     var responses =  askResponses[currentOriginalRequest.ID];
-
+                    // @todo poner por aki st.Microservice.SetReward(responses) 
                     var requestsToDo = ResponseSelectionFunction(status,responses);
 
                     foreach(Request r in requestsToDo){
@@ -184,7 +184,7 @@ namespace ServersWithLayers.Behaviors
             return response;
         }
 
-        // No ejecutar los tests al mismo tiempo :D
+        // Casi Estable
         [TestClass]
         public class BossDoItRequestTests {
             #region  vars
@@ -239,8 +239,15 @@ namespace ServersWithLayers.Behaviors
     
     
             }
+            [TestCleanup]
             
-    
+            public void Clean()
+            {
+                MicroService.Services.Clear();
+                Resource.Resources.Clear();
+                Env.ClearServersLayers();
+            }
+
             //Envio de requests tipo DoIt (ejemplo super simple)
 
             [TestMethod]

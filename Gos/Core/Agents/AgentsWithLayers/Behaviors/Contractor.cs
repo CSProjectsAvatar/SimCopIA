@@ -18,13 +18,14 @@ namespace ServersWithLayers
             {
                 case ReqType.Asking when BehaviorsLib.IsAccepted(state, req):
 
-                    Response response = BehaviorsLib.BuildResponse(state, req);
-                    state.Subscribe(response);
+                    Response askR = BehaviorsLib.BuildResponse(state, req);
+                    state.Subscribe(askR);
                     break;
 
                 case ReqType.Ping:
 
-                    state.Subscribe(req.MakeResponse());
+                    Response pingR = BehaviorsLib.BuildResponse(state, req);
+                    state.Subscribe(pingR);
                     break;
 
                 case ReqType.DoIt:

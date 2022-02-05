@@ -35,19 +35,17 @@ namespace ServersWithLayers{
         }
     }
 
-    public class ServerBio{
-        public string ID {get;}
-        public int Reputation {get; private set;}
+    public class ServerBio {
+        public string ID { get; }
+        public double Reputation { get; set; }
         public int ParallelProcessors { get; }
-        public string Leader {get; private set;}
+        public const double initRep = 1;
 
-        public ServerBio(Server server){
+        public ServerBio(Server server) {
             this.ID = server.ID;
-            this.Reputation = 0;
-            this.Leader = null;
+            this.Reputation = initRep;
             this.ParallelProcessors = server.Stats.MaxCapacity;
         }
-
 
     }
 }

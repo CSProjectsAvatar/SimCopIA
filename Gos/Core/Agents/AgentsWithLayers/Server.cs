@@ -1,25 +1,31 @@
 using System.Collections.Generic;
 using Core;
+using Microsoft.Extensions.Logging;
 
 namespace ServersWithLayers
 {
     public class Server{
         public string ID {get;}
         public Status Stats {get;}
-        internal List<Layer> _layers; 
-        public Server(string ID){
-            //if (ID.Equals("0"))
-            //    throw new GoSException("Server ID can't be 0, thats reserver for clients");
-                
+        public bool ServerDown { get; private set; }
+
+        internal Layer FirstLayer => _layers[0];
+        private List<Layer> _layers;
+        private ILogger<Server> _logger;
+        public Server(string ID, ILogger<Server> logger=null, ILogger<Status> loggerS=null)
+        {
             this.ID = ID;
-            this.Stats = new(ID);
+            this.Stats = new(ID,loggerS);
             
             this._layers = new();
+            _logger = logger;
         }
 
         public void HandlePerception(Perception p){
+            if (ServerDown) return;
+            
             Stats.SaveEntry(p);
-
+            _logger?.LogDebug("Pasa por todas las capas del Server {id} y ejecuta un comportamiento de cada una elegido por un protocolo de selección", ID);
             foreach(var l in _layers) 
                 l.Process(p);
                         
@@ -46,6 +52,11 @@ namespace ServersWithLayers
             MicroService.AddServer(this, mService);
         }
 
+        internal void Failure()
+        {
+            ServerDown = true;
+        }
+
         public void AddLayer(Layer layer){
             var clonedLayer = layer.CloneInServer(this);
             _layers.Add(clonedLayer);
@@ -57,6 +68,10 @@ namespace ServersWithLayers
             Stats.AvailableResources.AddRange(resources);
         }
 
+        internal void ClearLayers()
+        {
+            _layers.Clear();
+        }
         ///retorna el object asociado a una variable `varName` de el primer comportamiento asociado a la capa en la posicion `layerIndex`
         internal object GetLayerBehaVars(int layerIndex,string varName){
             if(_layers.Count > layerIndex)

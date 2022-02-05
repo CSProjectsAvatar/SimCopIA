@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Utils;
+using Microsoft.Extensions.Logging;
 
 namespace ServersWithLayers
 {
@@ -8,26 +10,46 @@ namespace ServersWithLayers
 
         public static Env CurrentEnv {get; private set;}
         public static int Time => CurrentEnv.currentTime;
+        internal int GetEventCount => turn.Count;
         Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
         public List<Response> solutionResponses 
         => (from tR in GetClientResponses() select tR.Item2).ToList();
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
+        private ILogger<Env> _loggerEnv;
 
         private Server _clientServer;
 
         private static string main = "Main";
-        public Env(){
+        public Env(ILogger<Env> loggerEnv = null, ILogger<MicroService> loggerMS = null)
+        {
             Env.CurrentEnv = this;
             currentTime = 0;
             this.servers = new();
             turn = new();
              
-            new MicroService(main); // crea el microservicio principal
-
+            _loggerEnv = loggerEnv;
+            new MicroService(main,loggerMS).SetAsEntryPoint(); // crea el microservicio principal
             InitializeClientServer();
+        }
+
+        /// <summary>
+        /// Used for testing purpuses only
+        /// </summary>
+        internal void AdvanceTime(int toAdd){
+            currentTime += toAdd;
 
         }
+        internal List<Server> GetServers(Func<Server, bool> filter = null)
+        {
+            return servers.Select(s => s.Value).Where(filter ?? (s => true)).ToList();
+        }
+        internal void FailureInServer(string serverName)
+        {
+            var server = servers[serverName];
+            server.Failure();
+        }
+
         private void InitializeClientServer(){
             this._clientServer = new("0");
             new MicroService("CLIENTE");
@@ -52,6 +74,8 @@ namespace ServersWithLayers
             while (turn.Count != 0){
                 (int time, Event exe ) = this.turn.RemoveMin();
                 this.currentTime = time;
+                
+                _loggerEnv?.LogInformation("Ejecutando evento {exe} en el tiempo {time}", exe.GetType().Name, time);
                 yield return exe.ExecuteInTime;
             }
         }
@@ -81,7 +105,7 @@ namespace ServersWithLayers
                 .Where(pair => pair.Value.Type is ServiceType.EntryPoint)
                 .Select(pair => pair.Value.LeaderId);
 
-            return entryPoints.ElementAt(new Random().Next(entryPoints.Count()));
+            return entryPoints.ElementAt(UtilsT.Rand.Next(entryPoints.Count()));
         }
 
         // todas los responses enviados al cliente
@@ -106,9 +130,13 @@ namespace ServersWithLayers
                 logList.AddRange(LoggerBehav.GetLogList(item.Value,0));
             return logList;
         }
-  
 
-
+        internal static void ClearServersLayers()
+        {
+            foreach (var server in Env.CurrentEnv.servers.Values)
+                server.ClearLayers();
+        }
+      
     }
 }
 /*
@@ -125,5 +153,8 @@ Event:
 Resource:
 - Unidad principal pedida y transferida entre agentes. (i.e una pagina web, un archivo, una imagen, etc)
 
+
+Expo: ///////////////////
+- Hablar de la versatilidad de Eventos y percepciones (si lo hacemos)
 
 */

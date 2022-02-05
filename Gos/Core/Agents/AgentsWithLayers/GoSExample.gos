@@ -1,0 +1,20 @@
+
+behav boss{
+    ...
+    values = []
+    SelectBestServersForRespond ( IA )
+}
+
+behav boss{
+    ...
+    values = []
+    for server in receivedRequest{
+        values.Add(getValue(server.ServerBio()))
+    }
+}
+
+func getValue(serverBio){
+    optimize v1, v2, v3 - [0, 10]
+    value = v1*serverBio.rep + v2*serverBio.cantReq + v3*serverBio.Otracosa
+    return value
+}
