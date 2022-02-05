@@ -1185,6 +1185,53 @@ behav p {
                 @out.ToString());
         }
 
+        [TestMethod]
+        public void ParsingFallenLeader() {
+            var tokens = _lex.Tokenize(
+                @"
+behav fallen_leader {
+	init {
+		init_power = 3
+		max_ping = 3
+		count_ping = 0
+		last_see_leader = 0
+	}
+	if (percep is request or percep is response) and percep.sender == status.leader {
+		count_ping = 0
+		last_see_leader = env.time
+	}
+	let wait_time = pow(2, init_power + count_ping)
+
+	if env.time - last_see_leader > wait_time or env.time - last_see_leader == wait_time {
+		if count_ping > max_ping or count_ping == max_ping {  # mucho tiempo sin saber del li'der 
+			count_ping = 0
+			status.leader = status.my_server  # me pongo de li'der
+
+			for serv in status.neighbors {  # x cada servidor en mi red local (micro-servicio)
+				ping serv
+			}
+			return
+		} else {  # construyo pedi2 PING
+			let time = rand_int(wait_time/2)
+			ping status.leader in time  # envi'o PING
+			count_ping = count_ping + 1
+
+			alarm_me in wait_time
+		}
+	}
+}
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();
