@@ -91,4 +91,14 @@ Dado una lista ordenada de Servers o servers name por prioridad y una lista de p
 
 Cosas que se pueden Buscar con metaheuristica despues:
 - Cuanta reputacion dar
+
+Task6 (O)
+Usar una metaheuristica semejante a la del Jefe, en Las capas  de los Servers:
+Funcion que recibe una lista de Behaviors y devuelve un indice
+una variable por cada behavior, entre todas suman 1
+Se hace una variacion de la metaheuristica de exploracion y explotacion
+rotando tiempo que le doy a un behavior y aumentandolo
+la funcion de fitness puede ser la cantidad de reputacion ganada por request recibido
+
+METER CSP PARA DECIDIR REPARTICION DE RECURSOS
 */

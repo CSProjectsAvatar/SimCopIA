@@ -237,7 +237,7 @@ namespace Core {
             env.SubsribeEvent(18, p3);
 
             env.Run();
-            Assert.AreEqual(2, s2._layers[0].behaviors[0].variables["countPing"]);
+            Assert.AreEqual(2, s2.FirstLayer.behaviors[0].variables["countPing"]);
 
         }
 

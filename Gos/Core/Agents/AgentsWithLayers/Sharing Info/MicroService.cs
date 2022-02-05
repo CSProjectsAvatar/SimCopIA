@@ -31,7 +31,15 @@ namespace ServersWithLayers{
                 throw new Exception("MicroService doesn't exists");
             return Services[microserviceID];
         }
-
+        internal static double GetReputation(string server)
+        {
+            var sBio = Services
+                        .Select(kv => kv.Value)
+                        .Where(m => m.ContainsServer(server))
+                        .FirstOrDefault()
+                        .GetBio(server);
+            return sBio.Reputation;
+        }
         internal static void AddServer(Server server, string microS)
         {
             if (!Services.ContainsKey(microS))
@@ -70,6 +78,13 @@ namespace ServersWithLayers{
             bio.Reputation *= 1 + percent;
         }
 
+        
+
+        internal bool ContainsServer(string server)
+        {
+            return Dir.WhitePages.ContainsKey(server);
+        }
+
         internal List<string> GetProviders(string resourceName) 
         {
             List<string> res = new();
@@ -89,7 +104,9 @@ namespace ServersWithLayers{
         }
         internal ServerBio GetBio(string serverID)
         {
-            return Dir.WhitePages[serverID];
+            if (!Dir.WhitePages.TryGetValue(serverID, out ServerBio bio))
+                throw new ArgumentException($"Microservice {_name} does not contain server {serverID}");
+            return bio;
         }
         internal List<Resource> GetAllResourcesAvailable()
         {

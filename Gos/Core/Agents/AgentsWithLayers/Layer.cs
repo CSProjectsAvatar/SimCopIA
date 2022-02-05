@@ -31,6 +31,7 @@ namespace ServersWithLayers
         {
             return new Layer() { behaviors = behaviors.Select(x => x.Clone() as Behavior).ToList() };
         }
+    
     }
 
 }

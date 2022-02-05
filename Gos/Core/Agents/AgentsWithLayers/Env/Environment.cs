@@ -25,6 +25,13 @@ namespace ServersWithLayers
             new MicroService(main).SetAsEntryPoint(); // crea el microservicio principal
         }
 
+        /// <summary>
+        /// Used for testing purpuses only
+        /// </summary>
+        internal void AdvanceTime(int toAdd){
+            currentTime += toAdd;
+
+        }
         internal List<Server> GetServers(Func<Server, bool> filter = null)
         {
             return servers.Select(s => s.Value).Where(filter ?? (s => true)).ToList();
