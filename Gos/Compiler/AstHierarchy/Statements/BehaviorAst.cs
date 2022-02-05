@@ -46,6 +46,8 @@ namespace Compiler.AstHierarchy.Statements {
             }
             var child = context.CreateChildContext();
             child.DefVariable(Helper.StatusVar);
+            child.DefVariable(Helper.EnvVar);
+
             child.OpenBehavior = true;
 
             var mainCode = Code;

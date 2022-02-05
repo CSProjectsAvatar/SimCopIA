@@ -25,7 +25,7 @@ namespace Compiler.AstHierarchy.Statements {
                     Token.Column);
                 return false;
             }
-            var magicVars = new[] { Helper.DoneReqsVar, Helper.StatusVar, Helper.PercepVar };
+            var magicVars = new[] { Helper.DoneReqsVar, Helper.StatusVar, Helper.PercepVar, Helper.EnvVar };
             if (Left is Variable v && context.IsInsideBehav() && magicVars.Contains(v.Identifier)) {
                 _log.LogError(
                     Helper.LogPref + "variable '{id}' is read-only.",

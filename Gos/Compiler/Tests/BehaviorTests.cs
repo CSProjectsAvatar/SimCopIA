@@ -157,13 +157,15 @@ behav foo {
             Assert.IsTrue(ast.Validate(new Context()));
         }
 
-        [TestMethod]
-        public void StateInInit() {
+        [DataTestMethod]
+        [DataRow(Helper.StatusVar)]
+        [DataRow(Helper.EnvVar)]
+        public void AssignMagicVarInInit(string var) {
             var tokens = _lex.Tokenize(
                 @"
 behav foo {
     init {
-        status = [1, 2]
+        " + var + @" = [1, 2]
     }
 }
 " + _dslSuf);
@@ -567,6 +569,7 @@ behav foo {
         [DataRow(Helper.StatusVar)]
         [DataRow(Helper.PercepVar)]
         [DataRow(Helper.DoneReqsVar)]
+        [DataRow(Helper.EnvVar)]
         public void MagicVarCantBeAssignedInInit(string var) {
             var tokens = _lex.Tokenize(
                 @"
@@ -584,6 +587,7 @@ behav foo {
         [DataRow(Helper.StatusVar)]
         [DataRow(Helper.PercepVar)]
         [DataRow(Helper.DoneReqsVar)]
+        [DataRow(Helper.EnvVar)]
         public void MagicVarCantBeAssignedInMainCode(string var) {
             var tokens = _lex.Tokenize(
                 @"
@@ -599,6 +603,7 @@ behav foo {
         [DataRow(Helper.StatusVar)]
         [DataRow(Helper.PercepVar)]
         [DataRow(Helper.DoneReqsVar)]
+        [DataRow(Helper.EnvVar)]
         public void MagicVarCanBeAssignedOutside(string var) {
             var tokens = _lex.Tokenize(
                 @"
@@ -989,6 +994,90 @@ behav p {
 
             Assert.AreEqual(
                 $"[{EvalVisitor.GosObjToString(r1)}, {EvalVisitor.GosObjToString(r3)}]{_endl}",
+                @out.ToString());
+        }
+
+        [TestMethod]
+        public void LastOutsideValue() {
+            var tokens = _lex.Tokenize(
+                @"
+let a = 7
+behav p {
+    print a
+}
+a = 5
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("p");
+            _ = new Env(_logEnv, _logMicroS);
+
+            behavP.Run(null, null);
+
+            Assert.AreEqual(
+                $"5{_endl}", 
+                @out.ToString());
+        }
+
+        [TestMethod]
+        public void AlarmHasNotSender() {
+            var tokens = _lex.Tokenize(
+                @"
+behav p {
+    print percep.sender
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("p");
+            _ = new Env(_logEnv, _logMicroS);
+
+            Assert.ThrowsException<GoSException>(() => behavP.Run(null, new Observer("me")));
+        }
+
+        [TestMethod]
+        public void MessageSender() {
+            var tokens = _lex.Tokenize(
+                @"
+behav p {
+    print percep.sender
+}
+" + _dslSuf);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("p");
+            _ = new Env(_logEnv, _logMicroS);
+
+            behavP.Run(null, new Request("me", "fulano", ReqType.Ping));
+            behavP.Run(null, new Response(1, "you", "fulano", ReqType.Ping, null));
+
+            Assert.AreEqual(
+                $"me{_endl}" +
+                $"you{_endl}",
                 @out.ToString());
         }
 

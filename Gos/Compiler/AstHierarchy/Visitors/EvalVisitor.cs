@@ -487,6 +487,25 @@ namespace DataClassHierarchy
             return true;
         }
 
+        private bool TryEval(AstNode node, GosType expected, out object newVal) {
+            bool vsucc;
+            (vsucc, newVal) = Visit(node);
+            if (!vsucc) {
+                return false;
+            }
+            var type = Helper.GetType(newVal);
+            if (type != expected) {
+                _log.LogError(
+                    Helper.LogPref + "expected type: {expect}; actual type: {type}.",
+                    node.Token.Line,
+                    node.Token.Column,
+                    expected,
+                    type);
+                return false;
+            }
+            return true;
+        }
+
         public (bool, object) Visiting(PropSetAst node) {
             var (tsucc, tval) = Visit(node.Target);
             if (!tsucc) {
@@ -494,6 +513,13 @@ namespace DataClassHierarchy
             }
             var type = Helper.GetType(tval);
             switch (type) {
+                case GosType.ServerStatus when node.Property == "leader":
+                    if (!TryEval(node.NewVal, GosType.String, out var newVal)) {
+                        return default;
+                    }
+                    (tval as Status).ChangeLeader(newVal as string);
+                    break;
+
                 default:
                     _log.LogError(
                         Helper.LogPref + "{type} doesn't have a property called '{prop}' or it's value can't be set.",
@@ -503,6 +529,7 @@ namespace DataClassHierarchy
                         node.Property);
                     return default;
             }
+            return (true, null);
         }
 
         public (bool, object) Visiting(ListIdxGetAst node) {
@@ -548,9 +575,26 @@ namespace DataClassHierarchy
                 case GosType.ServerStatus when node.Property == "can_process":
                     var status = tval as Status;
                     return (true, status.HasCapacity);
+                case GosType.ServerStatus when node.Property == "leader":
+                    return (true, (tval as Status).LeaderId());
+                case GosType.ServerStatus when node.Property == "server":
+                    return (true, (tval as Status).ServerId);
+                case GosType.ServerStatus when node.Property == "neighbors":
+                    return (
+                        true, 
+                        (tval as Status)
+                            .GetNeighbors()
+                            .OfType<object>()
+                            .ToList());
 
                 case GosType.Request when node.Property == "type":
                     return (true, (double)(tval as Request).Type);
+
+                case GosType.Request or GosType.Response when node.Property == "sender":
+                    return (true, (tval as Message).Sender);
+
+                case GosType.Environment when node.Property == "time":
+                    return (true, (double)Env.Time);
 
                 default:
                     _log.LogError(
@@ -582,6 +626,7 @@ namespace DataClassHierarchy
                             .ToList()
                             .ForEach(kv => Context.DefVariable(kv.Key, kv.Value));  // las definiciones d otras vars ma'giks deben ir a partir d este punto
                         DefDoneReqs();
+                        Context.DefVariable(Helper.EnvVar, Env.CurrentEnv);
 
                         var (succ, _) = Visiting(node.Code.Where(st => st is not InitAst));  // ejecutan2 co'digo principal (obvian2 bloke init)
                         _returnFlag = default;
@@ -606,6 +651,7 @@ namespace DataClassHierarchy
                             .FirstOrDefault();
                         if (init != default) {  // hay un bloke init
                             Context.DefVariable(Helper.StatusVar, status);
+                            Context.DefVariable(Helper.EnvVar, Env.CurrentEnv);
 
                             var (succ, _) = Visit(init);  // ejecutan2 bloke init
 
@@ -868,6 +914,8 @@ namespace DataClassHierarchy
             //Context.Simulation = new Agents.Environment();
 
             var vis = Visit(node.Statements);
+
+            // @todo instanciar el ambient en este momento, engancharle las cosas y correrlo
             
             //if (vis.Item1) {  // evaluacio'n exitosa
             //    // @audit DE JUGUETE

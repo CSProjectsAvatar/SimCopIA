@@ -64,6 +64,7 @@ namespace Compiler {
         internal const string PercepVar = "percep";
         internal const string DoneReqsVar = "done_reqs";
         internal static readonly string HiddenDoneReqsHeapVar = "__done_reqs_heap";
+        internal const string EnvVar = "env";
 
         /// <summary>
         /// Convierte un símbolo a una representación en <see cref="string"/>.
@@ -101,6 +102,8 @@ namespace Compiler {
                 Response => GosType.Response,
                 Observer => GosType.Alarm,
                 Request => GosType.Request,
+                Env => GosType.Environment,
+                string => GosType.String,
                 _ => throw new NotImplementedException()
             };
         }

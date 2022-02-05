@@ -15,6 +15,8 @@
         /// Para el tipo de percepcio'n <see cref="ServersWithLayers.Observer"/>
         /// </summary>
         Alarm,
-        Request
+        Request,
+        Environment,
+        String
     }
 }

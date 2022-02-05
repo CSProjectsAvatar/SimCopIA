@@ -11,6 +11,7 @@ namespace ServersWithLayers{
 
         internal MicroService MicroService;
         public string serverID;
+        public string ServerId => serverID;
         public List<Resource> AvailableResources;
         #endregion
 
@@ -148,6 +149,22 @@ namespace ServersWithLayers{
             }
             aceptedRequests.Clear();
             l.ForEach(r => aceptedRequests.Enqueue(r));
+        }
+
+        public string LeaderId() {
+            return MicroService.LeaderId;
+        }
+
+        public void ChangeLeader(string newLeaderId) {
+            MicroService.ChangeLeader(newLeaderId);
+        }
+
+        /// <summary>
+        /// Devuelve el ID de todos los servidores del microservicio, inclui'2 el servidor asocia2 a la instancia de esta clase.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetNeighbors() {
+            return MicroService.GetServers(this);
         }
     }
 }

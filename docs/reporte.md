@@ -353,6 +353,7 @@ graph LR
 El lenguaje tiene 4 tipos:
 - `Number`: para todo tipo de n&uacute;meros
 - `Bool`: para valores de verdad (*true* o *false*)
+- `String`: para las cadenas de caracteres.
 - `Server`: para los servidores
 - `List`: para las listas.
 - `Null`: para la no existencia de algo, por ejemplo, el tipo de retorno de las funciones que no devuelven nada.
@@ -361,6 +362,7 @@ El lenguaje tiene 4 tipos:
     - `Request`: pedido.
     - `Response`: respuesta.
     - `Alarm`: notificaci&oacute;n
+- `Environment`: para el ambiente de la simulaci&oacute;n.
 
 Los operadores `+`, `-`, `*`, `/`, `%` solo est&aacute;n permitidos para el tipo `Number`. 
 
