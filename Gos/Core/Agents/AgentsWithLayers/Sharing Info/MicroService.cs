@@ -63,9 +63,28 @@ namespace ServersWithLayers{
             Services[microS].Dir.AddServer(server);
         }
 
+        
+        ///<summary>
+        /// Assigns a reward in reputation to the Sender in function of the respond time
+        ///</summary>
+        public void SetReward(Response response, int sendingTime)
+        {
+            var server = response.Sender;
+            var retard = Env.Time - sendingTime;
+            var addedV = RewardXTime(retard);
+            var bio = GetBio(server);
+            bio.Reputation += addedV;
+        }
+        // devuelve una recompensa en funcion del tiempo, mientras mas tiempo menor la recompensa, usando log
+        private double RewardXTime(int time)
+        {
+            return 1.0 / Math.Log(time + 1.5);
+        }
+        
         ///<summary>
         /// Asigna una recompensa en reputacion a todos los servidores que dieron respuestas
         /// </summary>
+        [Obsolete("Use SetReward(response, sendingTime) instead")]
         public void SetReward(List<Response> responses)
         {
             var servers = responses.Select(r => r.Sender).Distinct();
@@ -87,7 +106,7 @@ namespace ServersWithLayers{
             var bio = Dir.WhitePages[server];
             bio.Reputation *= 1 + percent;
         }
-
+        /// -------------
         
 
         internal bool ContainsServer(string server)
@@ -149,16 +168,21 @@ namespace ServersWithLayers{
             return  reputation * pProcessors;
         }
 
-        public IEnumerable<string> SortedByCredibility(string resName){
+        public IEnumerable<Response> SortByCredibility(IEnumerable<Response> servers){
 
-            var listServers=GetProviders(resName);
-
-            listServers.OrderByDescending(
-                (string s)=>credibilityFunction(this.GetBio(s))
+            return servers.OrderByDescending(
+                (Response r)=>credibilityFunction(this.GetBio(r.Sender))
             );
+        }
+        ///<summary>
+        /// Returns the servers of the microservice ordered by their credibility
+        ///</summary>
+        public IEnumerable<string> SortMicroserviceByCredb(){
 
-            return listServers;
-        } 
+            return  Dir.WhitePages
+                    .OrderByDescending( kv => credibilityFunction(kv.Value))
+                    .Select(kv => kv.Key);
+        }
     }
     public enum ServiceType{
         Private,
