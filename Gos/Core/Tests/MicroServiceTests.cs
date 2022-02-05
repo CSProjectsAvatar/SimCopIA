@@ -65,6 +65,7 @@ namespace Core {
         public void Clean() {
             MicroService.Services.Clear();
             Resource.Resources.Clear();
+            Env.ClearServersLayers();
         }
         
         [TestMethod]

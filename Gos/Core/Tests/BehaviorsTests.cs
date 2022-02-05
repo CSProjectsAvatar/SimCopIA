@@ -136,10 +136,7 @@ namespace Core {
         public void Clean() {
             MicroService.Services.Clear();
             Resource.Resources.Clear();
-            // Clean Layers in Servers
-            foreach (var server in servers) {
-                server.ClearLayers();
-            }
+            Env.ClearServersLayers();
         }
         
         [TestMethod]
@@ -265,9 +262,7 @@ namespace Core {
             env.SubsribeEvent(18, p3);
 
             env.Run();
-            s2.FirstLayer.behaviors[0].TryGetVar("countPing", out object countPing);
-            Assert.AreEqual(0, countPing);
-
+            Assert.AreEqual(0, s2.GetLayerBehaVars(0, "countPing"));
         }
 
         [TestMethod]
@@ -313,8 +308,7 @@ namespace Core {
             env.SubsribeEvent(34, p1);
             env.Run();
             
-            s2.FirstLayer.behaviors[0].TryGetVar("lastTimeSeeLeader", out object lastTimeSeeLeader);
-            Assert.AreEqual(env.currentTime, lastTimeSeeLeader);
+            Assert.AreEqual(env.currentTime, s2.GetLayerBehaVars(0, "lastTimeSeeLeader"));
         }
 
         #endregion

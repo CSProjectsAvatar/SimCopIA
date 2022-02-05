@@ -12,10 +12,13 @@ namespace ServersWithLayers
         public static int Time => CurrentEnv.currentTime;
         internal int GetEventCount => turn.Count;
         Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
-        public List<Response> solutionResponses; //poner privado y hacer como que un Enumerable :D
+        public List<Response> solutionResponses 
+        => (from tR in GetClientResponses() select tR.Item2).ToList();
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
         private ILogger<Env> _loggerEnv;
+
+        private Server _clientServer;
 
         private static string main = "Main";
         public Env(ILogger<Env> loggerEnv = null, ILogger<MicroService> loggerMS = null)
@@ -24,10 +27,10 @@ namespace ServersWithLayers
             currentTime = 0;
             this.servers = new();
             turn = new();
-            solutionResponses = new();
              
             _loggerEnv = loggerEnv;
             new MicroService(main,loggerMS).SetAsEntryPoint(); // crea el microservicio principal
+            InitializeClientServer();
         }
 
         /// <summary>
@@ -45,6 +48,16 @@ namespace ServersWithLayers
         {
             var server = servers[serverName];
             server.Failure();
+        }
+
+        private void InitializeClientServer(){
+            this._clientServer = new("0");
+            new MicroService("CLIENTE");
+            this._clientServer.SetMService("CLIENTE");
+            Layer l = new Layer();
+            l.behaviors = new List<Behavior>{LoggerBehav.LoggerBehavior};
+            this._clientServer.AddLayer(l);
+            this.AddServer(this._clientServer);
         }
 
         public void AddServerList(List<Server> servers){
@@ -94,6 +107,36 @@ namespace ServersWithLayers
 
             return entryPoints.ElementAt(UtilsT.Rand.Next(entryPoints.Count()));
         }
+
+        // todas los responses enviados al cliente
+        public IEnumerable<(int,Response)> GetClientResponses() {
+            var l=LoggerBehav.GetResponseList(this._clientServer,0);
+            if(l == null) 
+                return new List<(int,Response)>();
+            return l;
+        }
+        // el string log del cliente
+        public IEnumerable<(int,string)> GetClientReciveLog() {
+            var l = LoggerBehav.GetLogList(this._clientServer,0);
+            if(l == null) 
+                return new List<(int,string)>();
+            return l;
+        } 
+        // el string log de todos los servidores
+        public IEnumerable<(int,string)> GetAllServersLogs(){
+            List<(int,string)> logList = new();
+            logList.AddRange(GetClientReciveLog());
+            foreach (var item in servers)
+                logList.AddRange(LoggerBehav.GetLogList(item.Value,0));
+            return logList;
+        }
+
+        internal static void ClearServersLayers()
+        {
+            foreach (var server in Env.CurrentEnv.servers.Values)
+                server.ClearLayers();
+        }
+      
     }
 }
 /*

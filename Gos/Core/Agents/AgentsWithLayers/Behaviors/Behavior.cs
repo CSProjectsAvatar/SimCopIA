@@ -39,13 +39,13 @@ namespace ServersWithLayers
             copy._init += this._init;
             return copy;
         }
-        internal bool TryGetVar(string v, out object countPing)
-        {
-            if (variables.TryGetValue(v, out countPing))
-                return true;
-            countPing = null;
-            return false;
-        }
+        /// Retorna el object asociado a la variable `name`.
+        public object GetVariables(string name){
+            if(!variables.ContainsKey(name))
+                return null;
+            return variables[name];
+        } 
+
     }
 } 
 /*
