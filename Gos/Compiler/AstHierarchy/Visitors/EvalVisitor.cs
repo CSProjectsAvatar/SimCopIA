@@ -293,6 +293,12 @@ namespace DataClassHierarchy
                     }
                     return (true, Helper.Random.NextDouble() * (double)args[0]);
 
+                case Helper.RandIntFun:
+                    if (!IsOfTypeWithLog(GosType.Number, args[0], token)) {
+                        return default;
+                    }
+                    return (true, (double)(int)(Helper.Random.NextDouble() * (double)args[0]));
+
                 default:
                     throw new NotImplementedException("Not implemented built-in call.");
             }

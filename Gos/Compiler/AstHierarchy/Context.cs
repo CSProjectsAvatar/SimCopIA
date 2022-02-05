@@ -140,6 +140,7 @@ namespace DataClassHierarchy
         internal static Context Global() {
             var ctx = new Context();
             ctx.DefFunc(Helper.RandFun, 1);
+            ctx.DefFunc(Helper.RandIntFun, 1);
 
             return ctx;
         }

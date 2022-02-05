@@ -67,6 +67,7 @@ namespace Compiler {
         internal static readonly string HiddenDoneReqsHeapVar = "__done_reqs_heap";
         internal static readonly Random Random = new Random(Environment.TickCount);
         internal const string RandFun = "rand";
+        internal const string RandIntFun = "rand_int";
         internal const string EnvVar = "env";
 
         /// <summary>
