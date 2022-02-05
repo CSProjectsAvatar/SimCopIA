@@ -29,7 +29,8 @@ namespace ServersWithLayers
         }
         public Request(string sender, string receiver, ReqType type) : base(sender,receiver, type){
             this.MatureTime = 1;
-            AskingRscs = new();
+            //AskingRscs = new();
+            this._askingRscs = new();
         }
         // Crea un reponse a partir del request, en sentido contrario, con el campo data
         public Response MakeResponse(Dictionary<string, bool> data = null){

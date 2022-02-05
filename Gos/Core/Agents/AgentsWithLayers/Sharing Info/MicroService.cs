@@ -53,7 +53,9 @@ namespace ServersWithLayers{
 
         internal List<string> GetProviders(string resName)
         {
-            return Dir.YellowPages[resName];
+            if(Dir.YellowPages.ContainsKey(resName))
+                return Dir.YellowPages[resName];
+            return new List<string>();
         }
         internal ServerBio GetBio(string serverID)
         {
