@@ -20,13 +20,13 @@ namespace ServersWithLayers.Behaviors
             vars[nextReviewB]  = new Utils.Heap<Request>(); // la proxima revision a que request pertenece
             vars[askResponsesB] = new Dictionary<int, List<Response>>();
             vars[askResponsesAsocietedIDB] = new Dictionary<int, int>();
-            vars[solutionResponseAsocietedRequestB] = new Dictionary<int, Request>(); //de reqID --> Original Request
+            vars[solutionResponseAsocietedRequestB] = new Dictionary<int, (Request, int)>(); //de reqID --> Original Request
         } 
         private static void BossAnnounce(Status status, Perception p, Dictionary<string,object> variables)
         {
             var askResponses = variables[askResponsesB] as Dictionary<int,List<Response>>;
             var nextReview = variables[nextReviewB] as Utils.Heap<Request>;
-            var solutionResponseAsocietedRequest  = variables[solutionResponseAsocietedRequestB] as Dictionary<int, Request>;
+            var solutionResponseAsocietedRequest  = variables[solutionResponseAsocietedRequestB] as Dictionary<int, (Request,int)>; // reqID -> (OriginalRequest, tiempoDeSalida)
             var askResponsesAsocietedID  = variables[askResponsesAsocietedIDB] as Dictionary<int, int>;
             int reviewTime = (int)variables[reviewTimeB];
 
@@ -64,15 +64,15 @@ namespace ServersWithLayers.Behaviors
                     if( Env.Time != nextReview.First.Item1)
                         return;
                     
-                    (_,Request currentOriginalRequest) = nextReview.RemoveMin();
+                    (int requestExitTime,Request currentOriginalRequest) = nextReview.RemoveMin();
 
                     var responses =  askResponses[currentOriginalRequest.ID];
-                    status.MicroService.SetReward(responses);
+                    //status.MicroService.SetReward(responses);
                     var requestsToDo = ResponseSelectionFunction(status,responses);
 
                     foreach(Request r in requestsToDo){
                         status.Subscribe(r);
-                        solutionResponseAsocietedRequest.Add(r.ID, currentOriginalRequest);
+                        solutionResponseAsocietedRequest.Add(r.ID, (currentOriginalRequest,requestExitTime));
                     }
                     askResponses.Remove(currentOriginalRequest.ID);
 
@@ -80,12 +80,15 @@ namespace ServersWithLayers.Behaviors
             }
         }
 
-        private static void ProcessDoItResp(Response response, Status status, Dictionary<int, List<Response>> askResponses, Dictionary<int, Request> solutionResponseAsocietedRequest)
+        private static void ProcessDoItResp(Response response, Status status, Dictionary<int, List<Response>> askResponses, Dictionary<int, (Request,int)> solutionResponseAsocietedRequest)
         {
             if (solutionResponseAsocietedRequest.Keys.Contains(response.ReqID))
             {
                 var request_id = response.ReqID;
-                var originalRequest=solutionResponseAsocietedRequest[response.ReqID];
+                (var originalRequest, int exitTime)=solutionResponseAsocietedRequest[response.ReqID];
+
+                // dar recompensa en base al tiempo de salida del response
+                status.MicroService.SetReward(response, exitTime);
                 
                 Response solutionResponse = new Response(originalRequest.ID,status.serverID,originalRequest.Sender,ReqType.DoIt,response.AnswerRscs);
                 status.AddPartialRpnse(solutionResponse);
