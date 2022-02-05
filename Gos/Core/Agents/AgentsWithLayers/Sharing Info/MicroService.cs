@@ -87,38 +87,12 @@ namespace ServersWithLayers{
             return  reputation * pProcessors;
         }
 
-        public IEnumerable<string> SortedByCredibility(string resName){
+        public IEnumerable<Response> SortByCredibility(IEnumerable<Response> servers){
 
-            var listServers=GetProviders(resName);
-
-            listServers.OrderByDescending(
-                (string s)=>credibilityFunction(this.GetBio(s))
+            return servers.OrderByDescending(
+                (Response r)=>credibilityFunction(this.GetBio(r.Sender))
             );
-
-            return listServers;
         } 
-    }
-//borrar :(
-    class CredibilityComparer : IComparer<string>{
-        MicroService microService;
-        bool greaterFirst;
-        Func<ServerBio, double> creditibilityFunction => microService.credibilityFunction;
-        public CredibilityComparer(MicroService microService, bool greaterFirst =true){
-            this.microService = microService;
-            this.greaterFirst = greaterFirst;
-        }
-        public int Compare(string s1, string s2){
-            ServerBio sb1 = microService.GetBio(s1);
-            ServerBio sb2 = microService.GetBio(s2);
-
-            int direction = greaterFirst ? -1 : 1;            
-
-            if(this.creditibilityFunction(sb1) > this.creditibilityFunction(sb2))
-                return 1 * direction;
-            if(this.creditibilityFunction(sb1) < this.creditibilityFunction(sb2))
-                return -1 * direction;
-            return 0;
-        }
     }
 
     public enum ServiceType{

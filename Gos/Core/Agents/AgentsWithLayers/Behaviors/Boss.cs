@@ -147,35 +147,28 @@ namespace ServersWithLayers.Behaviors
         }
 
         private static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
-            // serverID -> Request 
-            Dictionary<string, Request> serverRequest = new();
-            // recurso -> listaOrdenadaDeMejoresServidores
-            Dictionary<string,IEnumerable<string>> sortedServersForResources = new();
-            // serverID -> Response 
-            Dictionary<string,Response> serverResponse =new();
+            List<Request> solution = new();
 
-            foreach(var r in responses){
-                foreach(var res in r.AnswerRscs.Keys ){
-                    if(!sortedServersForResources.ContainsKey(res)){
-                        sortedServersForResources.Add(res,status.MicroService.SortedByCredibility(res));
+            // resource is Ready 
+            HashSet<string> readyResources = new();
+
+            foreach(Response res in status.MicroService.SortByCredibility(responses)){
+                Request toSend = new Request(status.serverID,res.Sender,ReqType.DoIt);
+                List<Resource> resourcesToSend =new List<Resource>();
+                //Agregamos los recursos validos del response al request
+                foreach(string resource in res.AnswerRscs.Keys)
+                    if(res.AnswerRscs[resource] && !readyResources.Contains(resource)){
+                        resourcesToSend.Add(Resource.Resources[resource]);
+                        readyResources.Add(resource);
                     }
-                }
-                serverResponse.Add(r.Sender,r);
-            }
-            foreach(var res in sortedServersForResources.Keys){
-                foreach(var server in sortedServersForResources[res]){                                                
-                    if(serverResponse.ContainsKey(server))
-                    {                               
-                        if(!serverRequest.ContainsKey(server))
-                            serverRequest.Add(server,new Request(status.serverID,server,ReqType.DoIt));
-                        serverRequest[server].AskingRscs.Add(Resource.Resources[res]);
-                        break;
-                    }
+                //Si tiene algun recurso que mandar, se manda
+                if( resourcesToSend.Count != 0 ){
+                    toSend.AskingRscs = resourcesToSend;
+                    solution.Add(toSend);
                 }
             }
 
-            var sol = serverRequest.Values.ToList();
-            return sol;
+            return solution;
 
         }
 
