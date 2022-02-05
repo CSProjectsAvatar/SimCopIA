@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ServersWithLayers;
 using System.Linq;
 using Compiler.AstHierarchy.Statements;
+using Compiler;
 
 namespace DataClassHierarchy
 {
@@ -138,6 +139,7 @@ namespace DataClassHierarchy
         /// <returns></returns>
         internal static Context Global() {
             var ctx = new Context();
+            ctx.DefFunc(Helper.RandFun, 1);
 
             return ctx;
         }

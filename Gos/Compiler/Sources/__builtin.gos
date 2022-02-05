@@ -14,3 +14,17 @@
 let ASK = 0
 let DO = 1
 let PING = 2
+
+fun range(upper) {
+	let i = 0
+	let ans = []
+
+	forever {
+		if i == upper {
+			break
+		}
+		ans.add(i)
+		i = i + 1
+	}
+	return ans
+}

@@ -260,6 +260,10 @@ namespace DataClassHierarchy
 
             // Apareandolos con sus Evaluaciones
             var defFun = Context.GetFunc(node.Identifier, node.Args.Count);
+
+            if (defFun == null) {  // funcio'n built-in sin co'digo en GoS. Debe ser implementada en C#
+                return BuiltinCall(node.Identifier, exprValues, node.Token);
+            }
             var arguments = defFun.Arguments.Zip(exprValues, (arg, value) => (arg, value));
 
             var childCtx = Context.CreateChildContext();
@@ -279,6 +283,19 @@ namespace DataClassHierarchy
                 return (false, null);
             }
             return (true, returnedValue);
+        }
+
+        private (bool, object) BuiltinCall(string funName, IReadOnlyList<object> args, Token token) {
+            switch (funName) {
+                case Helper.RandFun:
+                    if (!IsOfTypeWithLog(GosType.Number, args[0], token)) {
+                        return default;
+                    }
+                    return (true, Helper.Random.NextDouble() * (double)args[0]);
+
+                default:
+                    throw new NotImplementedException("Not implemented built-in call.");
+            }
         }
 
         public (bool, object) Visiting(MethodCallAst node) {
@@ -493,12 +510,16 @@ namespace DataClassHierarchy
             if (!vsucc) {
                 return false;
             }
-            var type = Helper.GetType(newVal);
+            return IsOfTypeWithLog(expected, newVal, node.Token);
+        }
+
+        private bool IsOfTypeWithLog(GosType expected, object val, Token token) {
+            var type = Helper.GetType(val);
             if (type != expected) {
                 _log.LogError(
                     Helper.LogPref + "expected type: {expect}; actual type: {type}.",
-                    node.Token.Line,
-                    node.Token.Column,
+                    token.Line,
+                    token.Column,
                     expected,
                     type);
                 return false;
