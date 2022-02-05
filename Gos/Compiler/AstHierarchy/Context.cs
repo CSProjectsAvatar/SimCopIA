@@ -132,11 +132,12 @@ namespace DataClassHierarchy
             return _behavs[name];
         }
 
+        /// <summary>
+        /// El contexto global con sus definiciones built-in.
+        /// </summary>
+        /// <returns></returns>
         internal static Context Global() {
             var ctx = new Context();
-            ctx.DefVariable("ASK", (double)ReqType.Asking);
-            ctx.DefVariable("DO", (double)ReqType.DoIt);
-            ctx.DefVariable("PING", (double)ReqType.Ping);
 
             return ctx;
         }

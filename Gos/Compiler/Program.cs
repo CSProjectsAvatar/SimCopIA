@@ -42,7 +42,7 @@ gos run FILE");
                         ILogger<Lr1> logLr1 = loggerFactory.CreateLogger<Lr1>();
                         ILogger<Lexer.Lexer> logLex = loggerFactory.CreateLogger<Lexer.Lexer>();
                         var lex = new Lexer.Lexer(Helper.TokenWithRegexs, new ReGrammar(), logReLex, logLr1, logLr1Dfa, logLex);
-                        var tokens = lex.Tokenize(File.ReadAllText(args[1]));
+                        var tokens = lex.Tokenize(File.ReadAllText(args[1]), File.ReadAllText("Sources/__builtin.gos"));
                         var parser = new Lr1(new GosGrammar(), "./lr1-dfa.json", logLr1, logLr1Dfa);
 
                         if (parser.TryParse(tokens, out var ast)) {

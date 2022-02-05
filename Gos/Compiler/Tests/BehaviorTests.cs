@@ -623,7 +623,7 @@ let " + var + @" = 3
 behav foo {
     print [percep.type == DO, percep.type == ASK, percep.type == PING]
 }
-" + _dslSuf);
+" + _dslSuf, _builtinCode);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
             Assert.IsTrue(ast.Validate(Context.Global()));
 
@@ -794,7 +794,7 @@ behav foo {
         accept req
     }
 }
-" + _dslSuf);
+" + _dslSuf, _builtinCode);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
             Assert.IsTrue(ast.Validate(Context.Global()));
 
@@ -904,7 +904,7 @@ behav p {
         process percep
     }
 }
-" + _dslSuf);
+" + _dslSuf, _builtinCode);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
             Assert.IsTrue(ast.Validate(Context.Global()));
 
@@ -961,7 +961,7 @@ behav p {
         accept percep
     }
 }
-" + _dslSuf);
+" + _dslSuf, _builtinCode);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
             Assert.IsTrue(ast.Validate(Context.Global()));
 

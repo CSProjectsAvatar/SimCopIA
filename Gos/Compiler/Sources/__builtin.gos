@@ -1,0 +1,16 @@
+﻿fun pow(x, n) {
+	let i = 0
+	let ans = 1
+
+	forever {
+		if i == n {
+			break
+		}
+		ans = ans * x
+		i = i + 1
+	}
+	return ans
+}
+let ASK = 0
+let DO = 1
+let PING = 2

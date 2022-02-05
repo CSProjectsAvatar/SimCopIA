@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Compiler.Lexer;
+using System.IO;
 
 namespace Compiler.Tests {
     [TestClass]
@@ -19,6 +20,7 @@ namespace Compiler.Tests {
         protected static Lr1 _parser = new Lr1(new GosGrammar(), "./lr1-dfa.json", logLr1, logLr1Dfa);
         protected string _dslSuf;
         protected string _endl;
+        protected static string _builtinCode = File.ReadAllText("Sources/__builtin.gos");
 
         [TestInitialize]
         public void Init() {
