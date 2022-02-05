@@ -623,9 +623,11 @@ namespace DataClassHierarchy
 
                 case GosType.Request when node.Property == "type":
                     return (true, (double)(tval as Request).Type);
-
                 case GosType.Request or GosType.Response when node.Property == "sender":
                     return (true, (tval as Message).Sender);
+
+                case GosType.Response when node.Property == "req_type":
+                    return (true, (double)(tval as Response).Type);
 
                 case GosType.Environment when node.Property == "time":
                     return (true, (double)Env.Time);

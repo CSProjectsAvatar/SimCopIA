@@ -1095,6 +1095,38 @@ behav fallen_leader {
             Assert.IsTrue(success);
         }
 
+        [TestMethod]
+        public void ResponseRequestType() {
+            var tokens = _lex.Tokenize(
+                @"
+behav p {
+    if percep is not response resp {
+        return
+    }
+    print resp.req_type == PING
+}
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("p");
+            _ = new Env(_logEnv, _logMicroS);
+
+            behavP.Run(null, new Request("me", "fulano", ReqType.Ping));
+            behavP.Run(null, new Response(1, "you", "fulano", ReqType.Ping, null));
+
+            Assert.AreEqual(
+                $"True{_endl}",
+                @out.ToString());
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();
