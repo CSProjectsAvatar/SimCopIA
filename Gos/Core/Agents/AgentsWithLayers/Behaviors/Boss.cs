@@ -175,7 +175,6 @@ namespace ServersWithLayers.Behaviors
             return response;
         }
 
-        // Casi Estable
         [TestClass]
         public class BossDoItRequestTests {
             #region  vars

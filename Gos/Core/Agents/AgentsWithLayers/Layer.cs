@@ -21,6 +21,8 @@ namespace ServersWithLayers
         //Esto basado en un una Perception 'p' y el estado interno de 'server'
         public void Process(Perception p)
         {
+            if(behaviors.Count == 0) return;
+            
             int index = behaviorSelector(behaviors);
             Behavior conduct = behaviors[index]; // @todo implementar una politica de seleccion de behaviors
             conduct.Run(server.Stats, p);

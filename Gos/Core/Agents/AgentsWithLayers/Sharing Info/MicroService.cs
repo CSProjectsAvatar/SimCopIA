@@ -66,6 +66,7 @@ namespace ServersWithLayers{
         ///<summary>
         /// Asigna una recompensa en reputacion a todos los servidores que dieron respuestas
         /// </summary>
+        [Obsolete("Use SetReward(response, sendingTime) instead")]
         public void SetReward(List<Response> responses)
         {
             var servers = responses.Select(r => r.Sender).Distinct();
@@ -75,6 +76,23 @@ namespace ServersWithLayers{
                 AddRep(server, it.Current);
             }
         }
+        ///<summary>
+        /// Assigns a reward in reputation to the Sender in function of the respond time
+        ///</summary>
+        public void SetReward(Response response, int sendingTime)
+        {
+            var server = response.Sender;
+            var retard = Env.Time - sendingTime;
+            var addedV = RewardXTime(retard);
+            var bio = GetBio(server);
+            bio.Reputation += addedV;
+        }
+        // devuelve una recompensa en funcion del tiempo, mientras mas tiempo menor la recompensa, usando log
+        private double RewardXTime(int time)
+        {
+            return 1.0 / Math.Log(time + 1.5);
+        }
+        
         private IEnumerator<double> DecresingPercents(double init = 0.2, double next = 0.8){
             while(true){
                 yield return init;
