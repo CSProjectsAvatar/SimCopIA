@@ -12,7 +12,7 @@
 	return ans
 }
 let ASK = 0
-let DO = 1
+let ORDER = 1
 let PING = 2
 
 fun range(upper) {
