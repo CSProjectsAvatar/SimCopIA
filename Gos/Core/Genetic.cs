@@ -185,40 +185,73 @@ namespace Core
     }
     public class Factory
     {
-        List<Behavior> behaviors = new List<Behavior> { };
-        public Factory()
+        List<Behavior> _behaviors;
+        List<Resource> _resources;
+        public Factory(List<Behavior> behaviors, List<Resource> resources)
         {
-
+            _behaviors = behaviors;
+            _resources = resources;
         }
 
         public void RunSimulation(IndividualSim individual)
         {
+            List<MicroService> microServices = new List<MicroService> { };
             List<Server> servers = new List<Server> { };
-            foreach (var microServer in individual.MicroServers)
+
+            for (int i = 0; i < individual.MicroServers.Count; i++)
             {
-                for (int i = 0; i < microServer.Servers.Count; i++)
+                string name = "M" + i;
+                MicroService ms = new MicroService(name);
+                for (int j = 0; j < individual.MicroServers[i].Servers.Count; j++)
                 {
-                    Server server = new Server("S" + i);
-                    server.AddLayers(CreateLayer(microServer.Servers[i].layers));
-                    servers.Add(server);
+                    servers.Add(CreateServer(j, name, individual.MicroServers[i].Servers[j]));
                 }
+                microServices.Add(ms);
             }
 
         }
 
-        private IEnumerable<Layer> CreateLayer(List<LayerSim> layers)
+        private Server CreateServer(int j, string name, ServerSim serverSim)
+        {
+            Server server = new Server("S" + j);
+            server.AddLayers(CreateLayers(serverSim.layers));
+            server.SetResources(CreateResources(serverSim.resources));
+            server.SetMService(name);
+            return server;
+        }
+
+        private IEnumerable<Resource> CreateResources(List<int> resources)
+        {
+            List<Resource> res = new List<Resource> { };
+            foreach (var i in resources)
+                res.Add(_resources[resources[i]]);
+
+            return res;
+        }
+
+
+        private IEnumerable<Layer> CreateLayers(List<LayerSim> layers)
         {
             List<Layer> _layers = new List<Layer> { };
             foreach (var beha in layers)
-            {
-                Layer l = new Layer();
-                foreach (var i in beha.behavior)
-                {
-                    l.AddBehavior(this.behaviors[i]);
-                }
-                _layers.Add(l);
-            }
+                _layers.Add(CreateLayer(beha));
+                
             return _layers;
+        }
+
+        private Layer CreateLayer(LayerSim beha)
+        {
+            Layer l = new Layer();
+
+            foreach (var i in beha.behavior)
+                l.AddBehavior(CreateBehavior(i));// o poner _behaviors[i]; 
+
+            return l;
+        }
+
+        private Behavior CreateBehavior(int i)
+        {
+            return _behaviors[i];
         }
     }
 
