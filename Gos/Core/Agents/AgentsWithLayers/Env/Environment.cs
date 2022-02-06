@@ -136,7 +136,25 @@ namespace ServersWithLayers
             foreach (var server in Env.CurrentEnv.servers.Values)
                 server.ClearLayers();
         }
-      
+
+        public void GenerateEventsInTimeRange(List<Type> eventTypes, List<double> probabilities,int totalTime,int initialTime=0){
+            var eventCreator = new EventCreator(eventTypes,probabilities);
+
+            int lastEventTime = initialTime; 
+            foreach(var e in eventCreator.EventItertor())
+            {
+                lastEventTime += e.Item2;
+                if(lastEventTime > initialTime + totalTime)
+                    break;
+                this.SubsribeEvent(lastEventTime, e.Item1);
+            }
+        }
+        public void GenerateNEvents(List<Type> eventTypes, List<double> probabilities,int N,int initialTime=0){
+            var eventCreator = new EventCreator(eventTypes,probabilities);
+
+            foreach(var e in eventCreator.GetEvents(N))
+                this.SubsribeEvent(initialTime + e.Item2, e.Item1);
+        }
     }
 }
 /*
