@@ -115,12 +115,7 @@ namespace ServersWithLayers{
         
         //Se llama cuando se recorrieron todas las capas, retorna un enumerable con todas las persepciones acumuladas de las capas y luego borra el historial de ellas.
         public IEnumerable<(int, Perception)> EnumerateAndClear() {
-<<<<<<< HEAD
-            //RemoveDuplicatesBeforeSending();
-            _logger.LogInformation("Devuelve todos los eventos que se han subscrito en es Status del server {id} para subcribirlos en el Enviroment, se envia en evento y el tiempo en que tiene que subscribir y luego se eliminan del status", serverID);
-=======
             RemoveDuplicatesBeforeSending();
->>>>>>> Omar
             foreach(var x in _sendToEnv){
                 _logger?.LogInformation("Enviando {type} hacia {receiver} desde {this}", x.Item2.GetType().Name, x.Item2, serverID);
                 yield return x;
