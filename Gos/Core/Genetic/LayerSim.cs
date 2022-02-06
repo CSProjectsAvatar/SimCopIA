@@ -12,6 +12,8 @@ namespace Core
         private const double probMutateBehav = 0.7;
         internal List<int> behavior = new();
         private static Random _random = new Random();
+        private double probAddBehav;
+        private double probRemoveBehav;
 
         internal LayerSim Clone()
         {
@@ -23,16 +25,23 @@ namespace Core
 
         internal void Mutate()
         {
-            for (int i = 0; i < behavior.Count; i++)
-            {
-                if (_random.NextDouble() < probMutateBehav)
-                {
-                    var max = behavior.Max(); // @audit ver lo del max ese
-                    var beha = _random.Next(max);
-                    behavior[i] = beha;
+            // prob de agregar un behavior
+            if (_random.NextDouble() < probAddBehav) { // prob de agregar un behavior
+                behavior.Add(_random.Next(behavior.Count));
+            }
+            for (int i = 0; i < behavior.Count; i++) {
+                // prob de eliminar un behavior
+                if (_random.NextDouble() < probRemoveBehav) { // prob de eliminar un behavior
+                    behavior.RemoveAt(i);
+                    i--;
                 }
             }
             
+        }
+
+        internal static LayerSim RndLayer()
+        {
+            throw new NotImplementedException();
         }
     }
 
