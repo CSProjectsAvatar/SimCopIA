@@ -398,6 +398,15 @@ namespace DataClassHierarchy
                         BossBehav.ResponseSelectionFunction(tval as Status, resps.OfType<Response>())
                             .OfType<object>()
                             .ToList());
+                case GosType.ServerStatus when node.Function.Identifier == "providers" && node.Function.Args.Count == 1:
+                    if (!TryEval(node.Function.Args[0], GosType.Resource, out var resrcObj)) {
+                        return default;
+                    }
+                    return (
+                        true,
+                        (tval as Status).Providers(resrcObj as Resource)
+                            .OfType<object>()
+                            .ToList());
 
                 default:
                     _log.LogError(

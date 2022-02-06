@@ -200,6 +200,10 @@ namespace ServersWithLayers{
         public void Reward(Response response, int delay) {
             MicroService.SetReward(response, delay);
         }
+
+        public IEnumerable<string> Providers(Resource resource) {
+            return MicroService.GetProviders(resource.Name);
+        }
     }
 }
 
