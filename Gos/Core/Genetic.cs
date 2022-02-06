@@ -91,8 +91,6 @@ namespace Core
             }
             return childrens;
         }
-
-
     }
     public class IndividualSim
     {
@@ -133,8 +131,6 @@ namespace Core
 
             return microServer;
         }
-
-
     }
 
     public class MicroServiceSim
@@ -181,7 +177,6 @@ namespace Core
         internal List<int> resources = new();
         private static Random _random = new Random();
 
-
         public ServerSim Clone()
         {
             ServerSim serverSim = new ServerSim();
@@ -196,22 +191,29 @@ namespace Core
 
         internal void Mutate()
         {
-
             foreach (var layer in layers)
             {
                 double va = _random.NextDouble();
                 if (va < 0.7)
                     layer.Mutate();
             }
-            
+            for (int i = 0; i < resources.Count; i++)
+            {
+                double va = _random.NextDouble();
+                if (va < 0.7)
+                {
+                    var max = resources.Max();
+                    var reso = _random.Next(max);
+                    resources[i] = reso;
+                }
+            }
         }
     }
 
     internal class LayerSim
     {
         internal List<int> behavior = new();
-
-        LayerSim auxiliar = new LayerSim();
+        private static Random _random = new Random();
 
         internal LayerSim Clone()
         {
@@ -223,7 +225,17 @@ namespace Core
 
         internal void Mutate()
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < behavior.Count; i++)
+            {
+                double va = _random.NextDouble();
+                if (va < 0.7)
+                {
+                    var max = behavior.Max();
+                    var beha = _random.Next(max);
+                    behavior[i] = beha;
+                }
+            }
+            
         }
     }
     public class Factory
