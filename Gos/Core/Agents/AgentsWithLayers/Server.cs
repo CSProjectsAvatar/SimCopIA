@@ -7,13 +7,13 @@ namespace ServersWithLayers
     public class Server{
         public string ID {get;}
         public Status Stats {get;}
+        public bool ServerDown { get; private set; }
+
+        internal Layer FirstLayer => _layers[0];
         private List<Layer> _layers;
         private ILogger<Server> _logger;
         public Server(string ID, ILogger<Server> logger=null, ILogger<Status> loggerS=null)
         {
-            if (ID.Equals("0"))
-                throw new GoSException("Server ID can't be 0, thats reserver for clients");
-                
             this.ID = ID;
             this.Stats = new(ID,loggerS);
             
@@ -22,6 +22,8 @@ namespace ServersWithLayers
         }
 
         public void HandlePerception(Perception p){
+            if (ServerDown) return;
+            
             Stats.SaveEntry(p);
             _logger?.LogDebug("Pasa por todas las capas del Server {id} y ejecuta un comportamiento de cada una elegido por un protocolo de selección", ID);
             foreach(var l in _layers) 
@@ -50,6 +52,11 @@ namespace ServersWithLayers
             MicroService.AddServer(this, mService);
         }
 
+        internal void Failure()
+        {
+            ServerDown = true;
+        }
+
         public void AddLayer(Layer layer){
             var clonedLayer = layer.CloneInServer(this);
             _layers.Add(clonedLayer);
@@ -61,9 +68,15 @@ namespace ServersWithLayers
             Stats.AvailableResources.AddRange(resources);
         }
 
-        public List<Layer> Layers()
+        internal void ClearLayers()
         {
-            return _layers;
+            _layers.Clear();
+        }
+        ///retorna el object asociado a una variable `varName` de el primer comportamiento asociado a la capa en la posicion `layerIndex`
+        internal object GetLayerBehaVars(int layerIndex,string varName){
+            if(_layers.Count > layerIndex)
+                return _layers[layerIndex].behaviors[0].GetVariables(varName);
+            throw new System.Exception("Indice capa mayor que la cantidad de capas.");
         }
     }
 }

@@ -45,11 +45,10 @@ namespace ServersWithLayers
                 {
                     vars[countPingStr] = 0;
                     st.MicroService.ChangeLeader(st.serverID); //me pongo de lider
-                    foreach (var item in BehaviorsLib.CreatePingRequests(st))
-                    {
+                    // Envio PING a todos mis CoWorkers
+                    foreach (var item in BehaviorsLib.CreatePingRequests(st)) {
                         st.Subscribe(item);
                     }
-                    return;
                 }
                 else
                 {   // Construyo PING Request
@@ -57,6 +56,7 @@ namespace ServersWithLayers
                     int time = new Random().Next(waitTime/2);
 
                     st.SubscribeIn(time, pingRequest); // Envio PING
+                    st.SubscribeIn(waitTime, new Observer(st.serverID)); // Pongo Alarma
                     vars[countPingStr] = countPing + 1;
                 }
             }

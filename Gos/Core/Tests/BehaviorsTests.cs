@@ -4,8 +4,7 @@ using System;
 using System.Collections.Generic;
 using ServersWithLayers;
 using System.Linq;
-
-
+using Utils;
 namespace Core {
     [TestClass]
     public class BehaviorsTests :BaseTest{
@@ -137,11 +136,29 @@ namespace Core {
         public void Clean() {
             MicroService.Services.Clear();
             Resource.Resources.Clear();
+            Env.ClearServersLayers();
         }
         
+        [TestMethod]
+        public void TestingGenTimeOffset(){
+            // With for
+            double lambda = 0.2;
+            // for (double lambda = 0; lambda < 10; lambda += 0.1)
+            {  
+                double sum = 0;
+                for (int i = 0; i < 20; i++)
+                {
+                    sum += UtilsT.GenTimeOffset(lambda);
+                    System.Console.WriteLine((int)UtilsT.GenTimeOffset(lambda));
+                }
+                // System.Console.WriteLine("Para lambda: " + lambda + ": " + sum/20.0);
+            }
+
+        }
         
         [TestMethod]
         public void WorkerBehavTest_1() {
+
             var p1Do = new Request("S1", "S2", ReqType.DoIt);
             p1Do.AskingRscs.AddRange(new[] { r1 });
             var p2Do = new Request("S3", "S2", ReqType.DoIt);
@@ -207,10 +224,10 @@ namespace Core {
         public void FalenLeaderBehavTest_1()// al final se convierte en jefe
         {
             falenLeader = BehaviorsLib.FallenLeader;
-            
 
             s2.AddLayer(fallenL);
             s3.AddLayer(fallenL);
+
             s2.Stats.MicroService.ChangeLeader( "S1");
 
             //2do if sin convertirse en lider
@@ -222,7 +239,6 @@ namespace Core {
             //env.Run();
             //Assert.AreEqual(s1.ID, s2.Stats.MicroService.LeaderId);
 
-
             //al final se convierte en jefe
             env.SubsribeEvent(42, p4);
             env.SubsribeEvent(56, p5);
@@ -232,7 +248,6 @@ namespace Core {
             env.Run();
 
             Assert.AreEqual(s2.ID, s2.Stats.MicroService.LeaderId);
-
         }
 
         [TestMethod]
@@ -242,13 +257,12 @@ namespace Core {
             
             s2.Stats.MicroService.ChangeLeader("S1");
 
-            // else de mandar el request de tipo ping
+            // else de mandar el request de tipo ping, luego Se pone de Lider
             env.SubsribeEvent(10, p2);
             env.SubsribeEvent(18, p3);
 
             env.Run();
-            Assert.AreEqual(2, s2.Layers()[0].behaviors[0].CountPing());
-
+            Assert.AreEqual(0, s2.GetLayerBehaVars(0, "countPing"));
         }
 
         [TestMethod]
@@ -293,7 +307,9 @@ namespace Core {
             //1er if reiniciando los valores
             env.SubsribeEvent(34, p1);
             env.Run();
-            Assert.AreEqual(env.currentTime, s2.Layers()[0].behaviors[0].LastTSeeLeader());
+            
+            Assert.AreEqual(env.currentTime, s2.GetLayerBehaVars(0, "lastTimeSeeLeader"));
+
         }
 
         #endregion

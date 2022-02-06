@@ -36,7 +36,7 @@ namespace ServersWithLayers
             return new Layer() { behaviors = behaviors.Select(x => x.Clone() as Behavior).ToList(), behaviorSelector=this.behaviorSelector};
         }
 
-         public void SetBehaviourSelector(Func<IEnumerable<Behavior>, int>selector)
+        public void SetBehaviourSelector(Func<IEnumerable<Behavior>, int>selector)
         {
             behaviorSelector = selector;
         }

@@ -17,11 +17,20 @@ namespace ServersWithLayers
             req.AskingRscs = askRscs;
             return req;
         }
-         
-        public List<Resource> AskingRscs { get; set; }
+        
+        private List<Resource> _askingRscs;
+        public List<Resource> AskingRscs {
+            get =>_askingRscs;
+            set {
+                _askingRscs = value;
+                if (Type is ReqType.DoIt && _askingRscs.Count == 0)
+                    throw new Exception("Si el Request es de tipo DoIt la lista de pedidos no puede estar vacia");
+            }
+        }
         public Request(string sender, string receiver, ReqType type) : base(sender,receiver, type){
             this.MatureTime = 1;
-            AskingRscs = new();
+            //AskingRscs = new();
+            this._askingRscs = new();
         }
         // Crea un reponse a partir del request, en sentido contrario, con el campo data
         public Response MakeResponse(Dictionary<string, bool> data = null){

@@ -39,13 +39,11 @@ namespace ServersWithLayers{
         public string ID { get; }
         public double Reputation { get; set; }
         public int ParallelProcessors { get; }
-        public string Leader { get; private set; }
-        public const double constant = 0.01;
+        public const double initRep = 1;
 
         public ServerBio(Server server) {
             this.ID = server.ID;
-            this.Reputation = 0;
-            this.Leader = null;
+            this.Reputation = initRep;
             this.ParallelProcessors = server.Stats.MaxCapacity;
         }
 
