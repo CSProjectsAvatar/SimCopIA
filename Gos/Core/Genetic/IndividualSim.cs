@@ -34,8 +34,10 @@ namespace Core
 
             for (int i = 0; i < MicroServices.Count; i++)
             {
-                if (_random.NextDouble() < probRemoveMicro) // probabilidad de remover micro
+                if (_random.NextDouble() < probRemoveMicro) {// probabilidad de remover micro
                     MicroServices.RemoveAt(i);
+                    i--;
+                }
 
                 if (_random.NextDouble() < probMutateMicro) // probabilidad de mutacion micro
                     MicroServices[i].Mutate();
