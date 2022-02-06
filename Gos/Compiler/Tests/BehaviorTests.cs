@@ -469,13 +469,15 @@ behav foo {
         }
 
         [DataTestMethod]
-        [DataRow("ping status.my_server")]
-        [DataRow("alarm_me")]
-        public void ReqTypeTimeNonNumber(string beforeIn) {
+        [DataRow("ping status.my_server", "")]
+        [DataRow("alarm_me", "")]
+        [DataRow("ask status.my_server", "for []")]
+        [DataRow("order status.my_server", "for []")]
+        public void ReqTypeTimeNonNumber(string beforeIn, string afterIn) {
             var tokens = _lex.Tokenize(
                 @"
 behav foo {
-    " + beforeIn + @" in [1, 2]
+    " + beforeIn + @" in [1, 2] " + afterIn + @"
 }
 " + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
@@ -495,13 +497,15 @@ behav foo {
         }
 
         [DataTestMethod]
-        [DataRow("ping status.my_server")]
-        [DataRow("alarm_me")]
-        public void ReqTypeTimeNonInteger(string beforeIn) {
+        [DataRow("ping status.my_server", "")]
+        [DataRow("alarm_me", "")]
+        [DataRow("ask status.my_server", "for []")]
+        [DataRow("order status.my_server", "for []")]
+        public void ReqTypeTimeNonInteger(string beforeIn, string afterIn) {
             var tokens = _lex.Tokenize(
                 @"
 behav foo {
-    " + beforeIn + @" in 3.7
+    " + beforeIn + @" in 3.7 " + afterIn + @"
 }
 " + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
@@ -521,13 +525,15 @@ behav foo {
         }
 
         [DataTestMethod]
-        [DataRow("ping status.my_server")]
-        [DataRow("alarm_me")]
-        public void ReqTypeTimeCorrectness(string beforeIn) {
+        [DataRow("ping status.my_server", "")]
+        [DataRow("alarm_me", "")]
+        [DataRow("ask status.my_server", "for []")]
+        [DataRow("order status.my_server", "for []")]
+        public void ReqTypeTimeCorrectness(string beforeIn, string afterIn) {
             var tokens = _lex.Tokenize(
                 @"
 behav foo {
-    " + beforeIn + @" in 3.00
+    " + beforeIn + @" in 3.00 " + afterIn + @"
 }
 " + _dslSuf);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));

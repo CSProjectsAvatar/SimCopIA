@@ -978,6 +978,94 @@ namespace DataClassHierarchy
             return (true, null);
         }
 
+        public (bool, object) Visiting(AskAst node) {
+            if (!TryEval(node.Target, GosType.String, out var target)) {
+                return default;
+            }
+            var toArrival = 0;
+            if (node.AfterNow != null && TryEval(node.AfterNow, GosType.Number, out var afterNow)) {
+                var afterNowDouble = (double)afterNow;
+                if (!Helper.IsInteger(afterNowDouble)) {
+                    _log.LogError(
+                        Helper.LogPref + "time until ASK arrival can't be a fractional number.",
+                        node.AfterNow.Token.Line,
+                        node.AfterNow.Token.Column);
+                    return default;
+                }
+                toArrival = (int)afterNowDouble;
+
+            } else if (node.AfterNow != null) {  // error en la evaluacio'n del afterNow
+                return default;
+            }
+            if (!TryEval(node.Resources, GosType.List, out var resources)) {
+                return default;
+            }
+            var rsrcs = resources as List<object>;
+            if (rsrcs.Count == 0) {
+                _log.LogWarning(
+                    Helper.LogPref + "the list is empty, no resources are sent.",
+                    node.Resources.Token.Line,
+                    node.Resources.Token.Column);
+            } else if (!IsOfTypeWithLog(GosType.Resource, rsrcs[0], node.Resources.Token)) {
+                return default;
+            }
+            var targetId = target as string;
+            var status = Context.GetVar(Helper.StatusVar) as Status;
+            var ask = new Request(status.ServerId, targetId, ReqType.Asking);
+            ask.AskingRscs.AddRange(rsrcs.OfType<Resource>());
+
+            if (toArrival == 0) {
+                status.Subscribe(ask);
+            } else {
+                status.SubscribeIn(toArrival, ask);
+            }
+            return (true, null);
+        }
+
+        public (bool, object) Visiting(OrderAst node) {
+            if (!TryEval(node.Target, GosType.String, out var target)) {
+                return default;
+            }
+            var toArrival = 0;
+            if (node.AfterNow != null && TryEval(node.AfterNow, GosType.Number, out var afterNow)) {
+                var afterNowDouble = (double)afterNow;
+                if (!Helper.IsInteger(afterNowDouble)) {
+                    _log.LogError(
+                        Helper.LogPref + "time until ORDER arrival can't be a fractional number.",
+                        node.AfterNow.Token.Line,
+                        node.AfterNow.Token.Column);
+                    return default;
+                }
+                toArrival = (int)afterNowDouble;
+
+            } else if (node.AfterNow != null) {  // error en la evaluacio'n del afterNow
+                return default;
+            }
+            if (!TryEval(node.Resources, GosType.List, out var resources)) {
+                return default;
+            }
+            var rsrcs = resources as List<object>;
+            if (rsrcs.Count == 0) {
+                _log.LogWarning(
+                    Helper.LogPref + "the list is empty, no resources are sent.",
+                    node.Resources.Token.Line,
+                    node.Resources.Token.Column);
+            } else if (!IsOfTypeWithLog(GosType.Resource, rsrcs[0], node.Resources.Token)) {
+                return default;
+            }
+            var targetId = target as string;
+            var status = Context.GetVar(Helper.StatusVar) as Status;
+            var ask = new Request(status.ServerId, targetId, ReqType.DoIt);
+            ask.AskingRscs.AddRange(rsrcs.OfType<Resource>());
+
+            if (toArrival == 0) {
+                status.Subscribe(ask);
+            } else {
+                status.SubscribeIn(toArrival, ask);
+            }
+            return (true, null);
+        }
+
         public (bool, object) Visiting(Variable node){
             var result = Context.GetVar(node.Identifier);
             if(result is null){

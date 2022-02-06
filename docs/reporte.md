@@ -256,6 +256,11 @@ graph LR
         | "accept" <expr>
         | <ping>
         | "alarm_me" "in" <expr>
+        | "ask" <expr> <after-rsrc-req>
+        | "order" <expr> <after-rsrc-req>
+
+<after-rsrc-req> := "in" <expr> "for" <expr>
+                  | "for" <expr>
 
 <ping> := "ping" <expr> "in" <expr>
         | "ping" <expr>

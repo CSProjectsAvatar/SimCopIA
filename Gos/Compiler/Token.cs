@@ -215,6 +215,8 @@ namespace Compiler {
         }
 
         public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
+            Ask,
+            Order,
             AlarmMe,
             Ping,
             Respond,
@@ -389,7 +391,7 @@ namespace Compiler {
             /// <summary>
             /// .
             /// </summary>
-            Dot
+            Dot,
         }
 
         public override string ToString() {
