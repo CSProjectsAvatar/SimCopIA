@@ -19,7 +19,7 @@ namespace Compiler {
             ("fun", Token.TypeEnum.Fun),
             ("return", Token.TypeEnum.Return),
             ("new", Token.TypeEnum.New),
-            ("server|request|response|alarm|resource", Token.TypeEnum.Class),
+            ($"server|request|response|alarm|{ResourceClass}", Token.TypeEnum.Class),
             ("forever", Token.TypeEnum.Forever),
             ("break", Token.TypeEnum.Break),
             ("for", Token.TypeEnum.For),
@@ -62,7 +62,7 @@ namespace Compiler {
             (@"\]", Token.TypeEnum.RBracket),
             (".", Token.TypeEnum.Dot)
         };
-
+        private static int _resrcCount = 0;
         internal const string LogPref = "Line {l}, column {c}: ";
         internal const string StatusVar = "status";
         internal const string PercepVar = "percep";
@@ -72,6 +72,7 @@ namespace Compiler {
         internal const string RandFun = "rand";
         internal const string RandIntFun = "rand_int";
         internal const string EnvVar = "env";
+        internal const string ResourceClass = "resource";
 
         /// <summary>
         /// Convierte un símbolo a una representación en <see cref="string"/>.
@@ -139,6 +140,14 @@ namespace Compiler {
 
         internal static bool IsInteger(double x) {
             return !(x - (int)x > double.Epsilon);
+        }
+
+        internal static string NewResrcName() {
+            return $"resrc_{++_resrcCount}";
+        }
+
+        public static void Dispose() {
+            _resrcCount = 0;
         }
     }
 }

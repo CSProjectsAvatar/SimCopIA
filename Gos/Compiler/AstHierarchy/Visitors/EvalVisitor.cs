@@ -600,6 +600,41 @@ namespace DataClassHierarchy
                     (tval as Status).ChangeLeader(newVal as string);
                     break;
 
+                case GosType.Resource when node.Property == "time":
+                    if (!TryEval(node.NewVal, GosType.Number, out var timeObj)) {
+                        return default;
+                    }
+                    var timeDouble = (double)timeObj;
+                    if (!Helper.IsInteger(timeDouble)) {
+                        _log.LogError(
+                            Helper.LogPref + "resource time can't be a fractional number.",
+                            node.NewVal.Token.Line,
+                            node.NewVal.Token.Column
+                            );
+                        return default;
+                    }
+                    (tval as Resource).SetTime((int)timeDouble);
+                    break;
+                case GosType.Resource when node.Property == "required":
+                    if (!TryEval(node.NewVal, GosType.Bool, out var requiredObj)) {
+                        return default;
+                    }
+                    (tval as Resource).SetRequired((bool)requiredObj);
+                    break;
+                case GosType.Resource when node.Property == "requirements":
+                    if (!TryEval(node.NewVal, GosType.List, out var listObj)) {
+                        return default;
+                    }
+                    var list = listObj as List<object>;
+                    if (!LogIfEmpty(list, node.NewVal.Token)) {
+                        if (!IsOfTypeWithLog(GosType.Resource, list[0], node.NewVal.Token)) {
+                            return default;
+                        }
+                    }
+                    (tval as Resource).AddReqList(list.OfType<Resource>().ToList());
+
+                    break;
+
                 default:
                     _log.LogError(
                         Helper.LogPref + "{type} doesn't have a property called '{prop}' or it's value can't be set.",
@@ -610,6 +645,22 @@ namespace DataClassHierarchy
                     return default;
             }
             return (true, null);
+        }
+
+        /// <summary>
+        /// Notifica si la lista esta' vaci'a.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns>Si la lista esta' vaci'a.</returns>
+        private bool LogIfEmpty(List<object> list, Token token) {
+            if (list.Count == 0) {
+                _log.LogWarning(
+                    Helper.LogPref + "empty list.",
+                    token.Line,
+                    token.Column);
+                return true;
+            }
+            return false;
         }
 
         public (bool, object) Visiting(ListIdxGetAst node) {
@@ -697,6 +748,20 @@ namespace DataClassHierarchy
                 case GosType.Request or GosType.Response when node.Property == "id":
                     return (true, (double)(tval as Message).ID);
                 #endregion
+
+                case GosType.Resource when node.Property == "name":
+                    return (true, (tval as Resource).Name);
+                case GosType.Resource when node.Property == "time":
+                    return (true, (double)(tval as Resource).RequiredTime);
+                case GosType.Resource when node.Property == "required":
+                    return (true, (tval as Resource).IsRequired);
+                case GosType.Resource when node.Property == "requirements":
+                    return (
+                        true, 
+                        (tval as Resource)
+                            .GetRequirements()
+                            .OfType<object>()
+                            .ToList());
 
                 case GosType.Environment when node.Property == "time":
                     return (true, (double)Env.Time);
@@ -1147,6 +1212,9 @@ namespace DataClassHierarchy
                     var resp = obj as Response;
                     return $"response to request {resp.ReqID}";
 
+                case GosType.Resource:
+                    return $"resource {(obj as Resource).Name}";
+
                 default:
                     return obj?.ToString();
             }
@@ -1307,7 +1375,17 @@ namespace DataClassHierarchy
         }
         
         public (bool, object) Visiting(ClassAst node){
-            throw new NotImplementedException();
+            switch (node.ClassName) {
+                case Helper.ResourceClass:
+                    return (true, new Resource(Helper.NewResrcName()));
+                default:
+                    _log.LogError(
+                        Helper.LogPref + "an instance of the class {c} can't be created.",
+                        node.Token.Line,
+                        node.Token.Column,
+                        node.ClassName);
+                    return default;
+            }
         }
 
         public (bool, object) Visiting(GosListAst node) {
