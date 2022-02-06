@@ -139,6 +139,11 @@ namespace Core
 
     public class MicroServiceSim
     {
+        private double changeLeaderProb;
+        private double changeServerProb;
+        private static Random _random = new Random();
+
+
         internal List<ServerSim> Servers = new();
 
         public MicroServiceSim Clone()
@@ -149,12 +154,33 @@ namespace Core
             return microServerSim;
         }
 
+        public void Mutate()
+        {
+            if(_random.NextDouble() < changeLeaderProb)
+            {
+                int r = _random.Next(1, Servers.Count - 1);
+                var aux = Servers[0];
+                Servers[0] = Servers[r];
+                Servers[r] = aux
+;            }
+             if(_random.NextDouble() < changeServerProb)
+            {
+                foreach (var server in Servers)
+                {
+                    double va = _random.NextDouble();
+                    if (va < 0.7)
+                        server.Mutate();
+                }
+            }
+        }
     }
 
     public class ServerSim
     {
         internal List<LayerSim> layers = new();
         internal List<int> resources = new();
+        private static Random _random = new Random();
+
 
         public ServerSim Clone()
         {
@@ -166,6 +192,18 @@ namespace Core
                                    select item).ToList();
 
             return serverSim;
+        }
+
+        internal void Mutate()
+        {
+
+            foreach (var layer in layers)
+            {
+                double va = _random.NextDouble();
+                if (va < 0.7)
+                    layer.Mutate();
+            }
+            
         }
     }
 
@@ -181,6 +219,11 @@ namespace Core
             layer.behavior = (from item in behavior
                               select item).ToList();
             return layer;
+        }
+
+        internal void Mutate()
+        {
+            throw new NotImplementedException();
         }
     }
     public class Factory
