@@ -139,7 +139,7 @@ namespace ServersWithLayers.Behaviors
         }
         
 
-        internal static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
+        public static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
             var availList = status.AvailableResources;
             var res = resources.Where(x => !availList.Contains(x)).ToList();
 

@@ -63,6 +63,10 @@ namespace ServersWithLayers{
         public static void Dispose() {
             Resources.Clear();
         }
+
+        public static Resource Rsrc(string name) {
+            return Resources[name];
+        }
     }
 
 }

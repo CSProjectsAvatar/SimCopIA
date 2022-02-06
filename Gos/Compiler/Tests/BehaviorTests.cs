@@ -645,7 +645,7 @@ let " + var + @" = 3
             var tokens = _lex.Tokenize(
                 @"
 behav foo {
-    print [percep.type == DO, percep.type == ASK, percep.type == PING]
+    print [percep.type == ORDER, percep.type == ASK, percep.type == PING]
 }
 " + _dslSuf, _builtinCode);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
@@ -814,7 +814,7 @@ behav foo {
     }
     if req.type == ASK and i_accept(status, req) {
         respond req
-    } else_if req.type == DO or req.type == PING {
+    } else_if req.type == ORDER or req.type == PING {
         accept req
     }
 }

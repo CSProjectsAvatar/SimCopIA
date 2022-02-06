@@ -17,6 +17,7 @@
         Alarm,
         Request,
         Environment,
-        String
+        String,
+        Resource
     }
 }

@@ -11,6 +11,7 @@ using Compiler.AstHierarchy.Statements;
 using Core;
 using Microsoft.Extensions.Logging;
 using ServersWithLayers;
+using ServersWithLayers.Behaviors;
 
 namespace DataClassHierarchy
 {
@@ -319,6 +320,7 @@ namespace DataClassHierarchy
             }
             var ttype = Helper.GetType(tval);
             switch (ttype) {
+                #region lista
                 case GosType.List when node.Function.Identifier == "add" && node.Function.Args.Count == 1:
                     if (!TryEval(node.Function.Args, out IReadOnlyList<object> addArgs)) {
                         return default;
@@ -352,6 +354,17 @@ namespace DataClassHierarchy
                     }
                     l.RemoveAt((int)(double)delAtArgs[0] - 1);
                     break;
+                #endregion
+
+                case GosType.ServerStatus when node.Function.Identifier == "missing_resrcs" && node.Function.Args.Count == 1:
+                    if (!TryEval(node.Function.Args[0], GosType.Request, out var req)) {
+                        return default;
+                    }
+                    return (
+                        true,
+                        BossBehav.FilterNotAvailableRscs(tval as Status, (req as Request).AskingRscs)
+                            .OfType<object>()
+                            .ToList());
 
                 default:
                     _log.LogError(
@@ -625,9 +638,25 @@ namespace DataClassHierarchy
                     return (true, (double)(tval as Request).Type);
                 case GosType.Request or GosType.Response when node.Property == "sender":
                     return (true, (tval as Message).Sender);
+                case GosType.Request when node.Property == "resources":
+                    return (
+                        true, 
+                        (tval as Request)
+                            .AskingRscs
+                            .OfType<object>()
+                            .ToList());
 
                 case GosType.Response when node.Property == "req_type":
                     return (true, (double)(tval as Response).Type);
+                case GosType.Response when node.Property == "resources":
+                    return (
+                        true,
+                        (tval as Response)
+                            .AnswerRscs
+                            .Where(kv => kv.Value)
+                            .Select(kv => Resource.Rsrc(kv.Key))
+                            .OfType<object>()
+                            .ToList());
 
                 case GosType.Environment when node.Property == "time":
                     return (true, (double)Env.Time);

@@ -19,7 +19,7 @@ namespace Compiler {
             ("fun", Token.TypeEnum.Fun),
             ("return", Token.TypeEnum.Return),
             ("new", Token.TypeEnum.New),
-            ("server|request|response|alarm", Token.TypeEnum.Class),
+            ("server|request|response|alarm|resource", Token.TypeEnum.Class),
             ("forever", Token.TypeEnum.Forever),
             ("break", Token.TypeEnum.Break),
             ("for", Token.TypeEnum.For),
@@ -109,6 +109,7 @@ namespace Compiler {
                 Request => GosType.Request,
                 Env => GosType.Environment,
                 string => GosType.String,
+                Resource => GosType.Resource,
                 _ => throw new NotImplementedException()
             };
         }
