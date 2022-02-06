@@ -23,6 +23,8 @@
     - [DSL para las Gram&aacute;ticas](#dsl-para-las-gramáticas)
     - [*Syntax Highlight* en el Code](#syntax-highlight-en-el-code)
   - [Ejecutando `gos`](#ejecutando-gos-1)
+- [3ra Entrega](#3ra-entrega)
+  - [Simulacion](#simulacion)
 
 ## Propuesta
 
@@ -405,3 +407,29 @@ En la entrega se encuentra un archivo `distrb.gos` en la carpeta `Sources/`. Est
 ```console
 $ gos Sources/distrb.gos
 ```
+
+## 3da Entrega
+
+### Simulación
+  
+  La simulación que tenemos en uso actualmente es la misma idea que la 2da entrega, solo que esta vez aumentamos sus posibilidades de uso, pudiendo simular aspectos mas complejos de una manera más fácil.
+  
+#### **Ambiente**
+  El ambiente (Environment) es el encargado de avisarle a los servidores cuando un evento relacionado con estos está a punto de ocurrir. 
+#### **Servidores**
+  Ahora los Agentes (Servidores) tienen un conjunto de capas internas, cada una con una lista de comportamientos asociados. Cada una de estas capas se ejecutan cada vez que el cliente recibe información del ambiente (cada vez que llega un estímulo que el pueda detectar) y ejecutan  cada una uno de sus comportamientos, esta elección de comportamiento de cada capa está basada en el estado interno del servidor y la persepción entrante.  
+#### **Microservicios**
+  Cada servidor pertenece a un microservicio, el cual tiene como objetivo usualmente responder a Requests más complejos, usando los servidores pertenecientes a este los cuales se encargan de prestar sus Recursos basado en lo solicitado. 
+  ##### **Directorios**
+  Los directorios son listas que contienen información importante sobre un microservicio, tal como los recursos que proveen cada servidor perteneciente a este y la creedibilidad (o confiabilidad) asociada a un servidor.
+
+
+#### **Eventos**
+  Los eventos son se ejecutan en algún momento en el tiempo, estos pueden ser tanto: llegadas de mensajes, la ejecucion de un proceso interno de un servidor, como eventos meteorológicos que afecten la conectividad con algunos servidores o la interrumpa.  
+  ##### **Percepciones**
+  Estas son las directamente relacionadas con lo que el servidor puede detectar como:
+
+  - la llegada de un *Request* que es una solicitud de algún recurso o acción a algún servidor.
+  - la llegada de un *Response* que es una respuesta a un *Request*.
+  - la llegada de a lo que nosotros denominamos *Observer* que no es mas que la posibilidad que le dimos al sistema que (a nivel de implementación) le diga a un Servidor que debe cambiar su estado interno por alguna razón que el mismo servidor conoce. Esto es muy útil ya que nos da la posibilidad de no tener en cada instancia de tiempo que revisar si todos los servidores tienen algún cambio de estado interno.
+
