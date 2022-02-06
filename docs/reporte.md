@@ -444,7 +444,7 @@ $ gos Sources/distrb.gos
   Cada servidor pertenece a un microservicio, el cual tiene como objetivo usualmente responder a Requests más complejos, usando los servidores pertenecientes a este los cuales se encargan de prestar sus Recursos basado en lo solicitado. 
   - ##### **Directorios**
 
-    Los directorios son listas que contienen información importante sobre un microservicio, tal como los recursos que proveen cada servidor perteneciente a este y la creedibilidad (o confiabilidad) asociada a un servidor.
+    Los directorios son diccionarios que contienen información importante sobre un microservicio, tal como los recursos que proveen cada servidor perteneciente a este, la cantidad capacidad de procesamiento en paralelo y la creedibilidad (o confiabilidad) asociada a un servidor.
 
 
 #### **Eventos**
