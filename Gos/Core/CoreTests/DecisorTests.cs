@@ -75,19 +75,19 @@ namespace Core {
             layer.behaviors = new List<Behavior>(){ BehaviorsLib.Worker, BehaviorsLib.Contractor};
             var s1 = Env.CurrentEnv.GetServerByID("S1");
             s1.AddLayer(layer);
-            var d = new Decisor(s1.FirstLayer);
+            var d = new Decisor();
             List<Response> listResp = new List<Response>(){ 
                 new Response(5, "S1", "S2", ReqType.DoIt, new Dictionary<string, bool>()),
              };
-            
+            var mockR = new Request("S1", "S2", ReqType.DoIt);
             var main = MicroService.GetMS("Main");
             
-            d.BehaviorDecisor();
+            s1.FirstLayer.AssociateDecisor(d);
 
             for(int i=0;i<10;i++) {
                 main.SetReward(listResp);
                 Env.CurrentEnv.AdvanceTime(510);
-                d.BehaviorDecisor();
+                d.Selector(layer.behaviors);
             }
 
             Env.CurrentEnv.AdvanceTime(4000);
@@ -95,17 +95,54 @@ namespace Core {
             int times = 10;
             while (times --> 0){
                 Env.CurrentEnv.AdvanceTime(510);
-                var ind = d.BehaviorDecisor();
+                var ind = d.Selector(layer.behaviors);;
                 if (ind == 1){
                     for(int i=0;i<5;i++) main.SetReward(listResp);
                 }
             }
 
-            Assert.AreEqual(1, d.BehaviorDecisor());
+            Assert.AreEqual(1, d.Selector(layer.behaviors));
 
             main.SetReward(listResp);
             main.SetReward(listResp);
-            d.BehaviorDecisor();
+            d.Selector(layer.behaviors);;
+        }
+        
+        [TestMethod]
+        public void DecisorInLayerWithInitTest(){
+            var layer = new Layer();
+            layer.behaviors = new List<Behavior>(){ BehaviorsLib.Worker, BehaviorsLib.Contractor};
+            
+            var d = new Decisor();
+            layer.AssociateDecisor(d);
+
+            var s1 = Env.CurrentEnv.GetServerByID("S1");
+            s1.AddLayer(layer);
+
+            var mockR = new Response(1, "S1", "S2", ReqType.DoIt, new Dictionary<string, bool>());
+            var main = MicroService.GetMS("Main");
+            
+            layer = s1.FirstLayer;
+            layer.Process(mockR);
+
+            for(int i=0;i<15;i++) {
+                main.SetReward(mockR, 0);
+                Env.CurrentEnv.AdvanceTime(510);
+                layer.Process(mockR);
+            }
+
+            Env.CurrentEnv.AdvanceTime(4000);
+
+            int times = 50;
+            while (times --> 0){
+                Env.CurrentEnv.AdvanceTime(510);
+                var ind = layer.Process(mockR);
+                if (ind == 1){
+                    for(int i=0;i<100;i++) main.SetReward(mockR, Env.Time);
+                }
+            }
+            Env.CurrentEnv.AdvanceTime(510);
+            Assert.AreEqual(1, layer.Process(mockR));
         }
         
 

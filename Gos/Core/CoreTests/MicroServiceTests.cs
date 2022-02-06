@@ -127,5 +127,48 @@ namespace Core {
             Assert.IsTrue(s3Bio.Reputation > s7Bio.Reputation);
         }
 
+        [TestMethod]
+        public void SetRewardxTimeTest(){
+            List<Response> list = new List<Response>(){ 
+                new Response(5, "S7", "S2", ReqType.DoIt, new Dictionary<string, bool>()),
+                new Response(2, "S3", "S2", ReqType.DoIt, new Dictionary<string, bool>()),
+                new Response(4, "S1", "S2", ReqType.DoIt, new Dictionary<string, bool>()),
+                new Response(3, "S8", "S2", ReqType.DoIt, new Dictionary<string, bool>()),
+             };
+            var main = MicroService.Services["Main"];
+
+            var s1Bio = main.GetBio("S1");
+            var s2Bio = main.GetBio("S2");
+            var s3Bio = main.GetBio("S3");
+            var s7Bio = main.GetBio("S7");
+            var s8Bio = main.GetBio("S8");
+
+            Assert.AreEqual(s1Bio.Reputation, s2Bio.Reputation);
+            Assert.AreEqual(s1Bio.Reputation, s3Bio.Reputation);
+            Assert.AreEqual(s1Bio.Reputation, s7Bio.Reputation);
+            Assert.AreEqual(s1Bio.Reputation, s8Bio.Reputation);
+
+            Env.CurrentEnv.AdvanceTime(15); // t15
+            main.SetReward(list[0], 10);
+
+            Env.CurrentEnv.AdvanceTime(5); // t20
+            main.SetReward(list[1], 10);
+
+            Env.CurrentEnv.AdvanceTime(7); // t27
+            main.SetReward(list[2], 10);
+
+            Env.CurrentEnv.AdvanceTime(2); // t29
+            main.SetReward(list[3], 27);
+            
+            Assert.IsTrue(s8Bio.Reputation > s7Bio.Reputation);
+
+            Assert.IsTrue(s7Bio.Reputation > s3Bio.Reputation);
+            Assert.IsTrue(s3Bio.Reputation > s1Bio.Reputation);
+
+            Env.CurrentEnv.AdvanceTime(2); // t31
+            main.SetReward(list[1], 29);
+
+            Assert.IsTrue(s3Bio.Reputation > s8Bio.Reputation);
+        }
     }
 }

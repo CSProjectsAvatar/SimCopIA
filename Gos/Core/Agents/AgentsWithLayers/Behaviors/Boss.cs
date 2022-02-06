@@ -20,13 +20,13 @@ namespace ServersWithLayers.Behaviors
             vars[nextReviewB]  = new Utils.Heap<Request>(); // la proxima revision a que request pertenece
             vars[askResponsesB] = new Dictionary<int, List<Response>>();
             vars[askResponsesAsocietedIDB] = new Dictionary<int, int>();
-            vars[solutionResponseAsocietedRequestB] = new Dictionary<int, Request>(); //de reqID --> Original Request
+            vars[solutionResponseAsocietedRequestB] = new Dictionary<int, (Request, int)>(); //de reqID --> Original Request
         } 
         private static void BossAnnounce(Status status, Perception p, Dictionary<string,object> variables)
         {
             var askResponses = variables[askResponsesB] as Dictionary<int,List<Response>>;
             var nextReview = variables[nextReviewB] as Utils.Heap<Request>;
-            var solutionResponseAsocietedRequest  = variables[solutionResponseAsocietedRequestB] as Dictionary<int, Request>;
+            var solutionResponseAsocietedRequest  = variables[solutionResponseAsocietedRequestB] as Dictionary<int, (Request,int)>; // reqID -> (OriginalRequest, tiempoDeSalida)
             var askResponsesAsocietedID  = variables[askResponsesAsocietedIDB] as Dictionary<int, int>;
             int reviewTime = (int)variables[reviewTimeB];
 
@@ -64,15 +64,15 @@ namespace ServersWithLayers.Behaviors
                     if( Env.Time != nextReview.First.Item1)
                         return;
                     
-                    (_,Request currentOriginalRequest) = nextReview.RemoveMin();
+                    (int requestExitTime,Request currentOriginalRequest) = nextReview.RemoveMin();
 
                     var responses =  askResponses[currentOriginalRequest.ID];
-                    // @todo poner por aki st.Microservice.SetReward(responses) 
+                    //status.MicroService.SetReward(responses);
                     var requestsToDo = ResponseSelectionFunction(status,responses);
 
                     foreach(Request r in requestsToDo){
                         status.Subscribe(r);
-                        solutionResponseAsocietedRequest.Add(r.ID, currentOriginalRequest);
+                        solutionResponseAsocietedRequest.Add(r.ID, (currentOriginalRequest,requestExitTime));
                     }
                     askResponses.Remove(currentOriginalRequest.ID);
 
@@ -80,22 +80,16 @@ namespace ServersWithLayers.Behaviors
             }
         }
 
-        private static void ProcessDoItResp(Response response, Status status, Dictionary<int, List<Response>> askResponses, Dictionary<int, Request> solutionResponseAsocietedRequest)
+        private static void ProcessDoItResp(Response response, Status status, Dictionary<int, List<Response>> askResponses, Dictionary<int, (Request,int)> solutionResponseAsocietedRequest)
         {
             if (solutionResponseAsocietedRequest.Keys.Contains(response.ReqID))
             {
                 var request_id = response.ReqID;
-                var originalRequest=solutionResponseAsocietedRequest[response.ReqID];
+                (var originalRequest, int exitTime)=solutionResponseAsocietedRequest[response.ReqID];
 
-                ///// Esta sucesion de pasos comentados me llevan a un error logico probablemente asociado con referencias
-                ///// tuve que crear un Response nuevo y entonces llamar a AddPartialResponse para que funcionara
-                ///// En estos pasos comentados debe haber algun bug que no logro encontrar ahora mismo :D
-
-                //cambiamos el id del response que acaba de llegar para usarlo con AddPartialResponse
-               // response.Reassign(originalRequest.ID);
-                //cambiamos el sender y el recieber
-               // response.ReassignDirections(status.serverID, originalRequest.Sender);
-
+                // dar recompensa en base al tiempo de salida del response
+                status.MicroService.SetReward(response, exitTime);
+                
                 Response solutionResponse = new Response(originalRequest.ID,status.serverID,originalRequest.Sender,ReqType.DoIt,response.AnswerRscs);
                 status.AddPartialRpnse(solutionResponse);
 
@@ -147,35 +141,28 @@ namespace ServersWithLayers.Behaviors
         }
 
         private static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
-            // serverID -> Request 
-            Dictionary<string, Request> serverRequest = new();
-            // recurso -> listaOrdenadaDeMejoresServidores
-            Dictionary<string,IEnumerable<string>> sortedServersForResources = new();
-            // serverID -> Response 
-            Dictionary<string,Response> serverResponse =new();
+            List<Request> solution = new();
 
-            foreach(var r in responses){
-                foreach(var res in r.AnswerRscs.Keys ){
-                    if(!sortedServersForResources.ContainsKey(res)){
-                        sortedServersForResources.Add(res,status.MicroService.SortedByCredibility(res));
+            // resource is Ready 
+            HashSet<string> readyResources = new();
+
+            foreach(Response res in status.MicroService.SortByCredibility(responses)){
+                Request toSend = new Request(status.serverID,res.Sender,ReqType.DoIt);
+                List<Resource> resourcesToSend =new List<Resource>();
+                //Agregamos los recursos validos del response al request
+                foreach(string resource in res.AnswerRscs.Keys)
+                    if(res.AnswerRscs[resource] && !readyResources.Contains(resource)){
+                        resourcesToSend.Add(Resource.Resources[resource]);
+                        readyResources.Add(resource);
                     }
-                }
-                serverResponse.Add(r.Sender,r);
-            }
-            foreach(var res in sortedServersForResources.Keys){
-                foreach(var server in sortedServersForResources[res]){                                                
-                    if(serverResponse.ContainsKey(server))
-                    {                               
-                        if(!serverRequest.ContainsKey(server))
-                            serverRequest.Add(server,new Request(status.serverID,server,ReqType.DoIt));
-                        serverRequest[server].AskingRscs.Add(Resource.Resources[res]);
-                        break;
-                    }
+                //Si tiene algun recurso que mandar, se manda
+                if( resourcesToSend.Count != 0 ){
+                    toSend.AskingRscs = resourcesToSend;
+                    solution.Add(toSend);
                 }
             }
 
-            var sol = serverRequest.Values.ToList();
-            return sol;
+            return solution;
 
         }
 
@@ -191,7 +178,7 @@ namespace ServersWithLayers.Behaviors
             return response;
         }
 
-        // Casi Estable
+
         [TestClass]
         public class BossDoItRequestTests {
             #region  vars
@@ -265,7 +252,7 @@ namespace ServersWithLayers.Behaviors
                     Resource.Resources["img"],
                     Resource.Resources["index"],
                     Resource.Resources["database"],
-                    Resource.Resources["gold"],  
+                    //Resource.Resources["gold"], // si se pone el response nunca deberia de llegar
                 };
 
 
@@ -275,14 +262,14 @@ namespace ServersWithLayers.Behaviors
                  
                 //LoggerBehav.PrintResponses(s1,0);
 
-                IEnumerable<(int,string)> logList =Env.CurrentEnv.GetAllServersLogs() ;
-
-                System.Console.WriteLine("EVENTOS:");
-                foreach(var s in logList)
-                    System.Console.WriteLine(s.Item2);
-
-                LoggerBehav.PrintRequests(s2,0);
-                LoggerBehav.PrintRequests(s3,0);
+                //IEnumerable<(int,string)> logList =Env.CurrentEnv.GetAllServersLogs() ;
+      
+                //System.Console.WriteLine("EVENTOS:");
+                //foreach(var s in logList)
+                //    System.Console.WriteLine(s.Item2);
+      
+                //LoggerBehav.PrintRequests(s2,0);
+                //LoggerBehav.PrintRequests(s3,0);
 
                //var responsesS1 = LoggerBehav.GetResponseList(s1,0);
                //var requestsS2 = LoggerBehav.GetRequestList(s2,0);
@@ -291,14 +278,14 @@ namespace ServersWithLayers.Behaviors
                //Assert.AreEqual(2,requestsS2?.Count);
                //Assert.AreEqual(2,requestsS2?.Count);
                //Assert.AreEqual(4,responsesS1?.Count);
-               //Assert.AreEqual(2,Env.CurrentEnv.GetClientResponses().Count());
+               Assert.AreEqual(1,Env.CurrentEnv.GetClientResponses().Count());
 
             }
             //Envio de ciclo completo de varios request tipo DoIt donde no se solapan los recursos  (ejemplo super simple)
             [TestMethod]
             public void ProcessNDoItRequestTest(){                
 
-                int n = 10;
+                int n = 100;
 
                 for(var i=1; i<= n;i++){
                     
@@ -313,32 +300,31 @@ namespace ServersWithLayers.Behaviors
                             Resource.Resources["database"],
                         };      
     
-                    Env.CurrentEnv.SubsribeEvent(i*10,req1);
+                    Env.CurrentEnv.SubsribeEvent(i*20,req1);
                 }
                     
                 Env.CurrentEnv.Run();
                 
 
                 //Imprimir en la terminal todos los eventos de llegada de cada servidor  :D 
-                System.Console.WriteLine("\nEventos de llegada:");
-                var logList = LoggerBehav.GetLogList(s2,0);
-                logList.AddRange(LoggerBehav.GetLogList(s3,0));
-                logList.AddRange(LoggerBehav.GetLogList(s1,0));
-                logList.AddRange(Env.CurrentEnv.GetClientReciveLog());
+               //System.Console.WriteLine("\nEventos de llegada:");
+               //var logList = LoggerBehav.GetLogList(s2,0);
+               //logList.AddRange(LoggerBehav.GetLogList(s3,0));
+               //logList.AddRange(LoggerBehav.GetLogList(s1,0));
+               //logList.AddRange(Env.CurrentEnv.GetClientReciveLog());
+//
+               //logList.Sort();
+               //foreach(var s in logList)
+               //    System.Console.WriteLine(s.Item2);
 
-                logList.Sort();
-                foreach(var s in logList)
-                    System.Console.WriteLine(s.Item2);
 
-
-                var responsesS1 = LoggerBehav.GetResponseList(s1,0);
+                //var responsesS1 = LoggerBehav.GetResponseList(s1,0);
                 var requestsS2 = LoggerBehav.GetRequestList(s2,0);
                 var requestsS3 = LoggerBehav.GetRequestList(s3,0);
                 
-                Assert.AreEqual(2*(int)n/3 ,requestsS2?.Count);
-                Assert.AreEqual(2*(n-(int)n/3),requestsS3?.Count);
-                Assert.AreEqual(2*n,responsesS1?.Count);
-                Assert.AreEqual(n,Env.CurrentEnv.GetClientResponses().Count());
+               //Assert.AreEqual(2*(int)n/3 ,requestsS2?.Count);
+               //Assert.AreEqual(2*(n-(int)(n/3)) + (int)n/3 ,requestsS3?.Count);
+                Assert.AreEqual(n, Env.CurrentEnv.GetClientResponses().Count());
             }
 
             [TestMethod]
@@ -348,14 +334,14 @@ namespace ServersWithLayers.Behaviors
                     Resource.Resources["img"],
                     Resource.Resources["index"],
                     Resource.Resources["database"],
-                   // Resource.Resources["gold"],   // de ser asi el request no llega al cliente.
+                   // Resource.Resources["gold"], 
                 };                    
                 Request req2= new Request("0", "s1", ReqType.Asking);                                
                 req2.AskingRscs = new List<Resource>{
                     Resource.Resources["img"],
                     Resource.Resources["index"],
                     Resource.Resources["database"],
-                    Resource.Resources["gold"],   // de ser asi el request no llega al cliente.
+                    Resource.Resources["gold"],   
                 };       
 
                 Env.CurrentEnv.SubsribeEvent(10,req1);
@@ -363,19 +349,25 @@ namespace ServersWithLayers.Behaviors
 
                 Env.CurrentEnv.Run();
                  
-                var sortedEvents = Env.CurrentEnv.GetAllServersLogs().ToList();
+                var solution_responses = Env.CurrentEnv.GetClientResponses();
 
-                System.Console.WriteLine("Logs:");
-                sortedEvents.Sort();
-                foreach (var item in sortedEvents)
-                    System.Console.WriteLine(item.Item2);             
+                Assert.AreEqual(2,solution_responses.Count());
+                Assert.AreEqual(3,solution_responses.ToList()[0].Item2.AnswerRscs.Count);
+                Assert.AreEqual(3,solution_responses.ToList()[1].Item2.AnswerRscs.Count);
 
-                System.Console.WriteLine("Responses:");
-                foreach(var s in Env.CurrentEnv.solutionResponses){
-                    foreach(var k in s.AnswerRscs.Keys)
-                        System.Console.WriteLine("  "+k+": "+s.AnswerRscs[k]);
-                    System.Console.WriteLine();
-                }
+                //var sortedEvents = Env.CurrentEnv.GetAllServersLogs().ToList();
+//
+                //System.Console.WriteLine("Logs:");
+                //sortedEvents.Sort();
+                //foreach (var item in sortedEvents)
+                //    System.Console.WriteLine(item.Item2);             
+//
+                //System.Console.WriteLine("Responses:");
+                //foreach(var s in Env.CurrentEnv.solutionResponses){
+                //    foreach(var k in s.AnswerRscs.Keys)
+                //        System.Console.WriteLine("  "+k+": "+s.AnswerRscs[k]);
+                //    System.Console.WriteLine();
+                //}
                 
             }
         }
