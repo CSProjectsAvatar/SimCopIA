@@ -153,8 +153,8 @@ namespace Core
 
     public class ServerSim
     {
-        List<Layer> layers = new();
-        List<int> resources = new();
+        internal List<LayerSim> layers = new();
+        internal List<int> resources = new();
 
         public ServerSim Clone()
         {
@@ -169,15 +169,15 @@ namespace Core
         }
     }
 
-    internal class Layer
+    internal class LayerSim
     {
         internal List<int> behavior = new();
 
-        Layer auxiliar = new Layer();
+        LayerSim auxiliar = new LayerSim();
 
-        internal Layer Clone()
+        internal LayerSim Clone()
         {
-            Layer layer = new Layer();
+            LayerSim layer = new LayerSim();
             layer.behavior = (from item in behavior
                               select item).ToList();
             return layer;
@@ -185,7 +185,7 @@ namespace Core
     }
     public class Factory
     {
-        List<Behavior> behaviors;
+        List<Behavior> behaviors = new List<Behavior> { };
         public Factory()
         {
 
@@ -198,10 +198,27 @@ namespace Core
             {
                 for (int i = 0; i < microServer.Servers.Count; i++)
                 {
-                    servers.Add(new Server("S" + i));
+                    Server server = new Server("S" + i);
+                    server.AddLayers(CreateLayer(microServer.Servers[i].layers));
+                    servers.Add(server);
                 }
             }
 
+        }
+
+        private IEnumerable<Layer> CreateLayer(List<LayerSim> layers)
+        {
+            List<Layer> _layers = new List<Layer> { };
+            foreach (var beha in layers)
+            {
+                Layer l = new Layer();
+                foreach (var i in beha.behavior)
+                {
+                    l.AddBehavior(this.behaviors[i]);
+                }
+                _layers.Add(l);
+            }
+            return _layers;
         }
     }
 
