@@ -420,28 +420,31 @@ $ gos Sources/distrb.gos
   
 #### **Ambiente**
   El ambiente (Environment) es el encargado de avisarle a los servidores cuando un evento relacionado con estos está a punto de ocurrir. Posee caracteristicas generales de la simulación y da acceso a algunas estadisticas finales como la cantidad de respuestas dadas al cliente (el servidor que hace los request iniciales a nuestro conjunto de servidores).
-#### **Servidores**
+#### **Comportamientos de Servidores**
   Ahora los Agentes (Servidores) tienen un conjunto de capas internas, cada una con una lista de comportamientos asociados. Cada una de estas capas se ejecutan cada vez que el servidor recibe información del ambiente (cada vez que llega un estímulo que este servidor pueda detectar) y cada una ejecuta uno de sus comportamientos, esta elección de comportamiento de cada capa está basada en el estado interno del servidor y la persepción entrante.  
   
-  Este modelo por capas da la posibilidad de crear capas personalizadas por el usuario a través de DSL pudiendo lograr comportamientos no previamente definidos. Estos comportamientos tienen memoria interna donde el usuario puede guardar datos para lograr funcionamientos mas complejos. A pesar de esta posibilidad brindamos implementaciones de servidores que creemos fundamentales en nuestra simulación.
-  - ##### **BuildIn Servers**
-    - *Boss* : 
+  Este modelo por capas da la posibilidad de crear capas personalizadas por el usuario a través de DSL pudiendo lograr comportamientos no previamente definidos. Estos comportamientos tienen memoria interna donde el usuario puede guardar datos para lograr funcionamientos mas complejos. A pesar de esta posibilidad brindamos implementaciones de comportamientos de servidores que creemos fundamentales en nuestra simulación.
+  - ##### **BuildIn Behaviors**
+    - *Jefe* : 
 
-      Es el servidor encargado de pedir recursos dentro de un microservicio. Cada vez que llega a el un Request pide los recursos solicitados por este a los integrantes de su microservicio a través de la interacción Request-Response, una vez satisfechos los recursos solicitados retorna un Response al servidor solicitante.
+      Es el comportamiento que se le da al servidor  encargado de pedir recursos dentro de un microservicio. Cada vez que llega a el un Request pide los recursos solicitados por este a los integrantes de su microservicio a través de la interacción Request-Response, una vez satisfechos los recursos solicitados retorna un Response al servidor solicitante.
 
-      Este servidor a la hora de solicitar un recurso a los integrantes de su microservicio pedido por otro servidor, pide estos recursos basado en una función de credibilidad modificable, el servidor que más rápido responda a sus pedidos, lo puntua con credibilidad dentro del microservicio, priorizando que la proxima vez que se haga un pedido se tenga en cuenta quien se le debe de pedir recursos sobre los demás.
-    - *Worker*:
-      <!-- @todo  -->
-       
-    - *Contractor*:
-      <!-- @todo  -->
+      Este comportamiento a la hora de solicitar un recurso a los integrantes de su microservicio (pedidos por otro servidor), lo pide basado en una función de credibilidad modificable, el servidor que más rápido responda a sus pedidos, lo puntua con credibilidad dentro del microservicio, priorizando que la proxima vez que se haga un pedido se tenga en cuenta quien se le debe de pedir recursos sobre los demás.
+
+    - *Empleado*:
+      
+      Para este comportamiento, dado un Request que le llega preguntando si puede resolver algo, esta comprueba si lo quiere o puede resolver (dado el resultado de una función de aceptación), en caso positivo responde afirmativamente para notificar al enviante de que va a aceptar lo preguntado por el Request, para que el enviante sepa que ya puede mandar un Request imperativo, diciendole a otros comportamientos que este servidor posea (como comportamiento de Trabajador) lo que tienen que hacer o procesar. Su uso va estrechamente relacionado con la existencia de algún servidor con comportamiento de Jefe, creando una red de contrato al interactuar entre ellos.
+
+    - *Trabajador*:
+
+      Es el comportamientos que se le da a los servidores destinados al procesamiento, este toma los pedidos ya aceptados previamente y los "procesa" para "obtener" los recursos asociados a estos. Después de el tiempo necesario de procesamiento, este construye una respuestas a los pedidos las retorna en forma de Response.
 
     - *Fallen Leader*:
-      <!-- @todo  -->
 
+      Este es un comportamiento de sustitución de lider, el cual consiste en estar comunicandose constantemente con el lider actual del microservicio. Si este en algún momento detecta que el lider actual no esta disponible, intenta conectarse varias veces más hasta llevar a cabo una acción. Cuando este ya verifica que efectivamente el lider actual está "caído", informa a todo el microservicio mandando un mensaje que este va a sustituir al lider actual. El servidor que posee este comportamiento suele tener el comportamiento de *Jefe* u otro que actue como tal para saber desempeñar la función de lider en caso de sustituya al lider del microservicio. 
 
 #### **Microservicios**
-  Cada servidor pertenece a un microservicio, el cual tiene como objetivo usualmente responder a Requests más complejos, usando los servidores pertenecientes a este los cuales se encargan de prestar sus Recursos basado en lo solicitado. 
+  Cada servidor pertenece a un microservicio, el cual tiene como objetivo usualmente responder a Requests más complejos, usando los servidores pertenecientes a este los cuales se encargan de prestar sus Recursos basado en lo solicitado. Cada Microservicio tiene un lider que es el encargado de recibir Request externos al su microservicio, este suele tener comportamientos iguales o parecidos a los de un *Jefe*.
   - ##### **Directorios**
 
     Los directorios son diccionarios que contienen información importante sobre un microservicio, tal como los recursos que proveen cada servidor perteneciente a este, la cantidad capacidad de procesamiento en paralelo y la creedibilidad (o confiabilidad) asociada a un servidor.
