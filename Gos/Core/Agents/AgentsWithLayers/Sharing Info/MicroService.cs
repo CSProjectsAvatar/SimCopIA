@@ -63,9 +63,28 @@ namespace ServersWithLayers{
             Services[microS].Dir.AddServer(server);
         }
 
+        
+        ///<summary>
+        /// Assigns a reward in reputation to the Sender in function of the respond time
+        ///</summary>
+        public void SetReward(Response response, int sendingTime)
+        {
+            var server = response.Sender;
+            var retard = Env.Time - sendingTime;
+            var addedV = RewardXTime(retard);
+            var bio = GetBio(server);
+            bio.Reputation += addedV;
+        }
+        // devuelve una recompensa en funcion del tiempo, mientras mas tiempo menor la recompensa, usando log
+        private double RewardXTime(int time)
+        {
+            return 1.0 / Math.Log(time + 1.5);
+        }
+        
         ///<summary>
         /// Asigna una recompensa en reputacion a todos los servidores que dieron respuestas
         /// </summary>
+        [Obsolete("Use SetReward(response, sendingTime) instead")]
         public void SetReward(List<Response> responses)
         {
             var servers = responses.Select(r => r.Sender).Distinct();
@@ -87,7 +106,7 @@ namespace ServersWithLayers{
             var bio = Dir.WhitePages[server];
             bio.Reputation *= 1 + percent;
         }
-
+        /// -------------
         
 
         internal bool ContainsServer(string server)
@@ -133,66 +152,38 @@ namespace ServersWithLayers{
             return servers;
         }
 
-        private void ResetReputation(ServerBio biography)
+        private void ReduceReputation(ServerBio biography)
         {
-            biography.Reputation = ServerBio.initRep;
+            biography.Reputation *= 0.9;
         }
 
-        internal void ForAllBiography()
+        internal void LostRepInMicroS()
         {
-            Dictionary<string, ServerBio> whitePages = Services[this.Name].Dir.WhitePages;
-            foreach (var item in whitePages)
-            {
-                ResetReputation(item.Value);
-            }
+            Dir.WhitePages.Values.ToList().ForEach(ReduceReputation);
         }
 
-
-        internal double Reputation (string serverID)
-        {
-            ServerBio sb = this.Dir.WhitePages[serverID];
-            return sb.Reputation;
-		}
         static double defaultCredibility(ServerBio bio){
             var reputation = bio.Reputation;
             var pProcessors = bio.ParallelProcessors;
             return  reputation * pProcessors;
         }
 
-        public IEnumerable<string> SortedByCredibility(string resName){
+        public IEnumerable<Response> SortByCredibility(IEnumerable<Response> servers){
 
-            var listServers=GetProviders(resName);
-
-            listServers.OrderByDescending(
-                (string s)=>credibilityFunction(this.GetBio(s))
+            return servers.OrderByDescending(
+                (Response r)=>credibilityFunction(this.GetBio(r.Sender))
             );
-
-            return listServers;
-        } 
-    }
-
-    class CredibilityComparer : IComparer<string>{
-        MicroService microService;
-        bool greaterFirst;
-        Func<ServerBio, double> creditibilityFunction => microService.credibilityFunction;
-        public CredibilityComparer(MicroService microService, bool greaterFirst =true){
-            this.microService = microService;
-            this.greaterFirst = greaterFirst;
         }
-        public int Compare(string s1, string s2){
-            ServerBio sb1 = microService.GetBio(s1);
-            ServerBio sb2 = microService.GetBio(s2);
+        ///<summary>
+        /// Returns the servers of the microservice ordered by their credibility
+        ///</summary>
+        public IEnumerable<string> SortMicroserviceByCredb(){
 
-            int direction = greaterFirst ? -1 : 1;            
-
-            if(this.creditibilityFunction(sb1) > this.creditibilityFunction(sb2))
-                return 1 * direction;
-            if(this.creditibilityFunction(sb1) < this.creditibilityFunction(sb2))
-                return -1 * direction;
-            return 0;
+            return  Dir.WhitePages
+                    .OrderByDescending( kv => credibilityFunction(kv.Value))
+                    .Select(kv => kv.Key);
         }
     }
-
     public enum ServiceType{
         Private,
         EntryPoint
