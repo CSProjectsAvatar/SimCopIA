@@ -326,14 +326,14 @@ namespace Core {
             s2.AddLayer(fallenL);
             s2.Stats.MicroService.ChangeLeader("S1");
 
-            s2.Stats.MicroService.ForAllBiography();
+            s2.Stats.MicroService.LostRepInMicroS();
 
             env.SubsribeEvent(10, p2);
 
             env.Run();
 
-            Assert.AreEqual(0.01, s2.Stats.MicroService.Reputation(s2.ID));
-            Assert.AreEqual(1, s2.Stats.CountMessagingHistory());
+            Assert.IsTrue(1 > s2.Stats.MicroService.GetBio(s2.ID).Reputation);
+            Assert.AreEqual(2, s2.Stats.CountMessagingHistory());
 
         }
 
