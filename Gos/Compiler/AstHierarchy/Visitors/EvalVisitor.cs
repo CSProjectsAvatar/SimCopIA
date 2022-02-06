@@ -365,6 +365,37 @@ namespace DataClassHierarchy
                         BossBehav.FilterNotAvailableRscs(tval as Status, (req as Request).AskingRscs)
                             .OfType<object>()
                             .ToList());
+                case GosType.ServerStatus when node.Function.Identifier == "reward" && node.Function.Args.Count == 2:
+                    if (!TryEval(node.Function.Args[0], GosType.Response, out var resp)
+                            || !TryEval(node.Function.Args[1], GosType.Number, out var delay)) {
+                        return default;
+                    }
+                    if (!Helper.IsInteger((double)delay)) {
+                        _log.LogError(
+                            Helper.LogPref + "second parameter can't be a fractional number.",
+                            node.Function.Args[1].Token.Line,
+                            node.Function.Args[1].Token.Column
+                            );
+                        return default;
+                    }
+                    var status = tval as Status;
+                    status.Reward(resp as Response, (int)(double)delay);
+
+                    return (true, null);
+                case GosType.ServerStatus when node.Function.Identifier == "reqs_for_best" && node.Function.Args.Count == 1:
+                    if (!TryEval(node.Function.Args[0], GosType.List, out var respsObj)) {
+                        return default;
+                    }
+                    var resps = respsObj as List<object>;
+                    if (resps.Count == 0) {
+                        _log.LogWarning(
+                            Helper.LogPref + "empty list; no requests will be given.",
+                            node.Function.Args[0].Token.Line,
+                            node.Function.Args[0].Token.Column);
+                    }
+                    return (
+                        true,
+                        BossBehav.ResponseSelectionFunction(tval as Status, resps.OfType<Response>()));
 
                 default:
                     _log.LogError(

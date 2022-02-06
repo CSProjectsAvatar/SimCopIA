@@ -196,6 +196,10 @@ namespace ServersWithLayers{
         {
             return _sendToEnv[_sendToEnv.Count-1].Item2;
         }
+
+        public void Reward(Response response, int delay) {
+            MicroService.SetReward(response, delay);
+        }
     }
 }
 

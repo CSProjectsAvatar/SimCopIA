@@ -140,7 +140,7 @@ namespace ServersWithLayers.Behaviors
             return res;
         }
 
-        private static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
+        public static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
             List<Request> solution = new();
 
             // resource is Ready 
