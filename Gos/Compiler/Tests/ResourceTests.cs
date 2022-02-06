@@ -23,10 +23,8 @@ namespace Compiler.Tests {
                 @"
 let r = new resource
 print r.name
-r.required = true
 r.time = 3.0
 
-print r.required
 print r.time
 
 let r1 = new resource
@@ -34,6 +32,8 @@ let r2 = new resource
 
 r.requirements = [r1, r2]
 print r.requirements
+print r1.required
+print r.required
 " + _dslSuf, _builtinCode);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
             Assert.IsTrue(ast.Validate(Context.Global()));
@@ -47,9 +47,10 @@ print r.requirements
 
             Assert.AreEqual(
                 $"resrc_1{_endl}" +
-                $"True{_endl}" +
                 $"3{_endl}" +
-                $"[resource resrc_2, resource resrc_3]{ _endl}",
+                $"[resource resrc_2, resource resrc_3]{ _endl}" +
+                $"True{_endl}" +
+                $"False{_endl}",
                 @out.ToString());
         }
 

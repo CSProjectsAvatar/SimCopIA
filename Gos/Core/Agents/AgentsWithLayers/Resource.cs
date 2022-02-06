@@ -72,10 +72,6 @@ namespace ServersWithLayers{
             RequiredTime = time;
         }
 
-        public void SetRequired(bool requiredObj) {
-            IsRequired = requiredObj;
-        }
-
         public IEnumerable<Resource> GetRequirements() {
             return Requirements.Select(r => Rsrc(r));
         }

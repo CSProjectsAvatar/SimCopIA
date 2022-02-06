@@ -615,12 +615,6 @@ namespace DataClassHierarchy
                     }
                     (tval as Resource).SetTime((int)timeDouble);
                     break;
-                case GosType.Resource when node.Property == "required":
-                    if (!TryEval(node.NewVal, GosType.Bool, out var requiredObj)) {
-                        return default;
-                    }
-                    (tval as Resource).SetRequired((bool)requiredObj);
-                    break;
                 case GosType.Resource when node.Property == "requirements":
                     if (!TryEval(node.NewVal, GosType.List, out var listObj)) {
                         return default;
