@@ -380,6 +380,9 @@ El lenguaje tiene 4 tipos:
     - `Response`: respuesta.
     - `Alarm`: notificaci&oacute;n
 - `Environment`: para el ambiente de la simulaci&oacute;n.
+- `Resource`: para los recursos.
+- `Layer`: para las capas de comportamientos de cada servidor.
+- `Behavior`: para los comportamientos.
 
 Los operadores `+`, `-`, `*`, `/`, `%` solo est&aacute;n permitidos para el tipo `Number`. 
 
@@ -392,8 +395,8 @@ El indexado sobre las listas es en base 1.
 
 #### Otras Reglas Sem&aacute;nticas
 - Una variable solo puede ser definida una vez en un mismo ámbito.
-- Los nombres de variables y funciones no comparten el mismo
-ámbito (pueden existir una variable y una función llamadas
+- Los nombres de variables y funciones s&iacute; comparten el mismo
+ámbito (no pueden existir una variable y una función llamadas
 igual).
 - No se pueden redefinir las funciones predefinidas.
 - Una función puede tener distintas definiciones siempre que

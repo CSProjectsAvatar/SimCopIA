@@ -28,3 +28,7 @@ fun range(upper) {
 	}
 	return ans
 }
+
+fun one_always(bs) {
+	return 1
+}

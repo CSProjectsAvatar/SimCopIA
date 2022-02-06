@@ -18,6 +18,9 @@
         Request,
         Environment,
         String,
-        Resource
+        Resource,
+        Layer,
+        Behavior,
+        Function
     }
 }

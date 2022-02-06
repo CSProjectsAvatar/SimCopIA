@@ -638,6 +638,61 @@ namespace DataClassHierarchy
 
                     break;
 
+                case GosType.Layer when node.Property == "behaviors":
+                    if (!TryEval(node.NewVal, GosType.List, out listObj)) {
+                        return default;
+                    }
+                    list = listObj as List<object>;
+                    if (!LogIfEmpty(list, node.NewVal.Token)) {
+                        if (!IsOfTypeWithLog(GosType.Behavior, list[0], node.NewVal.Token)) {
+                            return default;
+                        }
+                    }
+                    (tval as Layer).SetBehaviors(list.OfType<Behavior>());
+
+                    break;
+                case GosType.Layer when node.Property == "selector":
+                    if (!TryEval(node.NewVal, GosType.Function, out var selectorObj)) {
+                        return default;
+                    }
+                    var selector = selectorObj as DefFun;
+                    if (selector.Arguments.Count != 1) {
+                        _log.LogError(
+                            Helper.LogPref + "selector function must receive only one argument.",
+                            node.NewVal.Token.Line,
+                            node.NewVal.Token.Column
+                            );
+                        return default;
+                    }
+                    var layer = tval as Layer;
+                    layer.SetBehaviourSelector(bs => {
+                        var (succ, res) = Visiting(new FunCall {
+                            Token = node.NewVal.Token,
+                            Args = new() {
+                                new GosListAst { 
+                                    Elements = layer.Behavs
+                                        .Select(b => new Variable {
+                                            Identifier = b.Name
+                                        })
+                                }
+                            },
+                            Identifier = selector.Identifier
+                        });
+                        if (!succ) {
+                            throw new GoSException($"Runtime error in selector function {selector.Identifier}.");
+                        }
+                        if (!IsOfTypeWithLog(GosType.Number, res, node.NewVal.Token)) {
+                            _log.LogError(
+                                Helper.LogPref + "returned value must be a number.",
+                                node.NewVal.Token.Line,
+                                node.NewVal.Token.Column);
+                            throw new GoSException($"Returned value must be a number.");
+                        }
+                        return (int)(double)res - 1;
+                    });
+
+                    break;
+
                 default:
                     _log.LogError(
                         Helper.LogPref + "{type} doesn't have a property called '{prop}' or it's value can't be set.",
@@ -782,64 +837,72 @@ namespace DataClassHierarchy
 
         public (bool, object) Visiting(DefFun node){
             Context.SetFunc(node.Identifier, node.Arguments.Count, node);
+            Context.DefVariable(node.Identifier, node);
             return (true, null);  
         }
 
         public (bool, object) Visiting(BehaviorAst node) {
+            // func principal del comportamiento
+            void Main(Status status, Perception percep, Dictionary<string, object> vars) {
+                Context = Context.CreateChildContext();
+                // definien2 variables
+                Context.DefVariable(Helper.StatusVar, status);
+                Context.DefVariable(Helper.PercepVar, percep);
+                vars
+                    .ToList()
+                    .ForEach(kv => Context.DefVariable(kv.Key, kv.Value));  // las definiciones d otras vars ma'giks deben ir a partir d este punto
+                DefDoneReqs();
+                Context.DefVariable(Helper.EnvVar, Env.CurrentEnv);
+
+                var (succ, _) = Visiting(node.Code.Where(st => st is not InitAst));  // ejecutan2 co'digo principal (obvian2 bloke init)
+                _returnFlag = default;
+
+                if (!succ) {
+                    stackC.Pop();
+                    throw new GoSException($"Runtime error in behavior '{node.Name}' main code.");
+                }
+                vars
+                    .ToList()
+                    .ForEach(kv => vars[kv.Key] = Context.GetVar(kv.Key));  // actualizan2 variables en el diccionario
+
+                stackC.Pop();
+            }
+            // init del comportamiento
+            void Init(Status status, Dictionary<string, object> vars) {
+                Context = Context.CreateChildContext();
+                Context.DefVariable(Helper.HiddenDoneReqsHeapVar, new Utils.Heap<Request>());  // variable oculta, el usuario no debe emplearla
+
+                var init = node.Code
+                    .OfType<InitAst>()
+                    .FirstOrDefault();
+                if (init != default) {  // hay un bloke init
+                    Context.DefVariable(Helper.StatusVar, status);
+                    Context.DefVariable(Helper.EnvVar, Env.CurrentEnv);
+
+                    var (succ, _) = Visit(init);  // ejecutan2 bloke init
+
+                    if (!succ) {
+                        stackC.Pop();
+                        throw new GoSException($"Runtime error in behavior '{node.Name}' init code.");
+                    }
+                }
+                Context.Variables
+                    .Where(v => v.Name != Helper.StatusVar)
+                    .ToList()
+                    .ForEach(v => vars[v.Name] = v.Value);  // anyadien2 variables al diccionario
+
+                stackC.Pop();
+            }
+
+            var behav = new Behavior(Main, Init) {
+                Name = node.Name
+            };
+
             Context.DefBehav(
                 node.Name,
-                new Behavior(
-                    // func principal del comportamiento
-                    (status, percep, vars) => {
-                        Context = Context.CreateChildContext();
-                        // definien2 variables
-                        Context.DefVariable(Helper.StatusVar, status);
-                        Context.DefVariable(Helper.PercepVar, percep);
-                        vars
-                            .ToList()
-                            .ForEach(kv => Context.DefVariable(kv.Key, kv.Value));  // las definiciones d otras vars ma'giks deben ir a partir d este punto
-                        DefDoneReqs();
-                        Context.DefVariable(Helper.EnvVar, Env.CurrentEnv);
+                behav);
+            Context.DefVariable(node.Name, behav);
 
-                        var (succ, _) = Visiting(node.Code.Where(st => st is not InitAst));  // ejecutan2 co'digo principal (obvian2 bloke init)
-                        _returnFlag = default;
-
-                        if (!succ) {
-                            stackC.Pop();
-                            throw new GoSException($"Runtime error in behavior '{node.Name}' main code.");
-                        }
-                        vars
-                            .ToList()
-                            .ForEach(kv => vars[kv.Key] = Context.GetVar(kv.Key));  // actualizan2 variables en el diccionario
-
-                        stackC.Pop();
-                    },
-                    // init del comportamiento
-                    (status, vars) => {
-                        Context = Context.CreateChildContext();
-                        Context.DefVariable(Helper.HiddenDoneReqsHeapVar, new Utils.Heap<Request>());  // variable oculta, el usuario no debe emplearla
-
-                        var init = node.Code
-                            .OfType<InitAst>()
-                            .FirstOrDefault();
-                        if (init != default) {  // hay un bloke init
-                            Context.DefVariable(Helper.StatusVar, status);
-                            Context.DefVariable(Helper.EnvVar, Env.CurrentEnv);
-
-                            var (succ, _) = Visit(init);  // ejecutan2 bloke init
-
-                            if (!succ) {
-                                stackC.Pop();
-                                throw new GoSException($"Runtime error in behavior '{node.Name}' init code.");
-                            }
-                        }
-                        Context.Variables
-                            .Where(v => v.Name != Helper.StatusVar)
-                            .ToList()
-                            .ForEach(v => vars[v.Name] = v.Value);  // anyadien2 variables al diccionario
-
-                        stackC.Pop();
-                    }));
             return (true, null);
         }
 
@@ -1381,6 +1444,8 @@ namespace DataClassHierarchy
             switch (node.ClassName) {
                 case Helper.ResourceClass:
                     return (true, new Resource(Helper.NewResrcName()));
+                case Helper.LayerClass:
+                    return (true, new Layer());
                 default:
                     _log.LogError(
                         Helper.LogPref + "an instance of the class {c} can't be created.",

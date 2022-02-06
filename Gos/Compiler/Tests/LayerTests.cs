@@ -11,24 +11,20 @@ using System.Threading.Tasks;
 
 namespace Compiler.Tests {
     [TestClass]
-    public class ResourceTests : LangTest {
+    public class LayerTests : LangTest {
         [TestMethod]
         public void PropertiesCorrectness() {
             var tokens = _lex.Tokenize(
                 @"
-let r = new resource
-print r.name
-r.time = 3.0
-
-print r.time
-
-let r1 = new resource
-let r2 = new resource
-
-r.requirements = [r1, r2]
-print r.requirements
-print r1.required
-print r.required
+behav p {
+    print 1
+}
+behav q {
+    print 2
+}
+let l = new layer
+l.behaviors = [p, q]
+l.selector = one_always
 " + _dslSuf, _builtinCode);
             Assert.IsTrue(_parser.TryParse(tokens, out var ast));
             Assert.IsTrue(ast.Validate(Context.Global()));
@@ -40,12 +36,18 @@ print r.required
 
             Assert.IsTrue(success);
 
+            var layer = ctx.GetVar("l") as Layer;
+            var serv = new Server("me");
+            serv.AddLayer(layer);
+
+            for (int i = 0; i < 20; i++) {
+                serv.HandlePerception(new Request("fulano", "me", ReqType.Ping));
+            }
             Assert.AreEqual(
-                $"resrc_1{_endl}" +
-                $"3{_endl}" +
-                $"[resource resrc_2, resource resrc_3]{ _endl}" +
-                $"True{_endl}" +
-                $"False{_endl}",
+                string.Join(
+                    _endl, 
+                    Enumerable.Range(1, 20).Select(_ => 1))
+                + _endl,
                 @out.ToString());
         }
 

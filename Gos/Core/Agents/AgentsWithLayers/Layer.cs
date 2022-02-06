@@ -10,6 +10,8 @@ namespace ServersWithLayers
         internal List<Behavior> behaviors;
         private Func<IEnumerable<Behavior>,int> behaviorSelector;
 
+        public IEnumerable<Behavior> Behavs => behaviors;
+
         public Layer()
         {
             behaviors = new List<Behavior> { };
@@ -43,6 +45,8 @@ namespace ServersWithLayers
             behaviorSelector = selector;
         }
 
+        public void SetBehaviors(IEnumerable<Behavior> enumerable) {
+            behaviors.AddRange(enumerable);
+        }
     }
-
 }

@@ -19,7 +19,7 @@ namespace Compiler {
             ("fun", Token.TypeEnum.Fun),
             ("return", Token.TypeEnum.Return),
             ("new", Token.TypeEnum.New),
-            ($"server|request|response|alarm|{ResourceClass}", Token.TypeEnum.Class),
+            ($"server|request|response|alarm|{ResourceClass}|{LayerClass}", Token.TypeEnum.Class),
             ("forever", Token.TypeEnum.Forever),
             ("break", Token.TypeEnum.Break),
             ("for", Token.TypeEnum.For),
@@ -73,6 +73,7 @@ namespace Compiler {
         internal const string RandIntFun = "rand_int";
         internal const string EnvVar = "env";
         internal const string ResourceClass = "resource";
+        internal const string LayerClass = "layer";
 
         /// <summary>
         /// Convierte un símbolo a una representación en <see cref="string"/>.
@@ -103,7 +104,7 @@ namespace Compiler {
             return obj switch {
                 double => GosType.Number,
                 bool => GosType.Bool,
-                //Agent => GosType.Server,
+                Server => GosType.Server,
                 List<object> => GosType.List,
                 null => GosType.Null,
                 Status => GosType.ServerStatus,
@@ -113,6 +114,9 @@ namespace Compiler {
                 Env => GosType.Environment,
                 string => GosType.String,
                 Resource => GosType.Resource,
+                Behavior => GosType.Behavior,
+                DefFun => GosType.Function,
+                Layer => GosType.Layer,
                 _ => throw new NotImplementedException()
             };
         }

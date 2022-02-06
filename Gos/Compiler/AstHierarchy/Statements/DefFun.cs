@@ -18,9 +18,9 @@ namespace DataClassHierarchy
         }
         public override bool Validate(Context context)
         {
-            if(!context.DefFunc(Identifier, Arguments.Count)){
+            if(!context.DefFunc(Identifier, Arguments.Count) || !context.DefVariable(Identifier)){
                 _log.LogError(
-                    "Line {line}, column {col}: function '{id}' is already defined.",
+                    "Line {line}, column {col}: function or variable '{id}' is already defined.",
                     Token.Line,
                     Token.Column,
                     Identifier);

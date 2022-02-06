@@ -18,9 +18,9 @@ namespace Compiler.AstHierarchy.Statements {
         public IEnumerable<IStatement> Code { get; init; }
 
         public override bool Validate(Context context) {
-            if (!context.DefBehav(Name, null)) {
+            if (!context.DefBehav(Name, null) || !context.DefVariable(Name)) {
                 _log.LogError(
-                    Helper.LogPref + "behavior already defined.",
+                    Helper.LogPref + "behavior or variable already defined.",
                     Token.Line,
                     Token.Column);
 
