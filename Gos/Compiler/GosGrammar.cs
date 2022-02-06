@@ -42,6 +42,8 @@ namespace Compiler {
         private static readonly UntType IsTypeEnd = new UntType(typeof(IsTypeEndUnt));
         private static readonly UntType Ping = new UntType(typeof(PingUnt));
         private static readonly UntType AfterRsrcReq = new UntType(typeof(AfterRsrcReqUnt));
+        private static readonly UntType Ask = new UntType(typeof(AskUnt));
+        private static readonly UntType Order = new UntType(typeof(OrderUnt));
 
         #region terminales
         private static readonly TokenType n = TokenType.Number;
@@ -134,14 +136,17 @@ namespace Compiler {
             Stat > (accept, Expr),
             Stat > Ping,
             Stat > (alarmMe, @in, Expr),
-            Stat > (ask, Expr, AfterRsrcReq),
-            Stat > (order, Expr, AfterRsrcReq),
+            Stat > Ask,
+            Stat > Order,
 
-            AfterRsrcReq > (@in, Expr, @for, Expr),
-            AfterRsrcReq > (@for, Expr),
+            Ask > (ask, Atom, AfterRsrcReq),
+            Order > (order, Atom, AfterRsrcReq),
 
-            Ping > (ping, Expr, @in, Expr),
-            Ping > (ping, Expr),
+            AfterRsrcReq > (@in, Math, @for, Atom),
+            AfterRsrcReq > (@for, Atom),
+
+            Ping > (ping, Atom, @in, Math),
+            Ping > (ping, Atom),
 
             LetVar > (let, id, eq, Expr),
 
@@ -167,6 +172,9 @@ namespace Compiler {
 #pragma warning restore CS1718 // Comparison made to same variable
 
             Expr > Disj,
+            Expr > Ping,
+            Expr > Ask,
+            Expr > Order,
 
             ListIdx > Factor[Math],
 

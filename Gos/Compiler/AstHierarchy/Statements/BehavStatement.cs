@@ -10,11 +10,15 @@ namespace Compiler.AstHierarchy.Statements {
         }
 
         public override bool Validate(Context context) {
+            return Validate(context, _log, Token);
+        }
+
+        internal static bool Validate(Context context, ILogger logger, Token token) {
             if (!context.IsInsideBehav()) {
-                _log.LogError(
+                logger.LogError(
                     Helper.LogPref + "this statement must be inside a behav block.",
-                    Token.Line,
-                    Token.Column);
+                    token.Line,
+                    token.Column);
                 return false;
             }
             return true;

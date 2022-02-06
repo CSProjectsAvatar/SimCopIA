@@ -1133,12 +1133,49 @@ behav p {
                 @out.ToString());
         }
 
+        [TestMethod]
+        public void AskOrderPingAsExpressions() {
+            var tokens = _lex.Tokenize(
+                @"
+behav p {
+    let r1 = ask percep.sender for []
+    let r2 = order percep.sender for []
+    let r3 = ping percep.sender
+
+    print r1
+    print r2
+    print r3
+}
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("p");
+            _ = new Env(_logEnv, _logMicroS);
+
+            behavP.Run(new Status("me"), new Request("fulano", "me", ReqType.Ping));
+
+            Assert.AreEqual(
+                $"request 2 me --ASK--> fulano (){_endl}" +
+                $"request 3 me --DO--> fulano (){_endl}" +
+                $"request 4 me --PING--> fulano (){ _endl}",
+                @out.ToString());
+        }
+
         [TestCleanup]
         public void Clean() {
             _lex.Dispose();
             _parser.Dispose();
             MicroService.Services.Clear();
             Resource.Dispose();
+            Message.Dispose();
         }
     }
 }

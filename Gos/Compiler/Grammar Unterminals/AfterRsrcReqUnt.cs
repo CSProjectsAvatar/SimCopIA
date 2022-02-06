@@ -12,12 +12,12 @@ namespace Compiler.Grammar_Unterminals {
 
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation) {
             /*
-             <after-rsrc-req> := "in" <expr> "for" <expr>
-                               | "for" <expr>
+             <after-rsrc-req> := "in" <math> "for" <atom>
+                               | "for" <atom>
              */
-            Resources = (derivation[^1] as ExpressionUnt).Ast as Expression;
+            Resources = (derivation[^1] as AtomUnt).Ast as Expression;
             AfterNow = derivation.Count > 2
-                ? (derivation[1] as ExpressionUnt).Ast as Expression
+                ? (derivation[1] as MathUnt).Ast as Expression
                 : null;
 
             return null;

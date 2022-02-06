@@ -6,6 +6,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
+
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
@@ -19,6 +21,7 @@ namespace Compiler {
                     .AddConsole();
             });
             ILogger<Lr1Dfa> logLr1Dfa = loggerFactory.CreateLogger<Lr1Dfa>();
+            ILogger<Program> log = loggerFactory.CreateLogger<Program>();
 
             if (args.Length == 0) {
                 Console.WriteLine(@"
@@ -32,8 +35,14 @@ gos run FILE");
             } else {
                 switch (args[0]) {
                     case "init":
+                        var watch = new Stopwatch();
+                        watch.Start();
+
                         var dfa = new Lr1Dfa(new GosGrammar(), logLr1Dfa);
                         dfa.SaveToFile("./lr1-dfa.json");
+
+                        watch.Stop();
+                        log.LogInformation("Done. Elapsed: {e} ms", watch.ElapsedMilliseconds);
                         break;
                     case "run" when args.Length > 1:
                         Helper.LogFact = loggerFactory;

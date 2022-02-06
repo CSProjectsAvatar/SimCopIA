@@ -7,7 +7,7 @@ namespace Compiler {
             // <let-var> := "let" ID "=" <expr>
             var t = derivation[1] as Token;
             string id = t.Lexem;
-            var expr = (derivation[3] as Unterminal).Ast as Expression;
+            var expr = (derivation[3] as ExpressionUnt).Ast as Expression;
             return new LetVar(Helper.Logger<LetVar>()) {
                 Identifier = id,
                 Expr = expr,

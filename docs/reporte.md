@@ -256,14 +256,18 @@ graph LR
         | "accept" <expr>
         | <ping>
         | "alarm_me" "in" <expr>
-        | "ask" <expr> <after-rsrc-req>
-        | "order" <expr> <after-rsrc-req>
+        | <ask>
+        | <order>
 
-<after-rsrc-req> := "in" <expr> "for" <expr>
-                  | "for" <expr>
+<ask> := "ask" <atom> <after-rsrc-req>
 
-<ping> := "ping" <expr> "in" <expr>
-        | "ping" <expr>
+<order> := "order" <atom> <after-rsrc-req>
+
+<after-rsrc-req> := "in" <math> "for" <atom>
+                  | "for" <atom>
+
+<ping> := "ping" <atom> "in" <math>
+        | "ping" <atom>
 
 <let-var> := "let" ID "=" <expr>
 
@@ -287,6 +291,9 @@ graph LR
         | <math>
 
 <expr> := <disj>
+        | <ping>
+        | <ask>
+        | <order>
 
 <list-idx> := <factor> "[" <math> "]"
 

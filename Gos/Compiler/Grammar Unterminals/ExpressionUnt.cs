@@ -10,9 +10,13 @@ namespace Compiler {
     {
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
         {
-            // <expr> := <disj>
+            /* <expr> := <disj>
+                       | <ping>
+                       | <ask>
+                       | <order>
+             */
             return derivation[0] switch{
-                DisjUnt c => c.Ast,
+                DisjUnt or PingUnt or AskUnt or OrderUnt => (derivation[0] as Unterminal).Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

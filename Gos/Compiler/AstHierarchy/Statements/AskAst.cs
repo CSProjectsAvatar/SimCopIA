@@ -7,8 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Compiler.AstHierarchy.Statements {
-    public class AskAst : BehavStatement {
-        public AskAst(ILogger<AskAst> logger) : base(logger) {
+    public class AskAst : Expression, IStatement {
+        private readonly ILogger<AskAst> _log;
+
+        public AskAst(ILogger<AskAst> logger) {
+            _log = logger;
         }
 
         public Expression AfterNow { get; init; }
@@ -16,7 +19,7 @@ namespace Compiler.AstHierarchy.Statements {
         public Expression Target { get; init; }
 
         public override bool Validate(Context context) {
-            if (!base.Validate(context)) {
+            if (!BehavStatement.Validate(context, _log, Token)) {
                 return false;
             }
             return Target.Validate(context) && Resources.Validate(context) && (AfterNow?.Validate(context) ?? true);

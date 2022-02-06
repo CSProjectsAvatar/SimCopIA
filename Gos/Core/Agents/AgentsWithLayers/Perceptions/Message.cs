@@ -23,6 +23,10 @@ namespace ServersWithLayers
             this.Receiver = receiver;
             this.Type = type;
         }
+
+        public static void Dispose() {
+            lastMsgID = 0;
+        }
     }
 
 }

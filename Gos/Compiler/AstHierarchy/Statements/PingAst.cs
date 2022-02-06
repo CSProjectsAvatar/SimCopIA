@@ -7,8 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Compiler.AstHierarchy.Statements {
-    public class PingAst : BehavStatement {
-        public PingAst(ILogger<PingAst> logger) : base(logger) {
+    public class PingAst : Expression, IStatement {
+        private readonly ILogger<PingAst> _log;
+
+        public PingAst(ILogger<PingAst> logger) {
+            _log = logger;
         }
 
         public Expression Target { get; init; }
@@ -19,7 +22,7 @@ namespace Compiler.AstHierarchy.Statements {
         public Expression AfterNow { get; init; }
 
         public override bool Validate(Context context) {
-            if (!base.Validate(context)) {
+            if (!BehavStatement.Validate(context, _log, Token)) {
                 return false;
             }
             return Target.Validate(context) && (AfterNow?.Validate(context) ?? true);

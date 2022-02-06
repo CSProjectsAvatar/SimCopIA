@@ -997,7 +997,7 @@ namespace DataClassHierarchy
             } else {
                 status.SubscribeIn(toArrival, ping);
             }
-            return (true, null);
+            return (true, ping);
         }
 
         public (bool, object) Visiting(AlarmMeAst node) {
@@ -1059,7 +1059,7 @@ namespace DataClassHierarchy
             } else {
                 status.SubscribeIn(toArrival, ask);
             }
-            return (true, null);
+            return (true, ask);
         }
 
         public (bool, object) Visiting(OrderAst node) {
@@ -1095,15 +1095,15 @@ namespace DataClassHierarchy
             }
             var targetId = target as string;
             var status = Context.GetVar(Helper.StatusVar) as Status;
-            var ask = new Request(status.ServerId, targetId, ReqType.DoIt);
-            ask.AskingRscs.AddRange(rsrcs.OfType<Resource>());
+            var order = new Request(status.ServerId, targetId, ReqType.DoIt);
+            order.AskingRscs.AddRange(rsrcs.OfType<Resource>());
 
             if (toArrival == 0) {
-                status.Subscribe(ask);
+                status.Subscribe(order);
             } else {
-                status.SubscribeIn(toArrival, ask);
+                status.SubscribeIn(toArrival, order);
             }
-            return (true, null);
+            return (true, order);
         }
 
         public (bool, object) Visiting(Variable node){
