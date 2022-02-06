@@ -62,7 +62,7 @@ namespace ServersWithLayers
             _layers.Add(clonedLayer);
         }
 
-        internal void SetResources(IEnumerable<Resource> resources)
+        public void SetResources(IEnumerable<Resource> resources)
         {
             Stats.AvailableResources = new();
             Stats.AvailableResources.AddRange(resources);

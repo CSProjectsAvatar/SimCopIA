@@ -693,6 +693,33 @@ namespace DataClassHierarchy
 
                     break;
 
+                case GosType.Server when node.Property == "layers":
+                    if (!TryEval(node.NewVal, GosType.List, out listObj)) {
+                        return default;
+                    }
+                    list = listObj as List<object>;
+                    if (!LogIfEmpty(list, node.NewVal.Token)) {
+                        if (!IsOfTypeWithLog(GosType.Layer, list[0], node.NewVal.Token)) {
+                            return default;
+                        }
+                    }
+                    (tval as Server).SetLayers(list.OfType<Layer>());
+
+                    break;
+                case GosType.Server when node.Property == "resources":
+                    if (!TryEval(node.NewVal, GosType.List, out listObj)) {
+                        return default;
+                    }
+                    list = listObj as List<object>;
+                    if (!LogIfEmpty(list, node.NewVal.Token)) {
+                        if (!IsOfTypeWithLog(GosType.Resource, list[0], node.NewVal.Token)) {
+                            return default;
+                        }
+                    }
+                    (tval as Server).SetResources(list.OfType<Resource>());
+
+                    break;
+
                 default:
                     _log.LogError(
                         Helper.LogPref + "{type} doesn't have a property called '{prop}' or it's value can't be set.",
@@ -820,6 +847,9 @@ namespace DataClassHierarchy
                             .GetRequirements()
                             .OfType<object>()
                             .ToList());
+
+                case GosType.Server when node.Property == "id":
+                    return (true, (tval as Server).ID);
 
                 case GosType.Environment when node.Property == "time":
                     return (true, (double)Env.Time);
@@ -1446,6 +1476,8 @@ namespace DataClassHierarchy
                     return (true, new Resource(Helper.NewResrcName()));
                 case Helper.LayerClass:
                     return (true, new Layer());
+                case Helper.ServerClass:
+                    return (true, new Server(Helper.NewServerName()));
                 default:
                     _log.LogError(
                         Helper.LogPref + "an instance of the class {c} can't be created.",

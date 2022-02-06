@@ -19,7 +19,7 @@ namespace Compiler {
             ("fun", Token.TypeEnum.Fun),
             ("return", Token.TypeEnum.Return),
             ("new", Token.TypeEnum.New),
-            ($"server|request|response|alarm|{ResourceClass}|{LayerClass}", Token.TypeEnum.Class),
+            ($"{ServerClass}|request|response|alarm|{ResourceClass}|{LayerClass}", Token.TypeEnum.Class),
             ("forever", Token.TypeEnum.Forever),
             ("break", Token.TypeEnum.Break),
             ("for", Token.TypeEnum.For),
@@ -63,6 +63,8 @@ namespace Compiler {
             (".", Token.TypeEnum.Dot)
         };
         private static int _resrcCount = 0;
+        private static int _servCount = 0;
+        internal const string ServerClass = "server";
         internal const string LogPref = "Line {l}, column {c}: ";
         internal const string StatusVar = "status";
         internal const string PercepVar = "percep";
@@ -152,6 +154,11 @@ namespace Compiler {
 
         public static void Dispose() {
             _resrcCount = 0;
+            _servCount = 0;
+        }
+
+        internal static string NewServerName() {
+            return $"serv_{++_servCount}";
         }
     }
 }
