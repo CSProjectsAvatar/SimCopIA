@@ -128,6 +128,8 @@ namespace ServersWithLayers
             logList.AddRange(GetClientReciveLog());
             foreach (var item in servers)
                 logList.AddRange(LoggerBehav.GetLogList(item.Value,0));
+
+            logList.Sort();
             return logList;
         }
 
@@ -149,11 +151,42 @@ namespace ServersWithLayers
                 this.SubsribeEvent(lastEventTime, e.Item1);
             }
         }
+        //tiene algun error
         public void GenerateNEvents(List<Type> eventTypes, List<double> probabilities,int N,int initialTime=0){
             var eventCreator = new EventCreator(eventTypes,probabilities);
 
-            foreach(var e in eventCreator.GetEvents(N))
-                this.SubsribeEvent(initialTime + e.Item2, e.Item1);
+            int lastEvent = initialTime;
+            foreach(var e in eventCreator.GetEvents(N)){
+                lastEvent +=  e.Item2;
+                this.SubsribeEvent(lastEvent, e.Item1);
+            }
+        }
+        // Le agrega eventos a ejecutrase al environmen actual y ejecuta la simulacion,
+        // de no existir crea uno nuevo.
+        public static void RunDefaultCurrentEnv(){
+            if(Env.CurrentEnv == null)
+                new Env();
+            Env.CurrentEnv.RunDefault();
+        }
+        public void RunDefault(){
+            
+            List<Type> eventsTypes = new(){
+                typeof(Request),
+                typeof(CritFailure)
+            };
+            List<double> probabilities = new(){
+                0.98,
+                0.02
+            };
+
+            this.GenerateEventsInTimeRange(eventsTypes,probabilities,10000);
+
+            this.Run();
+        }
+        public void Dispose(){
+            MicroService.Services.Clear();
+            Resource.Resources.Clear();
+            Env.ClearServersLayers();
         }
     }
 }
