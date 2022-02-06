@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using ServersWithLayers;
 using System.Linq;
 using Utils;
+using ServersWithLayers;
 namespace Core {
     [TestClass]
     public class BehaviorsTests :BaseTest{
@@ -90,7 +91,7 @@ namespace Core {
             fallenL2 = new Layer();
             fallenL2.behaviors.Add(falenLeader2);
 
-            listBehavior = new List<Behavior> {falenLeader, workerB, contractor};
+            listBehavior = new List<Behavior> {falenLeader, contractor};
 
             r1 = new Resource("img1");
             r2 = new Resource("img2");
@@ -309,6 +310,7 @@ namespace Core {
             env.Run();
             
             Assert.AreEqual(env.currentTime, s2.GetLayerBehaVars(0, "lastTimeSeeLeader"));
+
         }
 
         #endregion
@@ -324,11 +326,14 @@ namespace Core {
             s2.AddLayer(fallenL);
             s2.Stats.MicroService.ChangeLeader("S1");
 
+            s2.Stats.MicroService.LostRepInMicroS();
+
             env.SubsribeEvent(10, p2);
 
             env.Run();
 
-            //Assert.AreEqual(, s2.Stats.MicroService.LeaderId);
+            Assert.IsTrue(1 > s2.Stats.MicroService.GetBio(s2.ID).Reputation);
+            Assert.AreEqual(2, s2.Stats.CountMessagingHistory());
 
         }
 

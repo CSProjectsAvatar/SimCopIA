@@ -197,6 +197,11 @@ namespace ServersWithLayers{
             return _sendToEnv[_sendToEnv.Count-1].Item2;
         }
 
+        internal int CountMessagingHistory()
+        {
+            return _messagingHistory.Count();
+        }
+
         public void Reward(Response response, int delay) {
             MicroService.SetReward(response, delay);
         }
