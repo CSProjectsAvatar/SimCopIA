@@ -667,8 +667,6 @@ namespace DataClassHierarchy
 
                 case GosType.Request when node.Property == "type":
                     return (true, (double)(tval as Request).Type);
-                case GosType.Request or GosType.Response when node.Property == "sender":
-                    return (true, (tval as Message).Sender);
                 case GosType.Request when node.Property == "resources":
                     return (
                         true, 
@@ -688,6 +686,15 @@ namespace DataClassHierarchy
                             .Select(kv => Resource.Rsrc(kv.Key))
                             .OfType<object>()
                             .ToList());
+                case GosType.Response when node.Property == "req_id":
+                    return (true, (double)(tval as Response).ReqID);
+
+                #region comunes a pedi2 y respuesta
+                case GosType.Request or GosType.Response when node.Property == "sender":
+                    return (true, (tval as Message).Sender);
+                case GosType.Request or GosType.Response when node.Property == "id":
+                    return (true, (double)(tval as Message).ID);
+                #endregion
 
                 case GosType.Environment when node.Property == "time":
                     return (true, (double)Env.Time);
