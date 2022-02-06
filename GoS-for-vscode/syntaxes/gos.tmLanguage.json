@@ -31,7 +31,7 @@
 					"match": ">|<|\\=|==|\\+|\\->|\\-|\\*|\\/|%"
 				}, {
 					"name": "support.class.gos",
-					"match": "\\b(server|request|response|alarm|resource)\\b"
+					"match": "\\b(server|request|response|alarm|resource|layer)\\b"
 				}]
 		},
 		"strings": {
