@@ -21,14 +21,15 @@ namespace Core
         {
             List<MicroService> microServices = new List<MicroService> { };
             List<Server> servers = new List<Server> { };
-
+            int ServersIDs = 0;
             for (int i = 0; i < individual.MicroServices.Count; i++)
             {
                 string name = "M" + i;
                 MicroService ms = new MicroService(name);
                 for (int j = 0; j < individual.MicroServices[i].Servers.Count; j++)
                 {
-                    servers.Add(CreateServer(j, name, individual.MicroServices[i].Servers[j]));
+                    servers.Add(CreateServer(ServersIDs, name, individual.MicroServices[i].Servers[j]));
+                    ServersIDs++;
                 }
                 microServices.Add(ms);
             }
@@ -48,7 +49,7 @@ namespace Core
         {
             List<Resource> res = new List<Resource> { };
             foreach (var i in resources)
-                res.Add(_resources[resources[i]]);
+                res.Add(_resources[i]);
 
             return res;
         }
