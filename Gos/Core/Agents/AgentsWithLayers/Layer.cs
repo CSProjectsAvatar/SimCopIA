@@ -41,6 +41,10 @@ namespace ServersWithLayers
             behaviorSelector = selector;
         }
 
+        public void AddBehavior(Behavior beha)
+        {
+            behaviors.Add(beha);
+        }
     }
 
 }
