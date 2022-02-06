@@ -63,19 +63,7 @@ namespace ServersWithLayers{
             Services[microS].Dir.AddServer(server);
         }
 
-        ///<summary>
-        /// Asigna una recompensa en reputacion a todos los servidores que dieron respuestas
-        /// </summary>
-        [Obsolete("Use SetReward(response, sendingTime) instead")]
-        public void SetReward(List<Response> responses)
-        {
-            var servers = responses.Select(r => r.Sender).Distinct();
-            var it = DecresingPercents();
-            foreach (var server in servers) {
-                it.MoveNext();
-                AddRep(server, it.Current);
-            }
-        }
+        
         ///<summary>
         /// Assigns a reward in reputation to the Sender in function of the respond time
         ///</summary>
@@ -93,6 +81,19 @@ namespace ServersWithLayers{
             return 1.0 / Math.Log(time + 1.5);
         }
         
+        ///<summary>
+        /// Asigna una recompensa en reputacion a todos los servidores que dieron respuestas
+        /// </summary>
+        [Obsolete("Use SetReward(response, sendingTime) instead")]
+        public void SetReward(List<Response> responses)
+        {
+            var servers = responses.Select(r => r.Sender).Distinct();
+            var it = DecresingPercents();
+            foreach (var server in servers) {
+                it.MoveNext();
+                AddRep(server, it.Current);
+            }
+        }
         private IEnumerator<double> DecresingPercents(double init = 0.2, double next = 0.8){
             while(true){
                 yield return init;
@@ -105,7 +106,7 @@ namespace ServersWithLayers{
             var bio = Dir.WhitePages[server];
             bio.Reputation *= 1 + percent;
         }
-
+        /// -------------
         
 
         internal bool ContainsServer(string server)
@@ -151,18 +152,14 @@ namespace ServersWithLayers{
             return servers;
         }
 
-        private void ResetReputation(ServerBio biography)
+        private void ReduceReputation(ServerBio biography)
         {
-            biography.Reputation = (int)ServerBio.initRep;
+            biography.Reputation *= 0.9;
         }
 
-        internal void ForAllBiography()
+        internal void LostRepInMicroS()
         {
-            Dictionary<string, ServerBio> whitePages = Services[this.Name].Dir.WhitePages;
-            foreach (var item in whitePages)
-            {
-                ResetReputation(item.Value);
-            }
+            Dir.WhitePages.Values.ToList().ForEach(ReduceReputation);
         }
 
         static double defaultCredibility(ServerBio bio){
@@ -176,9 +173,17 @@ namespace ServersWithLayers{
             return servers.OrderByDescending(
                 (Response r)=>credibilityFunction(this.GetBio(r.Sender))
             );
-        } 
-    }
+        }
+        ///<summary>
+        /// Returns the servers of the microservice ordered by their credibility
+        ///</summary>
+        public IEnumerable<string> SortMicroserviceByCredb(){
 
+            return  Dir.WhitePages
+                    .OrderByDescending( kv => credibilityFunction(kv.Value))
+                    .Select(kv => kv.Key);
+        }
+    }
     public enum ServiceType{
         Private,
         EntryPoint

@@ -4,8 +4,14 @@ using System.Linq;
 
 namespace ServersWithLayers
 {
-    public class Decisor
+    public interface IDecisor : ICloneable {
+        void SetLayer(Layer layer);
+        int Selector(IEnumerable<Behavior> behavs);
+
+    }
+    public class Decisor : IDecisor
     {
+        #region Internal vars
         Random Rnd = new Random(Environment.TickCount);
         int cycleTime;
         private Layer layer;
@@ -19,22 +25,37 @@ namespace ServersWithLayers
         private double totalGained;
 
         private List<double> bGainedReputation;
-        private List<double> bWeight;
+        // private List<double> bWeight;
+        #endregion
 
-        public Decisor(Layer layer, int cycle = 500)
+
+        public Decisor(int cycle = 500)
         {
-            if (layer.behaviors.Count == 0) {
-                throw new Exception("Layer must have at least one behavior");
-            }
             cycleTime = cycle;
+        }
+        public void SetLayer(Layer layer)
+        {
             this.layer = layer;
-            lastReputation = curReputation;
-            // set 1/count in every position
-            // bWeight = Enumerable.Repeat(1.0 / layer.behaviors.Count, layer.behaviors.Count).ToList();
-            bGainedReputation = Enumerable.Repeat(0.0, layer.behaviors.Count).ToList();
+            bGainedReputation = new List<double>();
+        }
+        private bool firstTime = true;
+        public int Selector(IEnumerable<Behavior> behavs){
+            if (firstTime)
+            {
+                firstTime = false;
+
+                lastReputation = curReputation;
+                bGainedReputation = Enumerable.Repeat(0.0, layer.behaviors.Count).ToList();
+            }
+            return BehaviorDecisor();
         }
 
-        public int BehaviorDecisor(){
+        public object Clone()
+        {
+            return new Decisor(cycleTime);
+        }
+        
+        private int BehaviorDecisor(){
             
             if (TimeToChangeBehav()) {
                 var gained = curReputation - lastReputation;
@@ -78,6 +99,8 @@ namespace ServersWithLayers
             }
             return 0;
         }
+
+        
     }
 
 }

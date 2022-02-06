@@ -164,6 +164,11 @@ namespace ServersWithLayers{
         {
             return _sendToEnv[_sendToEnv.Count-1].Item2;
         }
+
+        internal int CountMessagingHistory()
+        {
+            return _messagingHistory.Count();
+        }
     }
 }
 
