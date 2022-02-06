@@ -395,7 +395,9 @@ namespace DataClassHierarchy
                     }
                     return (
                         true,
-                        BossBehav.ResponseSelectionFunction(tval as Status, resps.OfType<Response>()));
+                        BossBehav.ResponseSelectionFunction(tval as Status, resps.OfType<Response>())
+                            .OfType<object>()
+                            .ToList());
 
                 default:
                     _log.LogError(
