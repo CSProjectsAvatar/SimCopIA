@@ -17,6 +17,8 @@ namespace Core
         private double probAddLayer;
         private double probRemoveLayer;
 
+        public static int ParallelsProcesors { get; private set; }
+
         public ServerSim Clone()
         {
             ServerSim serverSim = new ServerSim();
@@ -53,7 +55,7 @@ namespace Core
             // Resources
             for (int i = 0; i < resources.Count; i++) {
                 if (_random.NextDouble() < probMutateRscs) { // prob de mutar un recurso
-                    var reso = _random.Next(FactorySim.MaxResorce-1);
+                    var reso = _random.Next(FactorySim.MaxResource-1);
                     resources[i] = reso;
                 }
             }
@@ -61,6 +63,8 @@ namespace Core
 
         internal static ServerSim RndServer()
         {
+            ParallelsProcesors = _random.Next(1, FactorySim.MaxProcesorsInServer);
+            
             ServerSim s = new ServerSim();
 
             var countLayer = _random.Next(1, FactorySim.MaxBehavior);
@@ -69,8 +73,8 @@ namespace Core
                 s.layers.Add(LayerSim.RndLayer());
             }
 
-            var countResource = _random.Next(1, FactorySim.MaxResorce);
-            List<int> resor = new List<int>(Enumerable.Range(1, FactorySim.MaxResorce));
+            var countResource = _random.Next(1, FactorySim.MaxResource);
+            List<int> resor = new List<int>(Enumerable.Range(1, FactorySim.MaxResource));
             for (int i = 0; i < countResource; i++)
             {
                 var va = _random.Next(resor.Count - 1);

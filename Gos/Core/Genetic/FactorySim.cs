@@ -9,37 +9,53 @@ namespace Core
 {
     public class FactorySim
     {
-        List<Behavior> _behaviors;
-        List<Resource> _resources;
-        List<Type> _events;
-        private List<double> _probs;
+        static List<Behavior> _behaviors;
+        static List<Resource> _resources;
+        static List<Type> _events;
+        static private List<double> _probs;
+
+        public static double Budget { get; private set;}
+        public static int MaxProcesorsInServer { get; private set;}
+
         public static int MaxBehavior ;
-        public static int MaxResorce;
+        public static int MaxResource;
         public static int MaxServers;
 
 
-        public FactorySim(List<Behavior> behaviors, List<Resource> resources)
+        public FactorySim(List<Behavior> behaviors, List<Resource> resources, double budget = 50, int maxProcesors = 10)
             : this(behaviors, resources, 
                 new List<Type>() { 
                     typeof(ReqType) 
                 }, 
                 new List<double>() { 
                     1.0 
-                }
-            ) {
-            MaxBehavior = _behaviors.Count();
-            MaxResorce = _resources.Count();
-
-        }
+                },
+                budget,
+                maxProcesors
+            ) { }
 
 
-        public FactorySim(List<Behavior> behaviors, List<Resource> resources, List<Type> events, List<double> probabilities)
+        public FactorySim(List<Behavior> behaviors, 
+        List<Resource> resources, 
+        List<Type> events, 
+        List<double> probabilities, 
+        double budget,
+        int maxProcesors
+        )
         {
             _behaviors = behaviors;
             _resources = resources;
             _events = events;
             _probs = probabilities;
+
+            Budget = budget;
+            MaxProcesorsInServer = maxProcesors;
+            
+            MaxBehavior = _behaviors.Count();
+            MaxResource = _resources.Count();
+            MaxServers = MaxBehavior * MaxResource;
         }
+
 
         public void RunSimulation(IndividualSim individual)
         {
