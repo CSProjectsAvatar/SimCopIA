@@ -25,6 +25,7 @@ namespace DataClassHierarchy
         private readonly TextWriter _writer;
         private (bool Found, object Value) _returnFlag;
         private bool _breakFlag;
+        private bool _newRsrc = false;
 
         public Context Context { get => stackC.Peek(); set => stackC.Push(value); }
 
@@ -1347,6 +1348,8 @@ namespace DataClassHierarchy
             var servs = AccessibleServers().ToList();
             if (servs.Count == 0) {
                 _log.LogWarning("No servers are accessible from the global context. Simulation won't run.");
+            } else if (!_newRsrc) {
+                _log.LogWarning("No resources had been created. Simulation won't run.");
             } else {
                 var env = new Env(Helper.Logger<Env>(), Helper.Logger<MicroService>());
                 env.AddServerList(servs);
@@ -1385,7 +1388,7 @@ namespace DataClassHierarchy
             foreach (var (_, val) in Context.Variables) {
                 ans = ans.Concat(AccessibleServers(val));
             }
-            return ans;
+            return ans.Distinct();
         }
 
         private IEnumerable<Server> AccessibleServers(object val) {
@@ -1539,6 +1542,7 @@ namespace DataClassHierarchy
         public (bool, object) Visiting(ClassAst node){
             switch (node.ClassName) {
                 case Helper.ResourceClass:
+                    _newRsrc = true;
                     return (true, new Resource(Helper.NewResrcName()));
                 case Helper.LayerClass:
                     return (true, new Layer());

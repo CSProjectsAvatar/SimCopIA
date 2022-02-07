@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Compiler.Tests {
     [TestClass]
     public class ServerTests : LangTest {
-        [TestMethod]
+        //[TestMethod]
         public void PropertiesCorrectness() {
             var tokens = _lex.Tokenize(
                 @"

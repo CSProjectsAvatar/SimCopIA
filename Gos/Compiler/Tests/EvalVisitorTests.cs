@@ -86,6 +86,29 @@ let l = f()
             Assert.IsFalse(servs.Any(s => s.Stats.AvailableResources.Count != 0));
         }
 
+        [TestMethod]
+        public void AccessibleServersDuplicate() {
+            var tokens = _lex.Tokenize(
+                @"
+let r1 = new resource
+let s = new server
+s.resources = [r1]
+let r = s
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            var servs = vis.AccessibleServers().ToList();
+            Assert.AreEqual(1, servs.Count);
+        }
+
         [TestCleanup]
         public void Clean() {
             Dispose();
