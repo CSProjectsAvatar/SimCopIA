@@ -47,7 +47,7 @@ namespace ServersWithLayers{
         public IEnumerable<(Event, int)> EventItertor()
         {
             while(true){
-                var time = (int)UtilsT.GenTimeOffset();
+                var time = (int)UtilsT.GenTimeOffset(lambda: 0.12);
                 var type = GetType(UtilsT.Rand.NextDouble());
 
                 yield return (BuildEvent(type), time);
