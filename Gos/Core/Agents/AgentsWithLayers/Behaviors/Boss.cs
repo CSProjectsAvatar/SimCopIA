@@ -63,7 +63,7 @@ namespace ServersWithLayers.Behaviors
                 case Observer observer:
 
                     // (tiempo actual  == timepo de recogida de responses) <=> (observer asociado a esta capa)
-                    if( Env.Time == nextReview.First.Item1){
+                    if( nextReview.Count!=0 && Env.Time == nextReview.First.Item1){
                         (int requestExitTime,Request currentOriginalRequest) = nextReview.RemoveMin();
 
                         var responses =  askResponses[currentOriginalRequest.ID];

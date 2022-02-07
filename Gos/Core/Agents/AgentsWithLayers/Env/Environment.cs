@@ -83,9 +83,12 @@ namespace ServersWithLayers
             return turn.First.Item2;
         }
         //Ejecuta la simulacion.
-        public void Run(){
-            foreach (var item in this.EnumerateActions())
+        public void Run(int maxSimulationTime=10000){
+            foreach (var item in this.EnumerateActions()){
+                if(this.currentTime > maxSimulationTime)
+                    break;
                 item();
+            }
         }
 
         //Suscribe un evento en el environment.
