@@ -991,7 +991,7 @@ namespace DataClassHierarchy
             Response response = BehaviorsLib.BuildResponse(status, req);
 
             if (BehaviorsLib.Incomplete(status, response)) {
-                _log.LogInformation("Incomplete {r}", GosObjToString(response));
+                _log.LogDebug("Incomplete {r}", GosObjToString(response));
 
                 status.AddPartialRpnse(response);
             } else {
@@ -1094,7 +1094,7 @@ namespace DataClassHierarchy
 
             Response response = BehaviorsLib.BuildResponse(status, req);
 
-            _log.LogInformation("Subscribing {r}", GosObjToString(response));
+            _log.LogDebug("Subscribing {r}", GosObjToString(response));
             status.Subscribe(response);
 
             return (true, null);
@@ -1124,7 +1124,7 @@ namespace DataClassHierarchy
             }
             var status = Context.GetVar(Helper.StatusVar) as Status;
 
-            _log.LogInformation("Accepting {r}", GosObjToString(req));
+            _log.LogDebug("Accepting {r}", GosObjToString(req));
             status.AcceptReq(req);
 
             return (true, null);
@@ -1329,7 +1329,19 @@ namespace DataClassHierarchy
                 env.AddServerList(servs);
 
                 try {
-                    env.Run();
+                    env.RunDefault();
+
+                    var @out = env.Output;
+                    var endl = Environment.NewLine;
+                    _log.LogInformation(
+                        $"Statistics:{endl}" +
+                        $"Average delay time of satisfied requests: {{avg}} time units{endl}" +
+                        $"Percent of unsatisfied requests: {{notResp}} %{endl}" +
+                        $"Percent of satisfied requests: {{resp}} %{endl}",
+                        @out.Average,
+                        @out.NotResponsePercent,
+                        @out.ResponsePercent);
+
                 } catch (GoSException e) {
                     _log.LogError(e.Message);
                     return default;

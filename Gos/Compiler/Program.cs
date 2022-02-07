@@ -17,7 +17,7 @@ namespace Compiler {
                     .AddFilter("System", LogLevel.Warning)
                     .AddFilter("Core", LogLevel.Warning)
                     .AddFilter("Compiler", LogLevel.Warning)
-                    .AddFilter("DataClassHierarchy", LogLevel.Warning)
+                    .AddFilter("DataClassHierarchy", LogLevel.Information)
                     .AddFilter(nameof(ServersWithLayers), LogLevel.Warning)
                     .AddConsole();
             });
