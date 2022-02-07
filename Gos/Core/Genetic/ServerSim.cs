@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ServersWithLayers;
-
+using Utils;
 namespace Core
 {
     public class ServerSim
@@ -17,11 +17,14 @@ namespace Core
         private double probAddLayer;
         private double probRemoveLayer;
 
-        public static int ParallelsProcesors { get; private set; }
+        public int ParallelsProcesors { get; private set; }
+        public double Cost => ParallelsProcesors * UtilsT.CostByMicro;
 
         public ServerSim Clone()
         {
             ServerSim serverSim = new ServerSim();
+            serverSim.ParallelsProcesors = ParallelsProcesors;
+            
             serverSim.layers = (from item in layers
                                 select item.Clone()).ToList();
 
@@ -63,9 +66,10 @@ namespace Core
 
         internal static ServerSim RndServer()
         {
-            ParallelsProcesors = _random.Next(1, FactorySim.MaxProcesorsInServer);
-            
             ServerSim s = new ServerSim();
+            s.ParallelsProcesors = _random.Next(1, FactorySim.MaxProcesorsInServer);
+            if(s.ParallelsProcesors == 0)
+                throw new Exception("ParallelsProcesors == 0");
 
             var countLayer = _random.Next(1, FactorySim.MaxBehavior);
             for (int i = 0; i < countLayer; i++)
@@ -86,6 +90,21 @@ namespace Core
             return s;
         }
 
+        public override string ToString()
+        {
+            string toString = "Layers" + "\n";
+            foreach (var item in layers)
+            {
+                toString += item.ToString() + "\n";
+            }
+            toString += "Resources" + "\n";
+
+            foreach (var item in resources)
+            {
+                toString += FactorySim._resources[item].Name + "\n";
+            }
+            return toString;
+        }
     }
 
 }

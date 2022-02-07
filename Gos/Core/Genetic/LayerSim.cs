@@ -52,7 +52,17 @@ namespace Core
             return l;
         }
 
-        
+        public override string ToString()
+        {
+            string toString = "Behaviour" + "\n";
+
+            foreach (var item in behavior)
+            {
+                toString += item+ "\n";
+            }
+            return toString;
+        }
+
     }
 
 }

@@ -40,6 +40,7 @@ namespace ServersWithLayers{
                         where res.Item2.ReqID == req.Item2.ID
                         select (res.Item1 -req.Item1,res.Item2.Sender));
             
+            Average = int.MaxValue;
             if(difs.Count()!=0){
                 Average = difs.Select(((int,string) difServ)=>difServ.Item1).Average();
                 var orderedDifs = difs.OrderByDescending(((int,string) t)=> t.Item1);

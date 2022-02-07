@@ -9,8 +9,8 @@ namespace Core
 {
     public class FactorySim
     {
-        static List<Behavior> _behaviors;
-        static List<Resource> _resources;
+        internal static List<Behavior> _behaviors;
+        internal static List<Resource> _resources;
         static List<Type> _events;
         static private List<double> _probs;
 
@@ -25,7 +25,7 @@ namespace Core
         public FactorySim(List<Behavior> behaviors, List<Resource> resources, double budget = 50, int maxProcesors = 10)
             : this(behaviors, resources, 
                 new List<Type>() { 
-                    typeof(ReqType) 
+                    typeof(Request) 
                 }, 
                 new List<double>() { 
                     1.0 
@@ -56,61 +56,78 @@ namespace Core
         }
 
 
-        public void RunSimulation(IndividualSim individual)
+        public static Output RunSimulation(IndividualSim individual)
         {
+            if(!individual.ValidIndiv())
+                throw new Exception("Invalid individual");
+                
+            MicroService.Services.Clear();
+
             List<Server> servers = new List<Server> { };
 
+            int entryPoints = 0;
             // Creando los servers
+            int id = 0;
             for (int i = 0; i < individual.MicroServices.Count; i++)
             {
-                string mSName = null;
-                if (i != 0){// Para coger el primer MicroS como el Main
-
-                    mSName = "M" + i;
-                    MicroService ms = new MicroService(mSName);
+                string mSName = "M" + i;
+                MicroService ms = new MicroService(mSName);
+                if (individual.MicroServices[i].EntryPoint){
+                    ms.SetAsEntryPoint();
+                    entryPoints++;
                 }
+                    
                 for (int j = 0; j < individual.MicroServices[i].Servers.Count; j++) {
                     // Creo los servidores
-                    servers.Add(CreateServer(j, individual.MicroServices[i].Servers[j], mSName));
+                    servers.Add(CreateServer(++id, individual.MicroServices[i].Servers[j], mSName));
                 }
             }
+            if (entryPoints == 0)
+                throw new Exception("No se puede crear una simulacion sin servers de entrada");
 
             // Asignando los servers a un nuevo env
             Env env = new Env();
-            // env.CrearEventosConLoDeMauricio @audit 
             env.AddServerList(servers);
 
+            // env.CrearEventosConLoDeMauricio
+            var total = 10000;
+            env.GenerateEventsInTimeRange(_events, _probs, total);
 
+            env.Run();
 
+            // Evaluando
+            var output = env.Output;
 
             // Limpio MicroServicios (No hace falta limpiar los Recursos, ni los Servers)
             MicroService.Services.Clear();
 
-
+            return output;
         }
 
-        private Server CreateServer(int j, ServerSim serverSim, string mSName = null)
+        private  static Server CreateServer(int j, ServerSim serverSim, string mSName)
         {
             Server server = new Server("S" + j);
 
             server.AddLayers(CreateLayers(serverSim.layers));
             server.SetResources(CreateResources(serverSim.resources));
 
-            if(mSName is not null) server.SetMService(mSName);
+            // if(mSName is not null) 
+            server.SetMService(mSName);
             return server;
         }
 
-        private IEnumerable<Resource> CreateResources(List<int> resources)
+        private static IEnumerable<Resource> CreateResources(List<int> resources)
         {
             List<Resource> res = new List<Resource> { };
             foreach (var i in resources)
-                res.Add(_resources[resources[i]]);
+                res.Add(_resources[i]);
+           
 
             return res;
         }
 
 
-        private IEnumerable<Layer> CreateLayers(List<LayerSim> layers)
+        private static IEnumerable<Layer> CreateLayers(List<LayerSim> layers)
         {
             List<Layer> _layers = new List<Layer> { };
             foreach (var beha in layers)
@@ -119,7 +136,7 @@ namespace Core
             return _layers;
         }
 
-        private Layer CreateLayer(LayerSim layer)
+        private static Layer CreateLayer(LayerSim layer)
         {
             Layer l = new Layer();
 
@@ -129,9 +146,19 @@ namespace Core
             return l;
         }
 
-        private Behavior CreateBehavior(int i)
+        private static Behavior CreateBehavior(int i)
         {
             return _behaviors[i];
+        }
+
+        public static void SaveSimulation(IndividualSim individual)
+        {
+           // var run = RunSimulation(individual);
+        }
+
+        public string ToStringIndividual(IndividualSim individual)
+        {
+            return individual.ToString();
         }
     }
 
