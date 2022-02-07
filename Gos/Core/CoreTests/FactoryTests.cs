@@ -260,7 +260,7 @@ namespace Core {
            
             
             var meta = new Genetic();
-            var poblation = IndividualSim.Sampler(2);
+            var poblation = IndividualSim.Sampler(20);
             
             meta.Run( poblation,
                 (IndividualSim i) => FactorySim.RunSimulation(i).Average,
@@ -276,7 +276,7 @@ namespace Core {
             }
 
             //poner el assert
-
+            var a = 5;
         }
         public double Optimize(IndividualSim i)
         {

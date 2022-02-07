@@ -208,7 +208,7 @@ namespace Core {
 
             // TODO case Asking
             contractor.Run(s2.Stats, p1);
-            Assert.AreEqual(s1.ID, s2.Stats.GetRequestSentToEnv().receiver);
+            Assert.AreEqual(s1.ID, s2.Stats.GetRequestSentToEnv().Receiver);
 
             // TODO case DoIt
             contractor.Run(s2.Stats, p7);
@@ -216,7 +216,7 @@ namespace Core {
 
             // TODO case Ping
             contractor.Run(s2.Stats, p8);
-            Assert.AreEqual(s1.ID, s2.Stats.GetRequestSentToEnv().receiver);
+            Assert.AreEqual(s1.ID, s2.Stats.GetRequestSentToEnv().Receiver);
         }
 
         #region FalenLeader
