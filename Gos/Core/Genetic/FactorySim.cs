@@ -11,37 +11,77 @@ namespace Core
     {
         List<Behavior> _behaviors;
         List<Resource> _resources;
+        List<Type> _events;
+        private List<double> _probs;
+        public static int MaxBehavior ;
+        public static int MaxResorce;
+        public static int MaxServers;
+
+
         public FactorySim(List<Behavior> behaviors, List<Resource> resources)
+            : this(behaviors, resources, 
+                new List<Type>() { 
+                    typeof(ReqType) 
+                }, 
+                new List<double>() { 
+                    1.0 
+                }
+            ) {
+            MaxBehavior = _behaviors.Count();
+            MaxResorce = _resources.Count();
+
+        }
+
+
+        public FactorySim(List<Behavior> behaviors, List<Resource> resources, List<Type> events, List<double> probabilities)
         {
             _behaviors = behaviors;
             _resources = resources;
+            _events = events;
+            _probs = probabilities;
         }
 
         public void RunSimulation(IndividualSim individual)
         {
-            List<MicroService> microServices = new List<MicroService> { };
             List<Server> servers = new List<Server> { };
-            int ServersIDs = 0;
+
+            // Creando los servers
             for (int i = 0; i < individual.MicroServices.Count; i++)
             {
-                string name = "M" + i;
-                MicroService ms = new MicroService(name);
-                for (int j = 0; j < individual.MicroServices[i].Servers.Count; j++)
-                {
-                    servers.Add(CreateServer(ServersIDs, name, individual.MicroServices[i].Servers[j]));
-                    ServersIDs++;
+                string mSName = null;
+                if (i != 0){// Para coger el primer MicroS como el Main
+
+                    mSName = "M" + i;
+                    MicroService ms = new MicroService(mSName);
                 }
-                microServices.Add(ms);
+                for (int j = 0; j < individual.MicroServices[i].Servers.Count; j++) {
+                    // Creo los servidores
+                    servers.Add(CreateServer(j, individual.MicroServices[i].Servers[j], mSName));
+                }
             }
+
+            // Asignando los servers a un nuevo env
+            Env env = new Env();
+            // env.CrearEventosConLoDeMauricio @audit 
+            env.AddServerList(servers);
+
+
+
+
+            // Limpio MicroServicios (No hace falta limpiar los Recursos, ni los Servers)
+            MicroService.Services.Clear();
+
 
         }
 
-        private Server CreateServer(int j, string name, ServerSim serverSim)
+        private Server CreateServer(int j, ServerSim serverSim, string mSName = null)
         {
             Server server = new Server("S" + j);
+
             server.AddLayers(CreateLayers(serverSim.layers));
             server.SetResources(CreateResources(serverSim.resources));
-            server.SetMService(name);
+
+            if(mSName is not null) server.SetMService(mSName);
             return server;
         }
 
@@ -49,7 +89,7 @@ namespace Core
         {
             List<Resource> res = new List<Resource> { };
             foreach (var i in resources)
-                res.Add(_resources[i]);
+                res.Add(_resources[resources[i]]);
 
             return res;
         }
@@ -64,11 +104,11 @@ namespace Core
             return _layers;
         }
 
-        private Layer CreateLayer(LayerSim beha)
+        private Layer CreateLayer(LayerSim layer)
         {
             Layer l = new Layer();
 
-            foreach (var i in beha.behavior)
+            foreach (var i in layer.behavior)
                 l.AddBehavior(CreateBehavior(i));// o poner _behaviors[i]; 
 
             return l;

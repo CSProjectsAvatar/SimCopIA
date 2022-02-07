@@ -27,7 +27,7 @@ namespace Core
         {
             // prob de agregar un behavior
             if (_random.NextDouble() < probAddBehav) { // prob de agregar un behavior
-                behavior.Add(_random.Next(behavior.Count));
+                behavior.Add(_random.Next(FactorySim.MaxBehavior-1));
             }
             for (int i = 0; i < behavior.Count; i++) {
                 // prob de eliminar un behavior
@@ -42,26 +42,18 @@ namespace Core
         internal static LayerSim RndLayer()
         {
             LayerSim l = new LayerSim();
-            List<int> bevavior = Rellenar(5);// count de omarB
-            var countBehavior = _random.Next(1,3/*lo de omar countB*/);
+            List<int> bevavior = new List<int>(Enumerable.Range(1, FactorySim.MaxBehavior));
+            var countBehavior = _random.Next(1, FactorySim.MaxBehavior);
             for (int i = 0; i < countBehavior; i++)
             {
-                var va = _random.Next(bevavior.Count-1);// lo de omar countB
+                var va = _random.Next(bevavior.Count-1);
                 l.behavior.Add(bevavior[va]);
                 bevavior.RemoveAt(va);
             }
             return l;
         }
 
-        internal static List<int> Rellenar(int count)
-        {
-            List<int> b = new List<int> { };
-            for (int i = 0; i < count-1; i++)
-            {
-                b.Add(i);
-            }
-            return b;
-        }
+        
     }
 
 }

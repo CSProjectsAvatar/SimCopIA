@@ -53,8 +53,7 @@ namespace Core
             // Resources
             for (int i = 0; i < resources.Count; i++) {
                 if (_random.NextDouble() < probMutateRscs) { // prob de mutar un recurso
-                    var max = resources.Max(); // @audit ver lo del max ese
-                    var reso = _random.Next(max);
+                    var reso = _random.Next(FactorySim.MaxResorce-1);
                     resources[i] = reso;
                 }
             }
@@ -64,17 +63,17 @@ namespace Core
         {
             ServerSim s = new ServerSim();
 
-            var countLayer = _random.Next(1, 3/*lo de omar countB*/);
+            var countLayer = _random.Next(1, FactorySim.MaxBehavior);
             for (int i = 0; i < countLayer; i++)
             {
                 s.layers.Add(LayerSim.RndLayer());
             }
 
-            var countResource = _random.Next(1, 3/*lo de omar countR*/);
-            List<int> resor = LayerSim.Rellenar(5);// count de omarB
+            var countResource = _random.Next(1, FactorySim.MaxResorce);
+            List<int> resor = new List<int>(Enumerable.Range(1, FactorySim.MaxResorce));
             for (int i = 0; i < countResource; i++)
             {
-                var va = _random.Next(resor.Count - 1);// lo de omar countB
+                var va = _random.Next(resor.Count - 1);
                 s.resources.Add(resor[va]);
                 resor.RemoveAt(va);
 
