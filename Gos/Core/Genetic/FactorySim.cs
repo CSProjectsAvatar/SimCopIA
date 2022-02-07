@@ -56,7 +56,7 @@ namespace Core
         }
 
 
-        public void RunSimulation(IndividualSim individual)
+        public static void RunSimulation(IndividualSim individual)
         {
             List<Server> servers = new List<Server> { };
 
@@ -80,16 +80,13 @@ namespace Core
             // env.CrearEventosConLoDeMauricio @audit 
             env.AddServerList(servers);
 
-
-
-
             // Limpio MicroServicios (No hace falta limpiar los Recursos, ni los Servers)
             MicroService.Services.Clear();
 
 
         }
 
-        private Server CreateServer(int j, ServerSim serverSim, string mSName = null)
+        private  static Server CreateServer(int j, ServerSim serverSim, string mSName = null)
         {
             Server server = new Server("S" + j);
 
@@ -100,17 +97,18 @@ namespace Core
             return server;
         }
 
-        private IEnumerable<Resource> CreateResources(List<int> resources)
+        private static IEnumerable<Resource> CreateResources(List<int> resources)
         {
             List<Resource> res = new List<Resource> { };
             foreach (var i in resources)
                 res.Add(_resources[resources[i]]);
+           
 
             return res;
         }
 
 
-        private IEnumerable<Layer> CreateLayers(List<LayerSim> layers)
+        private static IEnumerable<Layer> CreateLayers(List<LayerSim> layers)
         {
             List<Layer> _layers = new List<Layer> { };
             foreach (var beha in layers)
@@ -119,7 +117,7 @@ namespace Core
             return _layers;
         }
 
-        private Layer CreateLayer(LayerSim layer)
+        private static Layer CreateLayer(LayerSim layer)
         {
             Layer l = new Layer();
 
@@ -129,9 +127,14 @@ namespace Core
             return l;
         }
 
-        private Behavior CreateBehavior(int i)
+        private static Behavior CreateBehavior(int i)
         {
             return _behaviors[i];
+        }
+
+        public static void SaveSimulation(IndividualSim individual)
+        {
+           // var run = RunSimulation(individual);
         }
     }
 
