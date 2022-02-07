@@ -517,14 +517,14 @@ $ gos Sources/distrb.gos
 
 ### Simulación
   
-  La simulación que tenemos en uso actualmente es la misma idea que la 2da entrega, solo que esta vez aumentamos sus posibilidades de uso, pudiendo simular aspectos mas complejos de una manera más fácil.
+  La simulación que tenemos en uso actualmente es la misma idea que la 2da entrega, solo que esta vez aumentamos sus posibilidades de uso, permitiendo simular aspectos mas complejos de una manera más fácil.
   
 #### **Ambiente**
   El ambiente (Environment) es el encargado de avisarle a los servidores cuando un evento relacionado con estos está a punto de ocurrir. Posee caracteristicas generales de la simulación y da acceso a algunas estadisticas finales como la cantidad de respuestas dadas al cliente (el servidor que hace los request iniciales a nuestro conjunto de servidores).
 #### **Comportamientos de Servidores**
   Ahora los Agentes (Servidores) tienen un conjunto de capas internas, cada una con una lista de comportamientos asociados. Cada una de estas capas se ejecutan cada vez que el servidor recibe información del ambiente (cada vez que llega un estímulo que este servidor pueda detectar) y cada una ejecuta uno de sus comportamientos, esta elección de comportamiento de cada capa está basada en el estado interno del servidor y la persepción entrante.  
   
-  Este modelo por capas da la posibilidad de crear capas personalizadas por el usuario a través de DSL pudiendo lograr comportamientos no previamente definidos. Estos comportamientos tienen memoria interna donde el usuario puede guardar datos para lograr funcionamientos mas complejos. A pesar de esta posibilidad brindamos implementaciones de comportamientos de servidores que creemos fundamentales en nuestra simulación.
+  Este modelo da la posibilidad de crear capas personalizadas por el usuario a través del DSL permitiendo lograr comportamientos no previamente definidos. Estos comportamientos tienen memoria interna donde el usuario puede guardar datos para lograr funcionamientos mas complejos. A pesar de esta posibilidad brindamos implementaciones de comportamientos de servidores que creemos fundamentales en nuestra simulación.
   - ##### **BuildIn Behaviors**
     - *Jefe* : 
 
@@ -552,16 +552,15 @@ $ gos Sources/distrb.gos
 
 
 #### **Eventos**
-  Los eventos son se ejecutan en algún momento en el tiempo, estos pueden ser tanto: llegadas de mensajes, la ejecucion de un proceso interno de un servidor, como eventos meteorológicos que afecten la conectividad con algunos servidores o la interrumpa.  
+  Los eventos se ejecutan en algún momento en el tiempo, estos pueden tanto ser : llegadas de mensajes la ejecucion de un proceso interno de un servidor, como eventos meteorológicos que afecten la conectividad con algunos servidores o la interrumpa.  
   - ##### **Percepciones**
     Estas son las directamente relacionadas con lo que el servidor puede detectar como:
 
     - la llegada de un *Request* que es una solicitud de algún recurso o acción a algún servidor.
     - la llegada de un *Response* que es una respuesta a un *Request*.
-    - la llegada de a lo que nosotros denominamos *Observer* que no es mas que la posibilidad que le dimos al sistema que (a nivel de implementación) le diga a un Servidor que debe cambiar su estado interno por alguna razón que el mismo servidor conoce. Esto es muy útil ya que nos da la posibilidad de no tener en cada instancia de tiempo que revisar si todos los servidores tienen algún cambio de estado interno.
-  - ##### **Eventos Ambientales**
-    
-    <!-- @todo  -->
+    - la llegada de a lo que nosotros denominamos *Observer* que no es mas que la posibilidad que le dimos al sistema que (a nivel de implementación) le diga a un Servidor que debe cambiar su estado interno por alguna razón que el mismo servidor conoce. Esto es muy útil ya que nos permite no tener en cada instancia de tiempo que revisar si todos los servidores tienen algún cambio de estado interno.
+  - ##### **Eventos Adicionales**
+    Son eventos que no son generados por los servidores, suelen simular fallas en los sistemas o algo que los afecte directamente, imposibilitando su uso o modificando algún aspecto de su funcionamiento. 
 
 ### Flujo de un Pedido
 ```mermaid
