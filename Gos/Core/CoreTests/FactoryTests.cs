@@ -257,44 +257,33 @@ namespace Core {
             List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
             List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
             FactorySim factory = new FactorySim(behaviors, resources);
-            
-            Func<IndividualSim, double> mini = null;
-            Func<IndividualSim, bool> validate = null;
-
-            // List<IndividualSim> poblation = IndividualSim.Sampler(20);
-
-            // Genetic genetic = new Genetic();
-            // genetic.Run(poblation, mini,validate, 10);// ponerle un time
-
-
-            // foreach (var item in poblation)
-            // {
-            //     FactorySim.RunSimulation(item);
-            // }
+           
             
             var meta = new Genetic();
-            var poblation = IndividualSim.Sampler(30);
+            var poblation = IndividualSim.Sampler(2);
             
             meta.Run( poblation,
                 (IndividualSim i) => FactorySim.RunSimulation(i).Average,
                 (IndividualSim i) => ValidInBudget(i),
-                100000);
+                20000);
 
             var i = poblation[0];
+            // print population
+            foreach (var item in poblation)
+            {
+                var res = FactorySim.RunSimulation(item).Average;
+                Console.WriteLine(res);
+            }
 
             //poner el assert
 
         }
-
-        [TestMethod]
-        public void cw()
+        public double Optimize(IndividualSim i)
         {
-            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
-            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
-            FactorySim factory = new FactorySim(behaviors, resources);
-            
-            string s= factory.ToStringIndividual(individual);
-            Console.WriteLine(s);
+            var output = FactorySim.RunSimulation(i);
+            var res = output.Average;
+            // var res = output.Average * ( 1 / output.ResponsePercent);
+            return res;
         }
         public bool ValidInBudget(IndividualSim individual)
         {// Calcula el coste de un individuo, basandose en los parallelsProcesors y el costo de estos
@@ -306,6 +295,17 @@ namespace Core {
             }
             var ret = cost < FactorySim.Budget;
             return cost < FactorySim.Budget;
+        }
+
+        [TestMethod]
+        public void cw()
+        {
+            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
+            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
+            FactorySim factory = new FactorySim(behaviors, resources);
+            
+            string s= factory.ToStringIndividual(individual);
+            Console.WriteLine(s);
         }
         public static void RunMetaWithFunc(){
             var meta = new MetaHeuristics();

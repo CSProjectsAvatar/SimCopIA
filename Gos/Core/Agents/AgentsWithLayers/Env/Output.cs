@@ -36,7 +36,7 @@ namespace ServersWithLayers{
                         select res.Item1 -req.Item1);
 
 
-
+            Average = int.MaxValue;
             if(difs.Count()!=0)
                 Average = difs.Average();
 
