@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ServersWithLayers;
 
 namespace Compiler.Tests {
     [TestClass]
@@ -814,8 +815,7 @@ print l" + _dslSuf);
 
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
+            Dispose();
         }
     }
 }

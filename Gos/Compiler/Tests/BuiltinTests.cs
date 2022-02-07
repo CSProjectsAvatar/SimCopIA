@@ -50,8 +50,7 @@ print pow(24, 1)
 
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
+            Dispose();
         }
     }
 }

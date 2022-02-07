@@ -1317,23 +1317,48 @@ namespace DataClassHierarchy
         }
 
         public (bool, object) Visiting(ProgramNode node){
-            //Context.Simulation = new Agents.Environment();
-
             var vis = Visit(node.Statements);
+            if (!vis.Item1) {
+                return default;
+            }
+            var servs = AccessibleServers().ToList();
+            if (servs.Count == 0) {
+                _log.LogWarning("No servers are accessible from the global context. Simulation won't run.");
+            } else {
+                var env = new Env(Helper.Logger<Env>(), Helper.Logger<MicroService>());
+                env.AddServerList(servs);
 
-            // @todo instanciar el ambient en este momento, engancharle las cosas y correrlo
-            
-            //if (vis.Item1) {  // evaluacio'n exitosa
-            //    // @audit DE JUGUETE
-            //    Context.Simulation.AddSomeRequests();
-            //    Context.Simulation.Run();
+                try {
+                    env.Run();
+                } catch (GoSException e) {
+                    _log.LogError(e.Message);
+                    return default;
+                }
+            }
+            return (true, null);
+        }
 
-            //    _log.LogInformation(
-            //        Context.Simulation.solutionResponses.Aggregate(
-            //            $"Responses to environment:{System.Environment.NewLine}",
-            //            (accum, r) => accum + $"time:{r.responseTime} body:{r.body}{System.Environment.NewLine}"));
-            //}
-            return vis;
+        internal IEnumerable<Server> AccessibleServers() {
+            var ans = Enumerable.Empty<Server>();
+
+            foreach (var (_, val) in Context.Variables) {
+                ans = ans.Concat(AccessibleServers(val));
+            }
+            return ans;
+        }
+
+        private IEnumerable<Server> AccessibleServers(object val) {
+            switch (Helper.GetType(val)) {
+                case GosType.Server:
+                    return new[] { val as Server };
+
+                case GosType.List:
+                    var l = val as List<object>;
+                    return l.Aggregate(Enumerable.Empty<Server>(), (accum, obj) => accum.Concat(AccessibleServers(obj)));
+
+                default:
+                    return Enumerable.Empty<Server>();
+            }
         }
 
         public (bool, object) Visiting(InfLoopAst node) {
@@ -1477,7 +1502,14 @@ namespace DataClassHierarchy
                 case Helper.LayerClass:
                     return (true, new Layer());
                 case Helper.ServerClass:
-                    return (true, new Server(Helper.NewServerName()));
+                    if (stackC.Count > 1) {
+                        _log.LogWarning(
+                            Helper.LogPref + "the server instance is not in the global context, it might not be considered for running.",
+                            node.Token.Line,
+                            node.Token.Column
+                            );
+                    }
+                    return (true, new Server(Helper.NewServerName(), Helper.Logger<Server>(), Helper.Logger<Status>()));
                 default:
                     _log.LogError(
                         Helper.LogPref + "an instance of the class {c} can't be created.",

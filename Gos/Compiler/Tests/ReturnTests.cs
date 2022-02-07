@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using ServersWithLayers;
 
 namespace Compiler.Tests {
     [TestClass]
@@ -76,8 +77,7 @@ fun f(x) {
 
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
+            Dispose();
         }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ServersWithLayers;
 
 namespace Compiler.Tests {
     [TestClass]
@@ -31,8 +32,7 @@ print 3 == true
 
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
+            Dispose();
         }
     }
 }

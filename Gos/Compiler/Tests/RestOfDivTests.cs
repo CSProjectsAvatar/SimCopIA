@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Compiler.Lexer;
 using DataClassHierarchy;
 using System.IO;
+using ServersWithLayers;
 
 namespace Compiler.Tests {
     [TestClass]
@@ -50,8 +51,7 @@ namespace Compiler.Tests {
 
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
+            Dispose();
         }
     }
 }

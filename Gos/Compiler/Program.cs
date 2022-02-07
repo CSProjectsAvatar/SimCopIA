@@ -18,6 +18,7 @@ namespace Compiler {
                     .AddFilter("Core", LogLevel.Warning)
                     .AddFilter("Compiler", LogLevel.Warning)
                     .AddFilter("DataClassHierarchy", LogLevel.Warning)
+                    .AddFilter(nameof(ServersWithLayers), LogLevel.Warning)
                     .AddConsole();
             });
             ILogger<Lr1Dfa> logLr1Dfa = loggerFactory.CreateLogger<Lr1Dfa>();

@@ -33,6 +33,7 @@ namespace Core {
                     .AddFilter("Core", LogLevel.Debug)
                     .AddFilter("Compiler", LogLevel.Information)
                     .AddFilter("DataClassHierarchy", LogLevel.Information)
+                    .AddFilter("ServersWithLayers", LogLevel.Debug)
                     .AddConsole();
             });
         } // init

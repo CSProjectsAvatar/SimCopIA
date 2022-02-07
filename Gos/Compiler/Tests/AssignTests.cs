@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ServersWithLayers;
 
 namespace Compiler.Tests {
     [TestClass]
@@ -110,8 +111,7 @@ f() = 20" + _dslSuf);
 
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
+            Dispose();
         }
     }
 }

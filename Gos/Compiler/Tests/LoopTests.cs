@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using ServersWithLayers;
 
 namespace Compiler.Tests {
     [TestClass]
@@ -184,8 +185,7 @@ for i, item, poff in [5, 4, 3] {
 
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
+            Dispose();
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Compiler.Lexer;
 using System.IO;
+using ServersWithLayers;
 
 namespace Compiler.Tests {
     [TestClass]
@@ -28,6 +29,19 @@ namespace Compiler.Tests {
             _dslSuf = @"
 ";
             _endl = Environment.NewLine;
+        }
+
+        protected static void Dispose() {
+            _lex.Dispose();
+            _parser.Dispose();
+            MicroService.Services.Clear();
+            Resource.Dispose();
+            Message.Dispose();
+            Helper.Dispose();
+
+            if (Env.CurrentEnv != null) {
+                Env.ClearServersLayers();
+            }
         }
     }
 }

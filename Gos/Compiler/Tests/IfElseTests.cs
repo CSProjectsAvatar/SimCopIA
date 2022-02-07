@@ -3,6 +3,7 @@ using Core;
 using DataClassHierarchy;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ServersWithLayers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,8 +16,7 @@ namespace Compiler.Tests {
     public class IfElseTests : LangTest {
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
+            Dispose();
         }
 
         [TestMethod]

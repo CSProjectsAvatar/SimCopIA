@@ -1171,11 +1171,7 @@ behav p {
 
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
-            MicroService.Services.Clear();
-            Resource.Dispose();
-            Message.Dispose();
+            Dispose();
         }
     }
 }

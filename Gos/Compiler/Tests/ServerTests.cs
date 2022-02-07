@@ -57,14 +57,28 @@ print s.id
                 @out.ToString());
         }
 
+        [TestMethod]
+        public void NotInGlobalContext() {
+            var tokens = _lex.Tokenize(
+                @"
+if true {
+    let s = new server
+}
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+        }
+
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
-            MicroService.Services.Clear();
-            Resource.Dispose();
-            Message.Dispose();
-            Helper.Dispose();
+            Dispose();
         }
     }
 }

@@ -51,12 +51,7 @@ print r.required
 
         [TestCleanup]
         public void Clean() {
-            _lex.Dispose();
-            _parser.Dispose();
-            MicroService.Services.Clear();
-            Resource.Dispose();
-            Message.Dispose();
-            Helper.Dispose();
+            Dispose();
         }
     }
 }
