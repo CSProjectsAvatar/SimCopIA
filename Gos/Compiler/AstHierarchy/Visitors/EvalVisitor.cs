@@ -1335,12 +1335,18 @@ namespace DataClassHierarchy
                     var endl = Environment.NewLine;
                     _log.LogInformation(
                         $"Statistics:{endl}" +
-                        $"Average delay time of satisfied requests: {{avg}} time units{endl}" +
-                        $"Percent of unsatisfied requests: {{notResp}} %{endl}" +
-                        $"Percent of satisfied requests: {{resp}} %{endl}",
+                        $"Average delay time of satisfied requests: {{avg}} time units.{endl}" +
+                        $"Percent of unsatisfied requests: {{notResp}} %.{endl}" +
+                        $"Percent of satisfied requests: {{resp}} %.{endl}" +
+                        $"The slowest response was given at time {{time1}} by {{serv1}}.{endl}" +
+                        $"The fastest response was given at time {{time2}} by {{serv2}}.{endl}" +
+                        $"Total monthly cost: ${{cost}}.{endl}",
                         @out.Average,
                         @out.NotResponsePercent,
-                        @out.ResponsePercent);
+                        @out.ResponsePercent,
+                        @out.SlowestResponse.Item1, @out.SlowestResponse.Item2,
+                        @out.FastestResponse.Item1, @out.FastestResponse.Item2,
+                        @out.TotalMonthlyCost);
 
                 } catch (GoSException e) {
                     _log.LogError(e.Message);

@@ -53,6 +53,8 @@ namespace ServersWithLayers{
             _logger= logger;
         }
 
+        public Status(string id, ILogger<Status> logger = null) : this(id, 5, logger) { }
+
         public void AddPartialRpnse(Response resp)
         {
             if (!_notCompletdRespns.ContainsKey(resp.ReqID)) // Si no esta lo agrego
