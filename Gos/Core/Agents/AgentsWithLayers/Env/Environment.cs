@@ -14,11 +14,16 @@ namespace ServersWithLayers
         Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
         public List<Response> solutionResponses 
         => (from tR in GetClientResponses() select tR.Item2).ToList();
+
+        private List<(int,Request)> clientRequests;
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
         private ILogger<Env> _loggerEnv;
 
+        
+
         private Server _clientServer;
+        public Output Output {get;}
 
         private static string main = "Main";
         public Env(ILogger<Env> loggerEnv = null, ILogger<MicroService> loggerMS = null)
@@ -31,6 +36,10 @@ namespace ServersWithLayers
             _loggerEnv = loggerEnv;
             new MicroService(main,loggerMS).SetAsEntryPoint(); // crea el microservicio principal
             InitializeClientServer();
+            
+            this.clientRequests = new();
+            this.Output = new Output(this);
+
         }
 
         /// <summary>
@@ -89,11 +98,18 @@ namespace ServersWithLayers
                     break;
                 item();
             }
+            Output.ProcessData();
         }
 
         //Suscribe un evento en el environment.
         public void SubsribeEvent(int time, Event e){
             turn.Add(time + e.MatureTime, e);
+
+            Request r0 = e as Request;
+            if( r0 != null && r0.Sender == "0" ){
+                clientRequests.Add((time,r0));
+            }
+
         }
         //Retorna un servidor con el identificador 'ID' si esta en el environment.
         public Server GetServerByID(string ID){
@@ -117,6 +133,9 @@ namespace ServersWithLayers
             if(l == null) 
                 return new List<(int,Response)>();
             return l;
+        }
+        public IEnumerable<(int,Request)> GetClientRequests(){
+            return clientRequests as IEnumerable<(int,Request)>;
         }
         // el string log del cliente
         public IEnumerable<(int,string)> GetClientReciveLog() {
