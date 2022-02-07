@@ -1,14 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
-namespace Core
-{
+namespace Core {
     [TestClass]
-    public abstract class BaseTest
-    {
+    public abstract class BaseTest {
         public ServiceCollection services;
 
         public ServiceProvider Container =>
@@ -18,14 +16,12 @@ namespace Core
         protected static ILoggerFactory LoggerFact;
 
         [TestCleanup]
-        public void BaseCleanUp()
-        {
+        public void BaseCleanUp() {
             LoggerFact.Dispose();
         }
 
         [TestInitialize]
-        public void PrimaryInitializer()
-        {
+        public void PrimaryInitializer() {
             services = new ServiceCollection();
 
             services.AddLogging();
@@ -37,6 +33,7 @@ namespace Core
                     .AddFilter("Core", LogLevel.Debug)
                     .AddFilter("Compiler", LogLevel.Information)
                     .AddFilter("DataClassHierarchy", LogLevel.Information)
+                    .AddFilter("ServersWithLayers", LogLevel.Debug)
                     .AddConsole();
             });
         } // init

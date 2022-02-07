@@ -59,6 +59,22 @@ namespace ServersWithLayers{
             foreach(var r in resources)
                 AddReq(r);
         }
+
+        public static void Dispose() {
+            Resources.Clear();
+        }
+
+        public static Resource Rsrc(string name) {
+            return Resources[name];
+        }
+
+        public void SetTime(int time) {
+            RequiredTime = time;
+        }
+
+        public IEnumerable<Resource> GetRequirements() {
+            return Requirements.Select(r => Rsrc(r));
+        }
     }
 
 }

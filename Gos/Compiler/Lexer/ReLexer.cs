@@ -9,7 +9,7 @@ namespace Compiler.Lexer {
     /// <summary>
     /// Tokenizador para expresiones regulares.
     /// </summary>
-    class ReLexer {
+    public class ReLexer {
         private readonly IDictionary<char, Token.TypeEnum> _metas;
         private readonly ILogger<ReLexer> _log;
 

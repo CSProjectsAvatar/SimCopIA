@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ServersWithLayers{
     public class MicroService{
-        internal static Dictionary<string, MicroService> Services = new();
+        public static Dictionary<string, MicroService> Services = new();
         private ILogger<MicroService> _logger;
 
         private string _name;

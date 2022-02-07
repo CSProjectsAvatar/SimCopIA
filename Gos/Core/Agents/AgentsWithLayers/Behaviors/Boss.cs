@@ -145,14 +145,14 @@ namespace ServersWithLayers.Behaviors
         }
         
 
-        internal static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
+        public static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
             var availList = status.AvailableResources;
             var res = resources.Where(x => !availList.Contains(x)).ToList();
 
             return res;
         }
 
-        private static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
+        public static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
             List<Request> solution = new();
 
             // resource is Ready 

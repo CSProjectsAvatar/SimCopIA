@@ -10,9 +10,15 @@ namespace Compiler.Grammar_Unterminals {
 
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation) {
             // <cond> := <math> "<" <math>
-		    //         | <math> ">" <math>
+            //         | <math> ">" <math>
             //         | <math> "==" <math>
-            var leftAst = (derivation[0] as MathUnt).Ast as Expression;
+            //         | <math>
+            var fstMath = derivation[0] as MathUnt;
+
+            if (derivation.Count == 1) {
+                return fstMath.Ast;
+            }
+            var leftAst = fstMath.Ast as Expression;
             var rightAst = (derivation[2] as MathUnt).Ast as Expression;
 
             return derivation[1] switch{

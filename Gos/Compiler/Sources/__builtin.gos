@@ -1,0 +1,34 @@
+﻿fun pow(x, n) {
+	let i = 0
+	let ans = 1
+
+	forever {
+		if i == n {
+			break
+		}
+		ans = ans * x
+		i = i + 1
+	}
+	return ans
+}
+let ASK = 0
+let ORDER = 1
+let PING = 2
+
+fun range(upper) {
+	let i = 0
+	let ans = []
+
+	forever {
+		if i == upper {
+			break
+		}
+		ans.add(i)
+		i = i + 1
+	}
+	return ans
+}
+
+fun one_always(bs) {
+	return 1
+}

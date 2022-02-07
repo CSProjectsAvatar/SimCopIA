@@ -155,7 +155,7 @@ namespace ServersWithLayers
             return logList;
         }
 
-        internal static void ClearServersLayers()
+        public static void ClearServersLayers()
         {
             foreach (var server in Env.CurrentEnv.servers.Values)
                 server.ClearLayers();

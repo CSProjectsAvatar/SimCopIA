@@ -2,33 +2,82 @@
 using System;
 using System.Collections.Generic;
 using ServersWithLayers;
+using System.Linq;
+using Compiler.AstHierarchy.Statements;
+using Compiler;
+
 namespace DataClassHierarchy
 {
     public class Context
     {
         public static Env Simulation {get; internal set;}
-        Context parent;
+
+        internal Context parent;
         
         Dictionary<string, object> _variables;
         Dictionary<(string, int), DefFun> _functions; // (nombre, aridad) 
+        private readonly Dictionary<string, Behavior> _behavs;
+
+        internal bool IsInsideBehav() {
+            for (var ctx = this; ctx != null; ctx = ctx.parent) {
+                if (ctx.OpenBehavior) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Whether a function declaration has been started in the validation process but it' hasn't been closed yet.
+        /// </summary>
+        internal bool OpenFunction { get; set; }
+
+        internal bool DefBehav(string name, Behavior node) {
+            if (_behavs.ContainsKey(name)) {
+                return false;
+            }
+            _behavs[name] = node;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Whether a loop declaration has been started in the validation process but it' hasn't been closed yet.
+        /// </summary>
+        internal bool OpenLoop { get; set; }
+        internal bool OpenBehavior { get; set; }
+
+        public IEnumerable<(string Name, object Value)> Variables => _variables.Select(kv => (kv.Key, kv.Value));
+
         public Context(){
             _variables = new Dictionary<string, object>();
             _functions = new Dictionary<(string, int), DefFun>();
-
+            _behavs = new();
         }
+
+        /// <summary>
+        /// Define la variable y devuelve true si no habi'a ninguna con ese nombre en el contexto actual.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public bool DefVariable(string name, object value = null)
         {
             if (_variables.ContainsKey(name))
             {
                 return false;
             }
-            SetVar(name, value);
+            _variables[name] = value;
             return true;
         }
 
-        public void SetVar(string name, object value)
-        {
-            _variables[name] = value;
+        public void SetVar(string name, object value) {
+            for (var ctx = this; ctx != null; ctx = ctx.parent) {
+                if (ctx._variables.ContainsKey(name)) {
+                    ctx._variables[name] = value;
+                    break;
+                }
+            }
         }
 
         public bool DefFunc(string name, int funArity, DefFun fun = null){
@@ -78,6 +127,22 @@ namespace DataClassHierarchy
             childContent.parent = this;
             
             return childContent;
+        }
+
+        internal Behavior GetBehav(string name) {
+            return _behavs[name];
+        }
+
+        /// <summary>
+        /// El contexto global con sus definiciones built-in.
+        /// </summary>
+        /// <returns></returns>
+        internal static Context Global() {
+            var ctx = new Context();
+            ctx.DefFunc(Helper.RandFun, 1);
+            ctx.DefFunc(Helper.RandIntFun, 1);
+
+            return ctx;
         }
     }
 }

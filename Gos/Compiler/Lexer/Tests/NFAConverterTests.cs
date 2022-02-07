@@ -21,7 +21,7 @@ namespace Tests {
         // Test que prueba la clausura del primer estado de un NFA
         [TestMethod]
         public void ClousureFirstNFAState() {
-            ResetStatesCounter();
+            
 
             var nfa = new NFA('a');
 
@@ -34,7 +34,7 @@ namespace Tests {
          // Test que prueba la clausura del primer estado de un NFA Union
         [TestMethod]
         public void ClousureUnionFirstNFAState() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('b');
@@ -52,7 +52,7 @@ namespace Tests {
         // Test que prueba la clausura del primer estado de un NFA Multiplicacion
         [TestMethod]
         public void ClousureMultiplicationFirstNFAState() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
 
@@ -67,7 +67,7 @@ namespace Tests {
         // Test que prueba la clausura del primer estado de un NFA Maybe
         [TestMethod]
         public void ClousureMaybeFirstNFAState() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
 
@@ -85,7 +85,7 @@ namespace Tests {
         // Test que prueba el Goto del primer estado de un NFA Union
         [TestMethod]
         public void GotoUnionFirstNFAState() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('b');
@@ -108,7 +108,7 @@ namespace Tests {
         // Test para probar el StringHash de DFAState para usar el HashSet
         [TestMethod]
         public void GetHashTest(){
-            ResetStatesCounter();
+            
 
             var arr = new uint [] { 1, 2, 3};
             var arr2 = new uint [] { 1, 5, 3};
@@ -134,7 +134,7 @@ namespace Tests {
         // Test de ToDFA para un NFA con un solo estado
         [TestMethod]
         public void MarkFinalStatesA() {
-            ResetStatesCounter();
+            
 
             var nfa = new NFA('a');
             
@@ -149,7 +149,7 @@ namespace Tests {
         // Test de ToDFA para probar estados de NFA Union
         [TestMethod]
         public void ToDFATestUnion() {
-            ResetStatesCounter();
+            
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('b');
 
@@ -174,7 +174,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un NFA con un solo estado
         [TestMethod]
         public void ToDFATestAccept() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('b');
@@ -194,7 +194,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un NFA con varios estados
         [TestMethod]
         public void ToDFATestAccept2() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('l');
@@ -209,7 +209,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un NFA con varios estados y union
         [TestMethod]
         public void ToDFATestAcceptConcat() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('l');
@@ -239,7 +239,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un string con *
         [TestMethod]
         public void ToDFATestAcceptConcatMult() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('l');
@@ -267,7 +267,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un string union con *
         [TestMethod]
         public void ToDFATestAcceptConcatUnionMult() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('l');
@@ -306,7 +306,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un string concat con ?
         [TestMethod]
         public void ToDFATestAcceptConcatMaybe() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('l');
@@ -332,7 +332,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un string concat ? y un char
         [TestMethod]
         public void AcceptConcatMaybeChar() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
 
@@ -358,7 +358,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un string concat ? y un char
         [TestMethod]
         public void ToDFATestAcceptConcatMaybeChar() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('l');
@@ -389,7 +389,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un string concat ? y *
         [TestMethod]
         public void AcceptConcatMaybeAndMultChar() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfaMaybe = nfa1.Maybe(); // a?
@@ -419,7 +419,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA para un string concat ? y *
         [TestMethod]
         public void ToDFATestAcceptConcatMaybeAndMult() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('l');
@@ -461,7 +461,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA con union, concat, ?, * y +
         [TestMethod]
         public void AcceptConcatMaybeConcatPlusOne() {
-            ResetStatesCounter();
+            
 
             var nfaA = new NFA('a');
             var nfaMaybe = nfaA.Maybe(); // a?
@@ -496,7 +496,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA con union, concat, ?, * y +
         [TestMethod]
         public void AcceptConcatMaybePlusMult() {
-            ResetStatesCounter();
+            
 
             var nfaA = new NFA('a');
             var nfaMaybe = nfaA.Maybe(); // a?
@@ -533,7 +533,7 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA con union, concat, ?, * y +
         [TestMethod]
         public void AcceptConcatMaybeConcatPlus() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('a');
             var nfa2 = new NFA('l');
@@ -582,7 +582,7 @@ namespace Tests {
         // Test de Upfloor con union
         [TestMethod]
         public void TestingUpfloorUnion() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('8');
             var nfa2 = new NFA('8');
@@ -602,7 +602,7 @@ namespace Tests {
         // Test de ToDFA probando el +
         [TestMethod]
         public void PlusTest() {
-            ResetStatesCounter();
+            
 
             var nfa1 = new NFA('8');
             var nfa2 = new NFA('9');
@@ -627,7 +627,7 @@ namespace Tests {
         // Test de ToDFA probando el +
         [TestMethod]
         public void PlusTestMini() {
-            ResetStatesCounter();
+            
 
             var nfaPt = new NFA('.');
             var nfa4 = new NFA('8');
@@ -658,8 +658,6 @@ namespace Tests {
         // Test de ToDFA probando Accept del DFA con union, concat, ?, * y +
         [TestMethod]
         public void Digits() {
-            ResetStatesCounter();
-
             var nfa1 = new NFA('8');
             var nfa2 = new NFA('9');
             var nfa3 = nfa1.Union(nfa2);
@@ -692,9 +690,9 @@ namespace Tests {
             Assert.IsFalse(dfa.Accept("8."));
         }
         
-    
-    
-    
+        [TestCleanup]
+        public void Clean() {
+            ResetStatesCounter();
+        }
     }
-
 }

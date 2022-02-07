@@ -11,6 +11,9 @@ namespace ServersWithLayers
         Action<Status, Perception, Dictionary<string, object>> action;
         
         bool _firstTime = true;
+
+        public string Name { get; init; }
+
         public Behavior():this(null) { }
         public Behavior(Action<Status, Perception, Dictionary<string, object>> action, Action<Status, Dictionary<string, object>> init = null)
         {

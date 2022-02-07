@@ -1,5 +1,7 @@
 
 
+using System;
+
 namespace DataClassHierarchy
 {
     public enum Operator{
@@ -19,7 +21,11 @@ namespace DataClassHierarchy
             Left = left;
             Right = right;
         }
-        public abstract (bool, object) TryCompute(object left, object right);
+
+        [Obsolete]
+        public virtual (bool, object) TryCompute(object left, object right) {  // @todo pa borrar
+            throw new InvalidOperationException();
+        }
 
         public override bool Validate(Context context){
             return Left.Validate(context) && Right.Validate(context);

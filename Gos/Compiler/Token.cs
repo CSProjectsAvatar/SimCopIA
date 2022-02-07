@@ -132,6 +132,10 @@ namespace Compiler {
                 TypeEnum.RPar => ")",
                 TypeEnum.Scape => "\\",
                 TypeEnum.Times => "*",
+                TypeEnum.RightArrow => "->",
+                TypeEnum.Percent => "%",
+                TypeEnum.Dot => ".",
+                TypeEnum.Class => "server, request, alarm or response",
                 _ => token.ToString()
             };
         }
@@ -196,23 +200,61 @@ namespace Compiler {
         /// </summary>
         internal static Token Div => new Token(TypeEnum.Div, 1, ++colHelper, "/");
 
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (->).
+        /// </summary>
+        internal static Token Connection => new Token(TypeEnum.RightArrow, 1, ++colHelper, "->");
+
+        /// <summary>
+        /// Propiedad helper para debuguear y testear (->).
+        /// </summary>
+        internal static Token New => new Token(TypeEnum.New, 1, ++colHelper, "new");
+
         internal static Token NumberFor(double x) {
             return new Token(TypeEnum.Number, 1, ++colHelper, x.ToString());
         }
 
         public enum TypeEnum {  // @remind LOS TOKENS TIENEN Q APARECER DEL + PRIORITARIO AL -
-            /// <summary>
-            /// simplew
-            /// </summary>
-            SimpleWorker,
+            Ask,
+            Order,
+            AlarmMe,
+            Ping,
+            Respond,
+            Accept,
+            Not,
+            Is,
+            RespondOrSave,
+            Process,
 
             /// <summary>
-            /// distw
+            /// Definicio'n de comportamiento.
             /// </summary>
-            DistWorker,
+            Behavior,
+
+            /// <summary>
+            /// Bloque de inicializacio'n de un comportamiento.
+            /// </summary>
+            InitBehav,
+
+            /// <summary>
+            /// Representa a un tipo relacionado con la simulación. No es la palabra clave "class".
+            /// </summary>
+            Class,
+
+            /// <summary>
+            /// True o false.
+            /// </summary>
+            Bool,
+            And,
+            Or,
+            For,
+            In,
+            Break,
+            Forever,
+            New,
 
             RightArrow,
-            
+
             /// <summary>
             /// Fin de archivo.
             /// </summary>
@@ -291,6 +333,8 @@ namespace Compiler {
             Div,
 
             If,
+            Else,
+            ElseIf,
             Return,
 
             /// <summary>
@@ -337,7 +381,17 @@ namespace Compiler {
             /// <summary>
             /// \
             /// </summary>
-            Scape
+            Scape,
+
+            /// <summary>
+            /// %
+            /// </summary>
+            Percent,
+
+            /// <summary>
+            /// .
+            /// </summary>
+            Dot,
         }
 
         public override string ToString() {

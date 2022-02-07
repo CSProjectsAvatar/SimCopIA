@@ -10,18 +10,20 @@ namespace ServersWithLayers{
         private ILogger<Status> _logger;
 
         internal MicroService MicroService;
-        internal string serverID;
-        internal List<Resource> AvailableResources;
+        public string serverID;
+        public string ServerId => serverID;
+        public List<Resource> AvailableResources;
         #endregion
 
         #region  Server State
         private int processedAtOnce;
-        internal bool HasCapacity => processedAtOnce < MaxCapacity;
+        public IEnumerable<Request> AceptedRequests => aceptedRequests;
+        public bool HasCapacity => processedAtOnce < MaxCapacity;
         internal bool HasRequests => aceptedRequests.Count > 0;
 
         Queue<Request> aceptedRequests;
 
-        internal void SaveEntry(Perception p)
+        public void SaveEntry(Perception p)
         {
             if (p is Message msg)
                 _messagingHistory.Add(msg);
@@ -51,7 +53,7 @@ namespace ServersWithLayers{
             _logger= logger;
         }
 
-        internal void AddPartialRpnse(Response resp)
+        public void AddPartialRpnse(Response resp)
         {
             if (!_notCompletdRespns.ContainsKey(resp.ReqID)) // Si no esta lo agrego
                 _notCompletdRespns.Add(resp.ReqID, resp);
@@ -68,7 +70,7 @@ namespace ServersWithLayers{
             }
         }
 
-        internal bool IncProcessing()
+        public bool IncProcessing()
         {
             if (HasCapacity)
             {
@@ -77,7 +79,7 @@ namespace ServersWithLayers{
             }
             return false;
         }
-        internal bool DecProcessing()
+        public bool DecProcessing()
         {
             if (processedAtOnce > 0)
             {
@@ -155,6 +157,36 @@ namespace ServersWithLayers{
             MicroService = ms;
         }
 
+        /// <summary>
+        /// Se asegura que <paramref name="req"/> no este' en la cola.
+        /// </summary>
+        /// <param name="req"></param>
+        public void EnsureExtractedFromAccepted(Request req) {
+            var l = aceptedRequests.ToList();
+            
+            if (l.RemoveAll(r => r.ID == req.ID) > 1) {
+                throw new Exception("Two requests with the same ID.");
+            }
+            aceptedRequests.Clear();
+            l.ForEach(r => aceptedRequests.Enqueue(r));
+        }
+
+        public string LeaderId() {
+            return MicroService.LeaderId;
+        }
+
+        public void ChangeLeader(string newLeaderId) {
+            MicroService.ChangeLeader(newLeaderId);
+        }
+
+        /// <summary>
+        /// Devuelve el ID de todos los servidores del microservicio, inclui'2 el servidor asocia2 a la instancia de esta clase.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetNeighbors() {
+            return MicroService.GetServers();
+        }
+
         public Request GetRequest()
         {
             return aceptedRequests.Peek();
@@ -168,6 +200,14 @@ namespace ServersWithLayers{
         internal int CountMessagingHistory()
         {
             return _messagingHistory.Count();
+        }
+
+        public void Reward(Response response, int delay) {
+            MicroService.SetReward(response, delay);
+        }
+
+        public IEnumerable<string> Providers(Resource resource) {
+            return MicroService.GetProviders(resource.Name);
         }
     }
 }

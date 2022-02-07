@@ -207,11 +207,11 @@ namespace Compiler {
                     F > n + F,
                     F > n)) {
                 var dfa = new Lr1Dfa(gram, _log);
-                var actionStates = dfa.action.Keys
+                var actionStates = dfa._action.Keys
                     .Select(k => k.Item1)
                     .Distinct()
                     .Count();
-                var gotoStates = dfa.@goto.Keys
+                var gotoStates = dfa._goto.Keys
                     .Select(k => k.Item1)
                     .Distinct()
                     .Count();
@@ -219,6 +219,32 @@ namespace Compiler {
                 Assert.AreEqual(12, actionStates);  // este es el total d estados
                 Assert.AreEqual(4, gotoStates);
             }
+        }
+
+        [TestMethod]
+        public void SaveToFile() {
+            var dfa = new Lr1Dfa();
+            dfa._action = new Dictionary<(uint, Token.TypeEnum), (Lr1Dfa.ActionEnum, uint)> {
+                [(0, Token.TypeEnum.And)] = (Lr1Dfa.ActionEnum.Reduce, 1),
+                [(1, Token.TypeEnum.Or)] = (Lr1Dfa.ActionEnum.Shift, 0),
+                [(2, Token.TypeEnum.RightArrow)] = (Lr1Dfa.ActionEnum.Ok, 1)
+            };
+            dfa._goto = new() {
+                [(1, "hello")] = 2,
+                [(2, "andy")] = 3
+            };
+            dfa.SaveToFile("./bla.json");
+            using var gram = new Grammar(
+                    E,
+                    E > (F, eq, F),
+                    E > n,
+                    F > n + F,
+                    F > n);
+            dfa = new Lr1Dfa(gram, "./bla.json", _log);
+
+            Assert.AreEqual(Lr1Dfa.ActionEnum.Reduce, dfa._action[(0, Token.TypeEnum.And)].Item1);
+            Assert.AreEqual(1u, dfa._action[(0, Token.TypeEnum.And)].Item2);
+            Assert.AreEqual(3u, dfa._goto[(2, "andy")]);
         }
     }
 }

@@ -11,7 +11,9 @@ namespace ServersWithLayers
         private Func<IEnumerable<Behavior>,int> behaviorSelector;
         private IDecisor decisor;
 
-        public Layer()  
+        public IEnumerable<Behavior> Behavs => behaviors;
+
+        public Layer()
         {
             behaviors = new List<Behavior> { };
             behaviorSelector = index => 0;
@@ -61,18 +63,9 @@ namespace ServersWithLayers
         {
             behaviors.Add(beha);
         }
+
+        public void SetBehaviors(IEnumerable<Behavior> enumerable) {
+            behaviors.AddRange(enumerable);
+        }
     }
-
 }
-
-/*
-
-history = [ ]
-req = [ r1, r2 ]
-ask req all
-
-history.add(env.time, req)
-
-
-status.reward(...)
-*/

@@ -11,6 +11,10 @@ namespace Compiler {
     public abstract class GramSymType {
         public abstract string Name { get; }
 
+        public (GramSymType, TokenType, UntType, TokenType) this[UntType expr] {
+            get => (this, new TokenType(Token.TypeEnum.LBracket), expr, new TokenType(Token.TypeEnum.RBracket));
+        }
+
         public static (GramSymType, TokenType, GramSymType) operator |(GramSymType @this, GramSymType other) {
             return (@this, new TokenType(Token.TypeEnum.Pipe), other);
         }
@@ -27,6 +31,10 @@ namespace Compiler {
         }
         public static (GramSymType, TokenType, GramSymType) operator /(GramSymType @this, GramSymType other) {
             return (@this, TokenType.Div, other);
+        }
+
+        public static (GramSymType, TokenType, GramSymType) operator %(GramSymType @this, GramSymType other) {
+            return (@this, new TokenType(Token.TypeEnum.Percent), other);
         }
 
         public static (GramSymType, TokenType, GramSymType) operator >(GramSymType @this, GramSymType other) {

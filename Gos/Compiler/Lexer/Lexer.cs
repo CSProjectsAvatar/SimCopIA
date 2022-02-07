@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Compiler.Lexer {
-    class Lexer : IDisposable {
+    public class Lexer : IDisposable {
         private readonly DFA _dfa;
         private readonly ILogger<Lexer> _log;
 
@@ -51,7 +51,12 @@ namespace Compiler.Lexer {
             DFAState.ResetStateCounter();
         }
 
-        public IEnumerable<Token> Tokenize(string gosCode) {
+        public IEnumerable<Token> Tokenize(string gosCode, string builtinCode = default) {
+            if (builtinCode != default) {
+                foreach (var tok in Tokenize(builtinCode, default).Where(t => t.Type != Token.TypeEnum.Eof)) {
+                    yield return tok;
+                }
+            }
             gosCode += Environment.NewLine;
 
             var state = _dfa.Initial;

@@ -10,11 +10,11 @@ namespace Compiler.Grammar_Unterminals {
         protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation) {
             /*
              <factor> := <atom>
-                       | "(" <math> ")"
+                       | "(" <expr> ")"
             */
             return derivation[0] switch {
                 AtomUnt a => a.Ast,
-                _ when derivation[1] is MathUnt m => m.Ast,
+                _ when derivation[1] is ExpressionUnt e => e.Ast,
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

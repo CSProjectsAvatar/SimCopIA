@@ -13,13 +13,13 @@ namespace ServersWithLayers
         public static Behavior Contractor = new Behavior(ContractorBehav.Behavior);
         public static Behavior FallenLeader = new Behavior(FallenLeaderBehav.Behavior, FallenLeaderBehav.BehavInit);
       
-        internal static bool Incomplete(Status st, Response response)
+        public static bool Incomplete(Status st, Response response)
         {
             var req = st.GetMsgById(response.ReqID) as Request;
             return response.AnswerRscs.Count < req.AskingRscs.Count;
         }
 
-        internal static int GetRequiredTimeToProcess(Request req)
+        public static int GetRequiredTimeToProcess(Request req)
         {// Returns the sum of all the required time to process the resources of the request
             var sum = 0;
             foreach (var r in req.AskingRscs)
@@ -30,7 +30,7 @@ namespace ServersWithLayers
         }
 
         // Builds a response to: asking, imperative and ping request; in the same way
-        internal static Response BuildResponse(Status status, Request req)
+        public static Response BuildResponse(Status status, Request req)
         {
             Dictionary<string, bool> data = new();
             
