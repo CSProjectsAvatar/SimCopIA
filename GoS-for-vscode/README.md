@@ -7,7 +7,7 @@ S&iacute;ganos [en Github](https://github.com/CSProjectsAvatar/SimCopIA).
 ## Caracter&iacute;sticas
 Esta extensi&oacute;n provee soporte para la sintaxis de GoS.
 
-En este lenguaje se puede declarar funciones:
+<!-- En este lenguaje se puede declarar funciones:
 
 ![func](imgs/func.gif)
 
@@ -15,12 +15,8 @@ En este lenguaje se puede declarar funciones:
 
 ![multiline](imgs/multiline.gif)
 
-Crear servidores de tipo *worker* simple y distribuidores de carga: <!--@audit ahora es new simplew, y los colores cambiaron-->
-
-![simple/distw](imgs/simplew-distw.gif)
-
 Conectarlos:
 
-![conn](imgs/conn.gif)
+![conn](imgs/conn.gif) -->
 
 Para m&aacute;s informaci&oacute;n puede visitar [nuestro reporte de desarrollo](https://github.com/CSProjectsAvatar/SimCopIA/blob/dev/reporte.pdf).
