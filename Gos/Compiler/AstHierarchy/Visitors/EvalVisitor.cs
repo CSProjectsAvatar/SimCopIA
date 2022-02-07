@@ -323,8 +323,16 @@ namespace DataClassHierarchy
                             token.Column);
                         return default;
                     }
-                    _ = GeneticMeta.GeneticAlgo(behavs, resrcs, out var res);
-
+                    var best = GeneticMeta.GeneticAlgo(behavs, resrcs, out var res);
+                    var endl = Environment.NewLine;
+                    for (int i = 0; i < Math.Min(3, best.Count); i++) {
+                        _log.LogInformation(
+                            $"The following configuration produces a delay average of {{avg}} and a satisfaction ratio of {{sat}}%:{endl}" +
+                            $"{{out}}",
+                            res[i].Item1,
+                            res[i].Item2,
+                            best[i]);
+                    }
                     return (
                         true,
                         res.Select(r => new List<object> { r.Item1, r.Item2 })
