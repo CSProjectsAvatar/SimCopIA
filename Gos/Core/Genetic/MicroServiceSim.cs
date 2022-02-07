@@ -63,6 +63,16 @@ namespace Core
                     server.Mutate();
             }
         }
+
+        public override string ToString()
+        {
+            string toString = "Servers" + "\n";
+            foreach (var item in Servers)
+            {
+                toString += item.ToString()+"\n";
+            }
+            return toString;
+        }
     }
 
 }

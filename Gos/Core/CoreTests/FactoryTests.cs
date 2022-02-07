@@ -273,11 +273,6 @@ namespace Core {
             }
             
 
-
-            individual.Mutate();
-
-            //poner el assert
-
         }
     }
 }

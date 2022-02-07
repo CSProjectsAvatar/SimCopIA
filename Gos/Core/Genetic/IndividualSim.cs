@@ -99,6 +99,16 @@ namespace Core
             }
             return poblation;
         }
+
+        public override string ToString()
+        {
+            string toString = "Microserver" + "\n";
+            foreach (var item in MicroServices)
+            {
+                toString += item.ToString() + "\n";
+            }
+            return toString;
+        }
     }
 
 }
