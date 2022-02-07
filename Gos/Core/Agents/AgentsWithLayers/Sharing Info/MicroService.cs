@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace ServersWithLayers{
     public class MicroService{
+        public override string ToString()
+        {
+            return $"{Name} - {Type} - {Count}";
+        }
         internal static Dictionary<string, MicroService> Services = new();
         private ILogger<MicroService> _logger;
 
@@ -19,6 +23,7 @@ namespace ServersWithLayers{
             }
         }   
         internal string LeaderId { get; set; }
+        internal int Count => Dir.WhitePages.Keys.Count;
         private Directory Dir { get; set; }
         internal Func<ServerBio,double> credibilityFunction;
         public MicroService(string name, ILogger<MicroService> logger = null) 
@@ -133,9 +138,16 @@ namespace ServersWithLayers{
         }
         internal ServerBio GetBio(string serverID)
         {
-            if (!Dir.WhitePages.TryGetValue(serverID, out ServerBio bio))
-                throw new ArgumentException($"Microservice {_name} does not contain server {serverID}");
-            return bio;
+            if (Dir.WhitePages.TryGetValue(serverID, out ServerBio bio))
+                return bio;
+            // search in the leaders of others MicroServices, the bio of the server
+            var externalbio = Services.Values
+                                    .Where(m => m.Name != this.Name)
+                                    .Where(m => m.ContainsServer(serverID))
+                                    .Select(m => m.GetBio(serverID)).FirstOrDefault();
+            if (externalbio is null)
+                throw new ArgumentException($"Microservice {_name} does not contain server {serverID} or any other MicroService contains it");
+            return externalbio;
         }
         internal List<Resource> GetAllResourcesAvailable()
         {

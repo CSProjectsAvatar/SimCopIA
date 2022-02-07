@@ -21,7 +21,7 @@ namespace Core
            
         }
 
-        public void Run(List<IndividualSim> individuals, 
+        public List<IndividualSim> Run(List<IndividualSim> individuals, 
         Func<IndividualSim, double> mini, 
         Func<IndividualSim, bool> validate,
         long timeInMs)
@@ -38,6 +38,9 @@ namespace Core
                 individuals.AddRange(parents);
                 individuals.AddRange(childs);
 
+                // Filtro de Validacion
+                individuals = individuals.Where(validate).ToList();
+
                 // Se mueren los menos adaptados
                 while (individuals.Count > initCount)
                 {
@@ -49,11 +52,20 @@ namespace Core
                 }
                 
             } // Proxima Generacion
+
+            // var current = individuals.Count;
+            // individuals = individuals.Where(validate).ToList();
+            // if (individuals.Count < current)
+            // {
+            //     Console.WriteLine("Se murieron " + (current - individuals.Count) + " individuos");
+            // }
+            return individuals;
+
         }
 
         private bool Survives(IndividualSim individual)
         {
-            if(_random.NextDouble() < 0.8){
+            if(_random.NextDouble() < 0.9){
                 return true;
             }
             return false;
@@ -82,8 +94,10 @@ namespace Core
                 var parent1 = parents[_random.Next(0, parents.Count - 1)];
                 var parent2 = parents[_random.Next(0, parents.Count - 1)];
 
-                //childrens.Add(generateChild(parent1, parent2));
-                childrens.Add(IndividualSim.generateChild(parent1, parent2));
+                var child = IndividualSim.generateChild(parent1, parent2);
+                if (_random.NextDouble() < _mutationProb) // @audit check this out
+                    child.Mutate();
+                childrens.Add(child);
             }
             return childrens;
         }

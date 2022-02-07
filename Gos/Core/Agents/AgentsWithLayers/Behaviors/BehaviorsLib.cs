@@ -12,6 +12,7 @@ namespace ServersWithLayers
         public static Behavior Worker = new Behavior(WorkerBehav.Behavior, WorkerBehav.BehavInit);
         public static Behavior Contractor = new Behavior(ContractorBehav.Behavior);
         public static Behavior FallenLeader = new Behavior(FallenLeaderBehav.Behavior, FallenLeaderBehav.BehavInit);
+        public static Behavior Boss = new Behavior(BossBehav.BossBehavior, BossBehav.BossBehavInit);
       
         internal static bool Incomplete(Status st, Response response)
         {

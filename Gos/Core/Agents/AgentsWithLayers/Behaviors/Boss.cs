@@ -8,7 +8,6 @@ namespace ServersWithLayers.Behaviors
 {
     public static class BossBehav
     {
-        public static Behavior BossBehavior = new Behavior(BossAnnounce,BossAnnounceInit);
         private static string reviewTimeB = "reviewTime";
         private static string nextReviewB = "nextReview";
         private static string askResponsesB = "askResponses";
@@ -16,7 +15,7 @@ namespace ServersWithLayers.Behaviors
         private static string askResponsesAsocietedIDB = "askResponsesAsocietedID";
         private static string decrementRewardsTimeB = "decrementRewardsTime";
 
-        private static void BossAnnounceInit(Status status,Dictionary<string, object> vars){
+        public static void BossBehavInit(Status status,Dictionary<string, object> vars){
             vars[reviewTimeB] = 5; //cambiar cualquier cosa 
             vars[nextReviewB]  = new Utils.Heap<Request>(); // la proxima revision a que request pertenece
             vars[askResponsesB] = new Dictionary<int, List<Response>>();
@@ -24,7 +23,7 @@ namespace ServersWithLayers.Behaviors
             vars[solutionResponseAsocietedRequestB] = new Dictionary<int, (Request, int)>(); //de reqID --> Original Request
             vars[decrementRewardsTimeB] = (500, false); //   (dalay de reduccion, ya esta inicializado)
         } 
-        private static void BossAnnounce(Status status, Perception p, Dictionary<string,object> variables)
+        public static void BossBehavior(Status status, Perception p, Dictionary<string,object> variables)
         {
             var askResponses = variables[askResponsesB] as Dictionary<int,List<Response>>;
             var nextReview = variables[nextReviewB] as Utils.Heap<Request>;
@@ -210,7 +209,7 @@ namespace ServersWithLayers.Behaviors
                 var loggerLayer = new Layer();
                 var contractorLayer = new Layer();
                 var workerLayer = new Layer();
-                bossLayer.behaviors = new List<Behavior>{BossBehavior};
+                bossLayer.behaviors = new List<Behavior>{BehaviorsLib.Boss};
                 loggerLayer.behaviors = new List<Behavior>{LoggerBehav.LoggerBehavior};
                 contractorLayer.behaviors = new List<Behavior>{BehaviorsLib.Contractor};
                 workerLayer.behaviors = new List<Behavior>{BehaviorsLib.Worker};

@@ -58,25 +58,32 @@ namespace Core
 
         public static Output RunSimulation(IndividualSim individual)
         {
+            if(!individual.ValidIndiv())
+                throw new Exception("Invalid individual");
+                
             MicroService.Services.Clear();
 
             List<Server> servers = new List<Server> { };
 
+            int entryPoints = 0;
             // Creando los servers
             int id = 0;
             for (int i = 0; i < individual.MicroServices.Count; i++)
             {
-                string mSName = null;
-                if (i != 0){// Para coger el primer MicroS como el Main
-
-                    mSName = "M" + i;
-                    MicroService ms = new MicroService(mSName);
+                string mSName = "M" + i;
+                MicroService ms = new MicroService(mSName);
+                if (individual.MicroServices[i].EntryPoint){
+                    ms.SetAsEntryPoint();
+                    entryPoints++;
                 }
+                    
                 for (int j = 0; j < individual.MicroServices[i].Servers.Count; j++) {
                     // Creo los servidores
                     servers.Add(CreateServer(++id, individual.MicroServices[i].Servers[j], mSName));
                 }
             }
+            if (entryPoints == 0)
+                throw new Exception("No se puede crear una simulacion sin servers de entrada");
 
             // Asignando los servers a un nuevo env
             Env env = new Env();
@@ -97,14 +104,15 @@ namespace Core
             return output;
         }
 
-        private  static Server CreateServer(int j, ServerSim serverSim, string mSName = null)
+        private  static Server CreateServer(int j, ServerSim serverSim, string mSName)
         {
             Server server = new Server("S" + j);
 
             server.AddLayers(CreateLayers(serverSim.layers));
             server.SetResources(CreateResources(serverSim.resources));
 
-            if(mSName is not null) server.SetMService(mSName);
+            // if(mSName is not null) 
+            server.SetMService(mSName);
             return server;
         }
 

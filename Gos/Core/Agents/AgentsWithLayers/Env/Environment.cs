@@ -121,10 +121,17 @@ namespace ServersWithLayers
         internal string GetRndEntryPoint()
         {
             var entryPoints = MicroService.Services
-                .Where(pair => pair.Value.Type is ServiceType.EntryPoint)
-                .Select(pair => pair.Value.LeaderId);
+                .Select(pair => pair.Value)
+                .Where(ms => ms.Type is ServiceType.EntryPoint)
+                .Where(ms => ms.Count > 0)
+                .Select(ms => ms.LeaderId);
 
-            return entryPoints.ElementAt(UtilsT.Rand.Next(entryPoints.Count()));
+            var entry =  entryPoints.ElementAt(UtilsT.Rand.Next(entryPoints.Count()));
+            if (entry == null)
+            {
+                throw new Exception("Receiver is null");
+            }
+            return entry;
         }
 
         // todas los responses enviados al cliente

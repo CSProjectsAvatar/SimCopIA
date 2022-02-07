@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ServersWithLayers;
-
+using Utils;
 namespace Core
 {
     public class ServerSim
@@ -18,10 +18,13 @@ namespace Core
         private double probRemoveLayer;
 
         public int ParallelsProcesors { get; private set; }
+        public double Cost => ParallelsProcesors * UtilsT.CostByMicro;
 
         public ServerSim Clone()
         {
             ServerSim serverSim = new ServerSim();
+            serverSim.ParallelsProcesors = ParallelsProcesors;
+            
             serverSim.layers = (from item in layers
                                 select item.Clone()).ToList();
 
@@ -65,6 +68,8 @@ namespace Core
         {
             ServerSim s = new ServerSim();
             s.ParallelsProcesors = _random.Next(1, FactorySim.MaxProcesorsInServer);
+            if(s.ParallelsProcesors == 0)
+                throw new Exception("ParallelsProcesors == 0");
 
             var countLayer = _random.Next(1, FactorySim.MaxBehavior);
             for (int i = 0; i < countLayer; i++)

@@ -9,13 +9,17 @@ namespace Core
 {
     public class MicroServiceSim
     {
+        public bool EntryPoint;
         private static Random _random = new Random();
         private double probChangeLeader = 0.3;
         private double probChangeServer = 0.3;
         private double probAddServer = 0.3;
+        private double probEntryPointChange = 0.3;
 
 
         internal List<ServerSim> Servers = new();
+
+        public double Budget => Servers.Sum(s => s.Cost);
 
         internal static MicroServiceSim RndMicro()
         {
@@ -26,6 +30,7 @@ namespace Core
             {
                 m.Servers.Add(ServerSim.RndServer());
             }
+            m.EntryPoint = _random.NextDouble() < 0.5;
 
             return m;
         }
@@ -33,6 +38,8 @@ namespace Core
         public MicroServiceSim Clone()
         {
             MicroServiceSim microServerSim = new MicroServiceSim();
+            microServerSim.EntryPoint = EntryPoint;
+            
             microServerSim.Servers = (from item in Servers
                                       select item.Clone()).ToList();
             return microServerSim;
@@ -40,6 +47,11 @@ namespace Core
 
         public void Mutate()
         {
+            // cambiar su condicion de EntryPoint
+            if (_random.NextDouble() < probEntryPointChange){
+                EntryPoint = !EntryPoint;
+            }
+
             if(_random.NextDouble() < probAddServer) { // prob de agregar un server
                 Servers.Add(ServerSim.RndServer());
             }

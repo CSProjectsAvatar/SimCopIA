@@ -9,7 +9,7 @@ using ServersWithLayers;
 
 namespace Core {
     [TestClass]
-    public class FactoryTests : BaseTest {
+    public class GeneticTests : BaseTest {
         #region  vars
 
         private Behavior boss;
@@ -184,8 +184,6 @@ namespace Core {
             var env = new Env();
         }
 
-       
-
         [TestCleanup]
         public void Clean() {
             MicroService.Services.Clear();
@@ -193,146 +191,64 @@ namespace Core {
             Env.ClearServersLayers();
         }
 
-        [TestMethod]
-        public void TestingGenTimeOffset() {
-            // With for
-            double lambda = 0.12;
-            // for (double lambda = 0; lambda < 10; lambda += 0.1)
-            {
-                double sum = 0;
-                for (int i = 0; i < 100; i++)
-                {
-                    var res = (int)UtilsT.GenTimeOffset(lambda);
-                    sum += res;
-                    System.Console.WriteLine(res);
-                }
-                Console.WriteLine(sum);
-                // System.Console.WriteLine("Para lambda: " + lambda + ": " + sum/20.0);
-            }
-
-        }
-
        
-        [TestMethod]
-        public void FactoryTest()
-        {
-            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
-            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7 , r8};
-            FactorySim factory = new FactorySim(behaviors, resources);
-            // factory.RunSimulation(individual);
-            
-            //poner el assert
-
-        }
-
-        [TestMethod]
-        public void FactoryRndTest()
-        {
-            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
-            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
-            FactorySim factory = new FactorySim(behaviors, resources);
-            //factory.RunSimulation(individual);
-
-
-            IndividualSim i = IndividualSim.RndIndividual();
-            //poner el assert
-
-        }
-
-        [TestMethod]
-        public void FactoryMutateTest()
-        {
-            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
-            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
-            FactorySim factory = new FactorySim(behaviors, resources);
-            //factory.RunSimulation(individual);
-
-
-            individual.Mutate();
-
-            //poner el assert
-        }
-
         [TestMethod]
         public void GeneticTest()
         {
             List<Behavior> behaviors = new List<Behavior> { boss, workerB, falenLeader, contractor };
             List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
-            FactorySim factory = new FactorySim(behaviors, resources);
-           
-            
+            /// --------------------------------------------------
+            List<(double, double)> results;
+            var bests = GeneticMeta.GeneticAlgo(behaviors, resources, out results);
+            /// --------------------------------------------------
+
+            var theBestVals = "Puntuacion Mejor individuo -> Avg: "
+                    + results.First().Item1 + " - Rspsive: " + results.First().Item2;
+            var strBest = "Individuo: \n" + bests.First();
+        }
+    }
+
+    public class GeneticMeta{
+
+        public static List<IndividualSim> GeneticAlgo(List<Behavior> behaviors, List<Resource> resources, out List<(double, double)> results, int budget = 50, int timeToWaitMs = 20000, int initialSamplerSize = 200)
+        {
+            FactorySim factory = new FactorySim(behaviors, resources, budget);
             var meta = new Genetic();
-            var poblation = IndividualSim.Sampler(200);
-            
-            var bests =  meta.Run( poblation,
+            var poblation = IndividualSim.Sampler(initialSamplerSize);
+
+            var bests = meta.Run(poblation,
                             (IndividualSim i) => Minimize(i),
                             (IndividualSim i) => i.ValidIndiv(),
-                            20000);
-
-            List<(double, double)> results = new();
+                            timeToWaitMs);
+            results = new();
             List<double> finalR = new();
             foreach (var item in bests.Take(10))
             {
-                var output = FactorySim.RunSimulation(item);
+                var output = CallRunSim(item);
                 results.Add((output.Average, output.ResponsePercent));
 
-                var res = Minimize(item);
+                var res = AverageResponsive(output);
                 finalR.Add(res);
             }
-
-            //poner el assert
-            var a = 5;
+            return bests.Take(10).ToList();
         }
-        public double Minimize(IndividualSim i)
+
+        public static double Minimize(IndividualSim i)
         {
-            var output = FactorySim.RunSimulation(i);
-            // var res = output.Average;
-            var res = output.Average * ( 1 / ((output.ResponsePercent) / 100.0));
+            Output output = CallRunSim(i);
+            var res = AverageResponsive(output);
             return res;
         }
-        [TestMethod]
-        public bool ValidInBudget(IndividualSim individual)
-        {// Calcula el coste de un individuo, basandose en los parallelsProcesors y el costo de estos
-            double cost = 0;
-            foreach (var microService in individual.MicroServices){
-                foreach (var server in microService.Servers){
-                    cost += server.ParallelsProcesors * UtilsT.CostByMicro;
-                }
-            }
-            var ret = cost < FactorySim.Budget;
-            return cost < FactorySim.Budget;
-        }
 
-        [TestMethod]
-        public void ValidIndvTest(){
-            Assert.IsTrue(individual.ValidIndiv());
-            // quitamos todos los servers del primer microS de individual
-            individual.MicroServices[0].Servers.Clear();
-            Assert.IsFalse(individual.ValidIndiv());
-            // seteamos un microS de individual como entryP
-            individual.MicroServices[1].EntryPoint = true;
-            Assert.IsTrue(individual.ValidIndiv());
-        }
-        [TestMethod]
-        public void cw()
+        private static double AverageResponsive(Output output)
         {
-            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
-            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
-            FactorySim factory = new FactorySim(behaviors, resources);
-            
-            string s= factory.ToStringIndividual(individual);
-            Console.WriteLine(s);
+            return output.Average * (1 / ((output.ResponsePercent) / 100.0));
         }
-        public static void RunMetaWithFunc(){
-            var meta = new MetaHeuristics();
-            var list = Individual.Sampler(4);
-            
-            meta.Run( list,
-                (Individual i) => SimulationSystem.RunSimulation(i),
-                (Individual i) => { return 0 < i.MonthlyMaintennanceCost; }, // @todo acotar superiorment el costo
-                1000);
 
-            Assert.AreEqual(57, list[0].Doers);
+        private static Output CallRunSim(IndividualSim i)
+        {
+            return FactorySim.RunSimulation(i);
         }
+
     }
 }
