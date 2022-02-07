@@ -55,7 +55,7 @@ namespace Core
             // Resources
             for (int i = 0; i < resources.Count; i++) {
                 if (_random.NextDouble() < probMutateRscs) { // prob de mutar un recurso
-                    var reso = _random.Next(FactorySim.MaxResorce);
+                    var reso = _random.Next(FactorySim.MaxResource);
                     resources[i] = reso;
                 }
             }
