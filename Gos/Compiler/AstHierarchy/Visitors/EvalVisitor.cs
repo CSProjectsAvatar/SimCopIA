@@ -310,7 +310,12 @@ namespace DataClassHierarchy
                             token.Column);
                         return default;
                     }
-                    var resrcs = AccessibleObjs<Resource>().ToList();
+                    var resrcs = AccessibleObjs<Resource>()
+                        .Concat(AccessibleObjs<Server>()
+                            .SelectMany(s => s.Resources()))
+                        .Distinct()
+                        .ToList();
+
                     if (resrcs.Count == 0) {
                         _log.LogError(
                             Helper.LogPref + "no resources found, genetic algorithm can't run.",

@@ -83,5 +83,9 @@ namespace ServersWithLayers
                 return _layers[layerIndex].behaviors[0].GetVariables(varName);
             throw new System.Exception("Indice capa mayor que la cantidad de capas.");
         }
+
+        public IEnumerable<Resource> Resources() {
+            return Stats.AvailableResources;
+        }
     }
 }
