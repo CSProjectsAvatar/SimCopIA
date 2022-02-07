@@ -48,6 +48,64 @@ print pow(24, 1)
                 @out.ToString());
         }
 
+        [TestMethod]
+        public void GeneticNoInput() {
+            var tokens = _lex.Tokenize(
+                @"
+print genetic()
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void GeneticNoResrcs() {
+            var tokens = _lex.Tokenize(
+                @"
+behav f {
+    print true
+}
+print genetic()
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        public void GeneticRunWell() {
+            var tokens = _lex.Tokenize(
+                @"
+behav f {
+    let a = 3
+}
+let r = new resource
+print genetic()
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+        }
+
         [TestCleanup]
         public void Clean() {
             Dispose();

@@ -72,6 +72,7 @@ namespace Compiler {
         internal static readonly Random Random = new Random(Environment.TickCount);
         internal const string RandFun = "rand";
         internal const string RandIntFun = "rand_int";
+        internal const string GeneticFun = "genetic";
         internal const string EnvVar = "env";
         internal const string ResourceClass = "resource";
         internal const string LayerClass = "layer";

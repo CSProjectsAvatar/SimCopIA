@@ -301,6 +301,31 @@ namespace DataClassHierarchy
                     }
                     return (true, (double)(int)(Helper.Random.NextDouble() * (double)args[0]));
 
+                case Helper.GeneticFun:
+                    var behavs = AccessibleObjs<Behavior>().ToList();
+                    if (behavs.Count == 0) {
+                        _log.LogError(
+                            Helper.LogPref + "no behaviors found, genetic algorithm can't run.",
+                            token.Line,
+                            token.Column);
+                        return default;
+                    }
+                    var resrcs = AccessibleObjs<Resource>().ToList();
+                    if (resrcs.Count == 0) {
+                        _log.LogError(
+                            Helper.LogPref + "no resources found, genetic algorithm can't run.",
+                            token.Line,
+                            token.Column);
+                        return default;
+                    }
+                    _ = GeneticMeta.GeneticAlgo(behavs, resrcs, out var res);
+
+                    return (
+                        true,
+                        res.Select(r => new List<object> { r.Item1, r.Item2 })
+                            .OfType<object>()
+                            .ToList());
+
                 default:
                     throw new NotImplementedException("Not implemented built-in call.");
             }
@@ -1345,7 +1370,7 @@ namespace DataClassHierarchy
             if (!vis.Item1) {
                 return default;
             }
-            var servs = AccessibleServers().ToList();
+            var servs = AccessibleObjs<Server>().ToList();
             if (servs.Count == 0) {
                 _log.LogWarning("No servers are accessible from the global context. Simulation won't run.");
             } else if (!_newRsrc) {
@@ -1382,27 +1407,31 @@ namespace DataClassHierarchy
             return (true, null);
         }
 
-        internal IEnumerable<Server> AccessibleServers() {
-            var ans = Enumerable.Empty<Server>();
+        /// <summary>
+        /// Retorna todos los objetos de tipo <typeparamref name="T"/> accesibles desde el contexto actual.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        internal IEnumerable<T> AccessibleObjs<T>() where T: class {
+            var ans = Enumerable.Empty<T>();
+            var targetType = Enum.Parse<GosType>(typeof(T).Name);
 
             foreach (var (_, val) in Context.Variables) {
-                ans = ans.Concat(AccessibleServers(val));
+                ans = ans.Concat(AccessibleObjs<T>(val, targetType));
             }
             return ans.Distinct();
         }
 
-        private IEnumerable<Server> AccessibleServers(object val) {
-            switch (Helper.GetType(val)) {
-                case GosType.Server:
-                    return new[] { val as Server };
+        private IEnumerable<T> AccessibleObjs<T>(object val, GosType target) where T: class {
+            var valType = Helper.GetType(val);
+            if (valType == target) {
+                return new[] { val as T };
 
-                case GosType.List:
-                    var l = val as List<object>;
-                    return l.Aggregate(Enumerable.Empty<Server>(), (accum, obj) => accum.Concat(AccessibleServers(obj)));
-
-                default:
-                    return Enumerable.Empty<Server>();
+            } else if (valType is GosType.List) {
+                var l = val as List<object>;
+                return l.Aggregate(Enumerable.Empty<T>(), (accum, obj) => accum.Concat(AccessibleObjs<T>(obj, target)));
             }
+            return Enumerable.Empty<T>();
         }
 
         public (bool, object) Visiting(InfLoopAst node) {

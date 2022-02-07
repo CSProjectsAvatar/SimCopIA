@@ -34,7 +34,7 @@ if true {
 
             Assert.IsTrue(success);
 
-            var servs = vis.AccessibleServers().ToList();
+            var servs = vis.AccessibleObjs<Server>().ToList();
             Assert.AreEqual(2, servs.Count);
             Assert.IsFalse(servs.Any(s => s.Stats.AvailableResources.Count != 0));
         }
@@ -55,7 +55,7 @@ let l = [[new server, new server], [new server]]
 
             Assert.IsTrue(success);
 
-            var servs = vis.AccessibleServers().ToList();
+            var servs = vis.AccessibleObjs<Server>().ToList();
             Assert.AreEqual(3, servs.Count);
         }
 
@@ -81,7 +81,7 @@ let l = f()
 
             Assert.IsTrue(success);
 
-            var servs = vis.AccessibleServers().ToList();
+            var servs = vis.AccessibleObjs<Server>().ToList();
             Assert.AreEqual(3, servs.Count);
             Assert.IsFalse(servs.Any(s => s.Stats.AvailableResources.Count != 0));
         }
@@ -105,7 +105,7 @@ let r = s
 
             Assert.IsTrue(success);
 
-            var servs = vis.AccessibleServers().ToList();
+            var servs = vis.AccessibleObjs<Server>().ToList();
             Assert.AreEqual(1, servs.Count);
         }
 

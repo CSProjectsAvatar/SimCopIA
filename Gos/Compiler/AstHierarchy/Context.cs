@@ -141,6 +141,7 @@ namespace DataClassHierarchy
             var ctx = new Context();
             ctx.DefFunc(Helper.RandFun, 1);
             ctx.DefFunc(Helper.RandIntFun, 1);
+            ctx.DefFunc(Helper.GeneticFun, 0);
 
             return ctx;
         }
