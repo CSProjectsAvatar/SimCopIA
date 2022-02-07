@@ -193,15 +193,17 @@ namespace Core {
         [TestMethod]
         public void TestingGenTimeOffset() {
             // With for
-            double lambda = 0.2;
+            double lambda = 0.1;
             // for (double lambda = 0; lambda < 10; lambda += 0.1)
             {
                 double sum = 0;
                 for (int i = 0; i < 20; i++)
                 {
-                    sum += UtilsT.GenTimeOffset(lambda);
-                    System.Console.WriteLine((int)UtilsT.GenTimeOffset(lambda));
+                    var res = (int)UtilsT.GenTimeOffset(lambda);
+                    sum += res;
+                    // System.Console.WriteLine(res);
                 }
+                Console.WriteLine(sum);
                 // System.Console.WriteLine("Para lambda: " + lambda + ": " + sum/20.0);
             }
 
