@@ -1,25 +1,30 @@
 using System.Collections.Generic;
 using Core;
 using Microsoft.Extensions.Logging;
-
+using Utils;
 namespace ServersWithLayers
 {
     public class Server{
         public string ID {get;}
         public Status Stats {get;}
+        public double MonthlyCost { get; }
         public bool ServerDown { get; private set; }
 
         internal Layer FirstLayer => _layers[0];
         private List<Layer> _layers;
         private ILogger<Server> _logger;
-        public Server(string ID, ILogger<Server> logger=null, ILogger<Status> loggerS=null)
+        public Server(string ID, ILogger<Server> logger=null, ILogger<Status> loggerS=null, int parallelsProcesors = 5)
         {
             this.ID = ID;
-            this.Stats = new(ID,loggerS);
+
+            this.Stats = new(ID, parallelsProcesors, loggerS);
+            MonthlyCost = parallelsProcesors * UtilsT.CostByMicro;
             
             this._layers = new();
             _logger = logger;
         }
+        public Server(string ID, int parallelsProcesors) : this(ID, null, null, parallelsProcesors) { }
+
 
         public void HandlePerception(Perception p){
             if (ServerDown) return;

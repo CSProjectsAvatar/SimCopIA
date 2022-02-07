@@ -21,9 +21,9 @@ namespace Core
            
         }
 
-        public void Run(List<Individual> individuals, 
-        Func<Individual, double> mini, 
-        Func<Individual, bool> validate,
+        public void Run(List<IndividualSim> individuals, 
+        Func<IndividualSim, double> mini, 
+        Func<IndividualSim, bool> validate,
         long timeInMs)
         {
             var initCount = individuals.Count;
@@ -51,7 +51,7 @@ namespace Core
             } // Proxima Generacion
         }
 
-        private bool Survives(Individual individual)
+        private bool Survives(IndividualSim individual)
         {
             if(_random.NextDouble() < 0.8){ // @audit poner una funcion de supervivencia en funcion de la calidad del individuo
                 return true;
@@ -59,7 +59,7 @@ namespace Core
             return false;
         }  
 
-        private List<Individual> getParents(List<Individual> individuals, Func<Individual, double> mini)
+        private List<IndividualSim> getParents(List<IndividualSim> individuals, Func<IndividualSim, double> mini)
         {
             int count = individuals.Count;
             int len = (int)Math.Ceiling(count * 0.6);
@@ -74,29 +74,30 @@ namespace Core
             return bests;
         }
 
-        private List<Individual> getChilds(List<Individual> parents)
+        private List<IndividualSim> getChilds(List<IndividualSim> parents)
         {
-            List<Individual> childrens = new List<Individual> { };
+            List<IndividualSim> childrens = new List<IndividualSim> { };
             while (childrens.Count != parents.Count)
             {
                 var parent1 = parents[_random.Next(0, parents.Count - 1)];
                 var parent2 = parents[_random.Next(0, parents.Count - 1)];
-                
-                childrens.Add(generateChild(parent1, parent2));
+
+                //childrens.Add(generateChild(parent1, parent2));
+                childrens.Add(IndividualSim.generateChild(parent1, parent2));
             }
             return childrens;
         }
 
-        [Obsolete]
-        private Individual generateChild(Individual parent1, Individual parent2)
+        /*[Obsolete]
+        private IndividualSim generateChild(IndividualSim parent1, IndividualSim parent2)
         {
             double va = _random.NextDouble(); //variable aleatoria con probabilidad uniforme en [0,1]
-            Individual child;
+            IndividualSim child;
             if (va < 0.5) {
-                child = new Individual(parent1.Doers);
+                child = new IndividualSim(parent1.Doers);
             }
             else {
-                child = new Individual(parent2.Doers);
+                child = new IndividualSim(parent2.Doers);
             }
 
             if (_random.NextDouble() < _mutationProb)
@@ -139,7 +140,7 @@ namespace Core
                 || 
                 (parents[1].Dispatchers == childs[0].Dispatchers &&
                 parents[0].Doers == childs[0].Doers) );
-        }
+        }*/
     }
   
 }

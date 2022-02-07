@@ -76,6 +76,19 @@ namespace Core
 
             return microServer;
         }
+
+        internal static IndividualSim RndIndividual()
+        {
+            IndividualSim i = new IndividualSim();
+
+            var countMicro = _random.Next(1, 4);// cambier 
+            for (int j = 0; j < countMicro; j++)
+            {
+                i.MicroServices.Add(MicroServiceSim.RndMicro());
+            }
+
+            return i;
+        }
     }
 
 }

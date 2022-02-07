@@ -6,6 +6,11 @@ namespace Utils
     public static class UtilsT
     {   // Usar GetTimeOffset() en EventCreator y getReqTimeToProcess()
         internal static Random Rand = new Random(Environment.TickCount);
+        internal static double CostByMicro = 1;
+        public static void SetCostByMicro(double cost)
+        {
+            CostByMicro = cost;
+        }
         public static double GenTimeOffset(double lambda = 1.5) {
             return -1 / lambda * Math.Log(Rand.NextDouble());
         }
