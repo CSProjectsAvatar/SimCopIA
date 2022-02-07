@@ -11,17 +11,33 @@ namespace Core
     {
         List<Behavior> _behaviors;
         List<Resource> _resources;
+        List<Type> _events;
+        private List<double> _probs;
+
         public FactorySim(List<Behavior> behaviors, List<Resource> resources)
+            : this(behaviors, resources, 
+                new List<Type>() { 
+                    typeof(ReqType) 
+                }, 
+                new List<double>() { 
+                    1.0 
+                }
+            ) {}
+
+
+        public FactorySim(List<Behavior> behaviors, List<Resource> resources, List<Type> events, List<double> probabilities)
         {
             _behaviors = behaviors;
             _resources = resources;
+            _events = events;
+            _probs = probabilities;
         }
 
         public void RunSimulation(IndividualSim individual)
         {
-            // List<MicroService> microServices = new List<MicroService> { };
             List<Server> servers = new List<Server> { };
 
+            // Creando los servers
             for (int i = 0; i < individual.MicroServices.Count; i++)
             {
                 string mSName = null;
@@ -35,6 +51,18 @@ namespace Core
                     servers.Add(CreateServer(j, individual.MicroServices[i].Servers[j], mSName));
                 }
             }
+
+            // Asignando los servers a un nuevo env
+            Env env = new Env();
+            // env.CrearEventosConLoDeMauricio @audit 
+            env.AddServerList(servers);
+
+
+
+
+            // Limpio MicroServicios (No hace falta limpiar los Recursos, ni los Servers)
+            MicroService.Services.Clear();
+
 
         }
 
