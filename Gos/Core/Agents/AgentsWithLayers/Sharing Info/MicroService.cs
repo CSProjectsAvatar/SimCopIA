@@ -152,7 +152,7 @@ namespace ServersWithLayers{
             return servers;
         }
 
-        private void ReduceReputation(ServerBio biography)
+        public void ReduceReputation(ServerBio biography)
         {
             biography.Reputation *= 0.9;
         }

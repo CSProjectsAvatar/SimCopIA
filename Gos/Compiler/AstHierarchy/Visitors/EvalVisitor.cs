@@ -382,6 +382,29 @@ namespace DataClassHierarchy
                     status.Reward(resp as Response, (int)(double)delay);
 
                     return (true, null);
+                case GosType.ServerStatus when node.Function.Identifier == "penalize" && node.Function.Args.Count == 1:
+                    if (!TryEval(node.Function.Args[0], GosType.String, out var servIdObj)) {
+                        return default;
+                    }
+                    status = tval as Status;
+                    var servId = servIdObj as string;
+                    if (!status.TryGetBio(servId, out var bio)) {
+                        _log.LogError(
+                            Helper.LogPref + "there's not server with ID '{id}'.",
+                            node.Function.Args[0].Token.Line,
+                            node.Function.Args[0].Token.Column,
+                            servId);
+                        return default;
+                    }
+                    status.Penalize(bio);
+
+                    break;
+                case GosType.ServerStatus when node.Function.Identifier == "penalize_all" && node.Function.Args.Count == 0:
+                    status = tval as Status;
+                    status.PenalizeAll();
+
+                    break;
+
                 case GosType.ServerStatus when node.Function.Identifier == "reqs_for_best" && node.Function.Args.Count == 1:
                     if (!TryEval(node.Function.Args[0], GosType.List, out var respsObj)) {
                         return default;

@@ -211,6 +211,25 @@ namespace ServersWithLayers{
         public IEnumerable<string> Providers(Resource resource) {
             return MicroService.GetProviders(resource.Name);
         }
+
+        public bool TryGetBio(string servId, out ServerBio bio) {
+            try {
+                bio = MicroService.GetBio(servId);
+                return true;
+
+            } catch (ArgumentException) {
+                bio = null;
+                return false;
+            }
+        }
+
+        public void Penalize(ServerBio bio) {
+            MicroService.ReduceReputation(bio);
+        }
+
+        public void PenalizeAll() {
+            MicroService.LostRepInMicroS();
+        }
     }
 }
 
