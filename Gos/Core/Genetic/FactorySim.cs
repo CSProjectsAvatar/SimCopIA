@@ -9,8 +9,8 @@ namespace Core
 {
     public class FactorySim
     {
-        static List<Behavior> _behaviors;
-        static List<Resource> _resources;
+        internal static List<Behavior> _behaviors;
+        internal static List<Resource> _resources;
         static List<Type> _events;
         static private List<double> _probs;
 
@@ -146,6 +146,11 @@ namespace Core
         public static void SaveSimulation(IndividualSim individual)
         {
            // var run = RunSimulation(individual);
+        }
+
+        public string ToStringIndividual(IndividualSim individual)
+        {
+            return individual.ToString();
         }
     }
 

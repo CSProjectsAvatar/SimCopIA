@@ -21,7 +21,7 @@ namespace Core
         {
             MicroServiceSim m = new MicroServiceSim();
 
-            var countServer = _random.Next(1,FactorySim.MaxServers/4);
+            var countServer = _random.Next(1,FactorySim.MaxServers);
             for (int i = 0; i < countServer; i++)
             {
                 m.Servers.Add(ServerSim.RndServer());
@@ -62,6 +62,16 @@ namespace Core
                 else if(_random.NextDouble() < probChangeServer) // prob de mutar un server
                     server.Mutate();
             }
+        }
+
+        public override string ToString()
+        {
+            string toString = "Servers" + "\n";
+            foreach (var item in Servers)
+            {
+                toString += item.ToString()+"\n";
+            }
+            return toString;
         }
     }
 

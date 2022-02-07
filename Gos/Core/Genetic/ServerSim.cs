@@ -85,6 +85,21 @@ namespace Core
             return s;
         }
 
+        public override string ToString()
+        {
+            string toString = "Layers" + "\n";
+            foreach (var item in layers)
+            {
+                toString += item.ToString() + "\n";
+            }
+            toString += "Resources" + "\n";
+
+            foreach (var item in resources)
+            {
+                toString += FactorySim._resources[item].Name + "\n";
+            }
+            return toString;
+        }
     }
 
 }
