@@ -285,6 +285,7 @@ namespace Core {
             // var res = output.Average * ( 1 / output.ResponsePercent);
             return res;
         }
+        [TestMethod]
         public bool ValidInBudget(IndividualSim individual)
         {// Calcula el coste de un individuo, basandose en los parallelsProcesors y el costo de estos
             double cost = 0;
@@ -309,7 +310,7 @@ namespace Core {
         }
         public static void RunMetaWithFunc(){
             var meta = new MetaHeuristics();
-            var list = Individual.Sampler(30);
+            var list = Individual.Sampler(4);
             
             meta.Run( list,
                 (Individual i) => SimulationSystem.RunSimulation(i),
