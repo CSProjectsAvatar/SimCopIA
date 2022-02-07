@@ -25,7 +25,7 @@ namespace Core
         public FactorySim(List<Behavior> behaviors, List<Resource> resources, double budget = 50, int maxProcesors = 10)
             : this(behaviors, resources, 
                 new List<Type>() { 
-                    typeof(ReqType) 
+                    typeof(Request) 
                 }, 
                 new List<double>() { 
                     1.0 
@@ -56,11 +56,14 @@ namespace Core
         }
 
 
-        public static void RunSimulation(IndividualSim individual)
+        public static Output RunSimulation(IndividualSim individual)
         {
+            MicroService.Services.Clear();
+
             List<Server> servers = new List<Server> { };
 
             // Creando los servers
+            int id = 0;
             for (int i = 0; i < individual.MicroServices.Count; i++)
             {
                 string mSName = null;
@@ -71,19 +74,27 @@ namespace Core
                 }
                 for (int j = 0; j < individual.MicroServices[i].Servers.Count; j++) {
                     // Creo los servidores
-                    servers.Add(CreateServer(j, individual.MicroServices[i].Servers[j], mSName));
+                    servers.Add(CreateServer(++id, individual.MicroServices[i].Servers[j], mSName));
                 }
             }
 
             // Asignando los servers a un nuevo env
             Env env = new Env();
-            // env.CrearEventosConLoDeMauricio @audit 
             env.AddServerList(servers);
+
+            // env.CrearEventosConLoDeMauricio
+            var total = 10000;
+            env.GenerateEventsInTimeRange(_events, _probs, total);
+
+            env.Run();
+
+            // Evaluando
+            var output = env.Output;
 
             // Limpio MicroServicios (No hace falta limpiar los Recursos, ni los Servers)
             MicroService.Services.Clear();
 
-
+            return output;
         }
 
         private  static Server CreateServer(int j, ServerSim serverSim, string mSName = null)
@@ -101,7 +112,7 @@ namespace Core
         {
             List<Resource> res = new List<Resource> { };
             foreach (var i in resources)
-                res.Add(_resources[resources[i]]);
+                res.Add(_resources[i]);
            
 
             return res;

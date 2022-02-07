@@ -217,7 +217,7 @@ namespace Core {
             List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
             List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7 , r8};
             FactorySim factory = new FactorySim(behaviors, resources);
-            factory.RunSimulation(individual);
+            // factory.RunSimulation(individual);
             
             //poner el assert
 
@@ -254,29 +254,58 @@ namespace Core {
         [TestMethod]
         public void GeneticTest()
         {
-            Func<IndividualSim, double> mini = null;
-            Func<IndividualSim, bool> validate = null;
-
-            List<IndividualSim> poblacion = IndividualSim.GeneratePoblation(20);
-
-            Genetic genetic = new Genetic();
-            genetic.Run(poblacion, mini,validate, 10);// ponerle un time
-
             List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
             List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
             FactorySim factory = new FactorySim(behaviors, resources);
-
-            foreach (var item in poblacion)
-            {
-                FactorySim.RunSimulation(item);
-            }
             
+            Func<IndividualSim, double> mini = null;
+            Func<IndividualSim, bool> validate = null;
+
+            // List<IndividualSim> poblation = IndividualSim.Sampler(20);
+
+            // Genetic genetic = new Genetic();
+            // genetic.Run(poblation, mini,validate, 10);// ponerle un time
 
 
-            individual.Mutate();
+            // foreach (var item in poblation)
+            // {
+            //     FactorySim.RunSimulation(item);
+            // }
+            
+            var meta = new Genetic();
+            var poblation = IndividualSim.Sampler(30);
+            
+            meta.Run( poblation,
+                (IndividualSim i) => FactorySim.RunSimulation(i).Average,
+                (IndividualSim i) => ValidInBudget(i),
+                100000);
+
+            var i = poblation[0];
 
             //poner el assert
 
+        }
+        public bool ValidInBudget(IndividualSim individual)
+        {// Calcula el coste de un individuo, basandose en los parallelsProcesors y el costo de estos
+            double cost = 0;
+            foreach (var microService in individual.MicroServices){
+                foreach (var server in microService.Servers){
+                    cost += server.ParallelsProcesors * UtilsT.CostByMicro;
+                }
+            }
+            var ret = cost < FactorySim.Budget;
+            return cost < FactorySim.Budget;
+        }
+        public static void RunMetaWithFunc(){
+            var meta = new MetaHeuristics();
+            var list = Individual.Sampler(30);
+            
+            meta.Run( list,
+                (Individual i) => SimulationSystem.RunSimulation(i),
+                (Individual i) => { return 0 < i.MonthlyMaintennanceCost; }, // @todo acotar superiorment el costo
+                1000);
+
+            Assert.AreEqual(57, list[0].Doers);
         }
     }
 }

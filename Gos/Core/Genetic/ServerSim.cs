@@ -17,7 +17,7 @@ namespace Core
         private double probAddLayer;
         private double probRemoveLayer;
 
-        public static int ParallelsProcesors { get; private set; }
+        public int ParallelsProcesors { get; private set; }
 
         public ServerSim Clone()
         {
@@ -63,9 +63,8 @@ namespace Core
 
         internal static ServerSim RndServer()
         {
-            ParallelsProcesors = _random.Next(1, FactorySim.MaxProcesorsInServer);
-            
             ServerSim s = new ServerSim();
+            s.ParallelsProcesors = _random.Next(1, FactorySim.MaxProcesorsInServer);
 
             var countLayer = _random.Next(1, FactorySim.MaxBehavior);
             for (int i = 0; i < countLayer; i++)

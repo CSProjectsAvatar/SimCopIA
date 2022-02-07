@@ -90,7 +90,7 @@ namespace Core
             return i;
         }
 
-        internal static List<IndividualSim> GeneratePoblation(int n)
+        internal static List<IndividualSim> Sampler(int n)
         {
             List<IndividualSim> poblation = new List<IndividualSim> { };
             for (int i = 0; i <= n; i++)
