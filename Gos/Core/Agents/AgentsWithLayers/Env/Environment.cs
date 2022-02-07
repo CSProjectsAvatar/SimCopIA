@@ -210,6 +210,12 @@ namespace ServersWithLayers
             Resource.Resources.Clear();
             Env.ClearServersLayers();
         }
+
+        public double GetMothlyCost(){
+            return servers.Values.Select((Server s)=> s.MonthlyCost).Sum();
+        }
+
+
     }
 }
 /*
