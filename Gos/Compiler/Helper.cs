@@ -56,7 +56,6 @@ namespace Compiler {
             ("%", Token.TypeEnum.Percent),
             (@"\(", Token.TypeEnum.LPar),
             (@"\)", Token.TypeEnum.RPar),
-            (@"\->", Token.TypeEnum.RightArrow),
             (",", Token.TypeEnum.Comma),
             (@"\[", Token.TypeEnum.LBracket),
             (@"\]", Token.TypeEnum.RBracket),
