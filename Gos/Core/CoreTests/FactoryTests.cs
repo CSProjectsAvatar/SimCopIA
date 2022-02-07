@@ -179,7 +179,7 @@ namespace Core {
 
             individual.MicroServices = microServices;
 
-;            
+            var env = new Env();
         }
 
        
@@ -249,7 +249,6 @@ namespace Core {
             individual.Mutate();
 
             //poner el assert
-
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Core
         {
             MicroServiceSim m = new MicroServiceSim();
 
-            var countServer = _random.Next(1,FactorySim.MaxServers);
+            var countServer = _random.Next(1,FactorySim.MaxServers/4);
             for (int i = 0; i < countServer; i++)
             {
                 m.Servers.Add(ServerSim.RndServer());
