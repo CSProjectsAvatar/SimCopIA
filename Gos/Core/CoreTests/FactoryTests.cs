@@ -251,5 +251,33 @@ namespace Core {
             //poner el assert
 
         }
+
+        [TestMethod]
+        public void GeneticTest()
+        {
+            Func<IndividualSim, double> mini = null;
+            Func<IndividualSim, bool> validate = null;
+
+            List<IndividualSim> poblacion = IndividualSim.GeneratePoblation(20);
+
+            Genetic genetic = new Genetic();
+            genetic.Run(poblacion, mini,validate, 10);// ponerle un time
+
+            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
+            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
+            FactorySim factory = new FactorySim(behaviors, resources);
+
+            foreach (var item in poblacion)
+            {
+                FactorySim.RunSimulation(item);
+            }
+            
+
+
+            individual.Mutate();
+
+            //poner el assert
+
+        }
     }
 }

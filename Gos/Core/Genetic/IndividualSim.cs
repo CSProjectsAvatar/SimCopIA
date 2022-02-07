@@ -89,6 +89,16 @@ namespace Core
 
             return i;
         }
+
+        internal static List<IndividualSim> GeneratePoblation(int n)
+        {
+            List<IndividualSim> poblation = new List<IndividualSim> { };
+            for (int i = 0; i <= n; i++)
+            {
+                poblation.Add(RndIndividual());
+            }
+            return poblation;
+        }
     }
 
 }
