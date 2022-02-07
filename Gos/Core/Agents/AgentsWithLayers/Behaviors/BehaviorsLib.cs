@@ -9,11 +9,13 @@ namespace ServersWithLayers
 
     public static class BehaviorsLib
     {
-        public static Behavior Worker = new Behavior(WorkerBehav.Behavior, WorkerBehav.BehavInit);
-        public static Behavior Contractor = new Behavior(ContractorBehav.Behavior);
-        public static Behavior FallenLeader = new Behavior(FallenLeaderBehav.Behavior, FallenLeaderBehav.BehavInit);
-        public static Behavior Boss = new Behavior(BossBehav.BossBehavior, BossBehav.BossBehavInit);
-      
+        public static Behavior Worker = new Behavior("worker", WorkerBehav.Behavior, WorkerBehav.BehavInit);
+        public static Behavior Contractor = new Behavior("contractor",ContractorBehav.Behavior);
+        public static Behavior FallenLeader = new Behavior("Fallenleader",FallenLeaderBehav.Behavior, FallenLeaderBehav.BehavInit);
+        public static Behavior Boss = new Behavior("Boss",BossBehav.BossBehavior, BossBehav.BossBehavInit);
+
+        
+        
         public static bool Incomplete(Status st, Response response)
         {
             var req = st.GetMsgById(response.ReqID) as Request;

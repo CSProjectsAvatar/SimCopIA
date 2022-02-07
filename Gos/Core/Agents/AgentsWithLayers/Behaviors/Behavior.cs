@@ -22,6 +22,11 @@ namespace ServersWithLayers
             _init = init;
         }
 
+        public Behavior(string name, Action<Status, Perception, Dictionary<string, object>> action, Action<Status, Dictionary<string, object>> init = null) : this(action,init)
+        {
+            Name = name;
+        }
+
         public void SetVar(string name, object value)
         {
             variables[name] = value;

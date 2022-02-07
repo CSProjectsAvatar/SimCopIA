@@ -130,7 +130,7 @@ namespace Core
 
         public override string ToString()
         {
-            string toString = "Microserver" + "\n";
+            string toString = "Microserveces" + "\n";
             int i = 0;
             foreach (var item in MicroServices)
             {
