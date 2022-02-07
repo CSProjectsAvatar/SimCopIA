@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ServersWithLayers;
-
+using Utils;
 namespace Core
 {
     public class FactorySim
@@ -19,7 +19,7 @@ namespace Core
 
         public static int MaxBehavior ;
         public static int MaxResource;
-        public static int MaxServers;
+        public static int MaxServers => (int)(Budget / UtilsT.CostByMicro);
 
 
         public FactorySim(List<Behavior> behaviors, List<Resource> resources, double budget = 50, int maxProcesors = 10)
@@ -53,7 +53,6 @@ namespace Core
             
             MaxBehavior = _behaviors.Count();
             MaxResource = _resources.Count();
-            MaxServers = MaxBehavior * MaxResource;
         }
 
 

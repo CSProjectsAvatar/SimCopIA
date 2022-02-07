@@ -58,6 +58,7 @@ namespace Core {
         ServerSim serverSim6;
         ServerSim serverSim7;
 
+        MicroServiceSim M1;
 
         IndividualSim individual;
         List<MicroServiceSim> microServices;
@@ -165,7 +166,7 @@ namespace Core {
             List<ServerSim> S2 = new List<ServerSim> { serverSim3,serverSim4};
             List<ServerSim> S3 = new List<ServerSim> { serverSim5,serverSim6,serverSim7};
 
-            MicroServiceSim M1 = new MicroServiceSim();
+            M1 = new MicroServiceSim();
             M1.Servers = S1;
             MicroServiceSim M2 = new MicroServiceSim();
             M2.Servers = S2;
@@ -218,6 +219,35 @@ namespace Core {
             FactorySim factory = new FactorySim(behaviors, resources);
             factory.RunSimulation(individual);
             
+            //poner el assert
+
+        }
+
+        [TestMethod]
+        public void FactoryRndTest()
+        {
+            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
+            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
+            FactorySim factory = new FactorySim(behaviors, resources);
+            //factory.RunSimulation(individual);
+
+
+            IndividualSim i = IndividualSim.RndIndividual();
+            //poner el assert
+
+        }
+
+        [TestMethod]
+        public void FactoryMutateTest()
+        {
+            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
+            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
+            FactorySim factory = new FactorySim(behaviors, resources);
+            //factory.RunSimulation(individual);
+
+
+            individual.Mutate();
+
             //poner el assert
 
         }

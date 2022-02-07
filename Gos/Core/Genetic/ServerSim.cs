@@ -55,7 +55,7 @@ namespace Core
             // Resources
             for (int i = 0; i < resources.Count; i++) {
                 if (_random.NextDouble() < probMutateRscs) { // prob de mutar un recurso
-                    var reso = _random.Next(FactorySim.MaxResource-1);
+                    var reso = _random.Next(FactorySim.MaxResorce);
                     resources[i] = reso;
                 }
             }
@@ -74,10 +74,10 @@ namespace Core
             }
 
             var countResource = _random.Next(1, FactorySim.MaxResource);
-            List<int> resor = new List<int>(Enumerable.Range(1, FactorySim.MaxResource));
+            List<int> resor = new List<int>(Enumerable.Range(0, FactorySim.MaxResource));
             for (int i = 0; i < countResource; i++)
             {
-                var va = _random.Next(resor.Count - 1);
+                var va = _random.Next(resor.Count);
                 s.resources.Add(resor[va]);
                 resor.RemoveAt(va);
 
