@@ -217,7 +217,7 @@ namespace Core {
             List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
             List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7 , r8};
             FactorySim factory = new FactorySim(behaviors, resources);
-            factory.RunSimulation(individual);
+            //factory.RunSimulation(individual);
             
             //poner el assert
 
@@ -272,6 +272,17 @@ namespace Core {
             }
             
 
+        }
+
+        [TestMethod]
+        public void cw()
+        {
+            List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
+            List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
+            FactorySim factory = new FactorySim(behaviors, resources);
+            
+            string s= factory.ToStringIndividual(individual);
+            Console.WriteLine(s);
         }
     }
 }

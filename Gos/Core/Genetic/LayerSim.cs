@@ -54,7 +54,13 @@ namespace Core
 
         public override string ToString()
         {
-            return "";
+            string toString = "Behaviour" + "\n";
+
+            foreach (var item in behavior)
+            {
+                toString += item+ "\n";
+            }
+            return toString;
         }
 
     }

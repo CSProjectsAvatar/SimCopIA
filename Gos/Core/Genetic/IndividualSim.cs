@@ -103,9 +103,11 @@ namespace Core
         public override string ToString()
         {
             string toString = "Microserver" + "\n";
+            int i = 0;
             foreach (var item in MicroServices)
             {
-                toString += item.ToString() + "\n";
+                toString += "M"+i + "\n" + item.ToString() + "\n";
+                i++;
             }
             return toString;
         }
