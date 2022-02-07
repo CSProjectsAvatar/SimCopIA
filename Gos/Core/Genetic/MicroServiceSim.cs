@@ -78,10 +78,12 @@ namespace Core
 
         public override string ToString()
         {
-            string toString = "Servers" + "\n";
+            string toString = "Servers :" +"\n";
+            int i = 0;
             foreach (var item in Servers)
             {
-                toString += item.ToString()+"\n";
+                toString += "S"+i+ "\n" + item.ToString()+"\n";
+                i++;
             }
             return toString;
         }
