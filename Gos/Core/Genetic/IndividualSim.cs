@@ -39,7 +39,7 @@ namespace Core
                     i--;
                 }
 
-                if (_random.NextDouble() < probMutateMicro) // probabilidad de mutacion micro
+                else if (_random.NextDouble() < probMutateMicro) // probabilidad de mutacion micro
                     MicroServices[i].Mutate();
             }
         }
@@ -81,7 +81,7 @@ namespace Core
         {
             IndividualSim i = new IndividualSim();
 
-            var countMicro = _random.Next(1, 4);// cambier 
+            var countMicro = _random.Next(1, FactorySim.MaxServers/4);// cambier 
             for (int j = 0; j < countMicro; j++)
             {
                 i.MicroServices.Add(MicroServiceSim.RndMicro());
