@@ -162,7 +162,7 @@ namespace ServersWithLayers
             return logList;
         }
 
-        internal static void ClearServersLayers()
+        public static void ClearServersLayers()
         {
             foreach (var server in Env.CurrentEnv.servers.Values)
                 server.ClearLayers();
@@ -217,6 +217,12 @@ namespace ServersWithLayers
             Resource.Resources.Clear();
             Env.ClearServersLayers();
         }
+
+        public double GetMothlyCost(){
+            return servers.Values.Select((Server s)=> s.MonthlyCost).Sum();
+        }
+
+
     }
 }
 /*

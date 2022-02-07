@@ -10,8 +10,8 @@ using DataClassHierarchy;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Agents;
 using Compiler;
+using Compiler.AstHierarchy;
 
 namespace Tests {
     [TestClass]
@@ -115,12 +115,12 @@ namespace Tests {
                 Statements = new List<IStatement>(){
                     defDouble, // f x -> 2x
                     letA,      // a = 10
-                    letB       // b = Double a
+                    letB,      // b = Double a
                 }
             };
         #endregion
 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -170,13 +170,13 @@ namespace Tests {
                     letB,       // b = 10
                     letC,       // c = 11
                     letD,       // d = a == b (true)
-                    letE        // e = a == c (false)
+                    letE,       // e = a == c (false)
                 }
             };
             
         #endregion
 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -227,12 +227,12 @@ namespace Tests {
                 Statements = new List<IStatement>(){
                     defDoubleMinusOne, // f x -> { y = 1; return 2x - y }
                     letA,      // a = 10
-                    letB       // b = DoubleMinusOne a
+                    letB,      // b = DoubleMinusOne a
                 }
             };
         #endregion
 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -253,13 +253,17 @@ namespace Tests {
                 Arguments = new List<string>(){ "x"},
                 Body = new List<IStatement>(){
                     new IfStmt(){
-                        Condition = new LessThanOp(){ // if x < 1
-                            Left = new Variable(){ Identifier = "x"},
-                            Right = new Number(){ Value = "1"}
+                        Conditions = new[] {
+                            new LessThanOp(){ // if x < 1
+                                Left = new Variable(){ Identifier = "x"},
+                                Right = new Number(){ Value = "1"}
+                            }
                         },
-                        Then = new List<IStatement>(){
-                            new Return(){
-                                Expr = new Number(){ Value = "1"}
+                        Thens = new[] {
+                            new List<IStatement>(){
+                                new Return(){
+                                    Expr = new Number(){ Value = "1"}
+                                }
                             }
                         }
                     },
@@ -295,12 +299,12 @@ namespace Tests {
                 Statements = new List<IStatement>(){
                     defFactorial, // f x -> x * f (x-1)
                     letA,      // a = 5
-                    letB       // b = Fact a
+                    letB,      // b = Fact a
                 }
             };
         #endregion
 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -322,13 +326,17 @@ namespace Tests {
                 Arguments = new List<string>(){ "x"},
                 Body = new List<IStatement>(){
                     new IfStmt(){
-                        Condition = new LessThanOp(){ // if x < 2
-                            Left = new Variable(){ Identifier = "x"},
-                            Right = new Number(){ Value = "2"}
+                        Conditions = new[] {
+                            new LessThanOp(){ // if x < 2
+                                Left = new Variable(){ Identifier = "x"},
+                                Right = new Number(){ Value = "2"}
+                            }
                         },
-                        Then = new List<IStatement>(){
-                            new Return(){
-                                Expr = new Number(){ Value = "1"}
+                        Thens = new[] {
+                            new List<IStatement>(){
+                                new Return(){
+                                    Expr = new Number(){ Value = "1"}
+                                }
                             }
                         }
                     },
@@ -372,12 +380,12 @@ namespace Tests {
                 Statements = new List<IStatement>(){
                     defFib, // f x -> if x < 2 then 1 else f(x-1) + f(x-2)
                     letA,      // a = 6
-                    letB       // b = Fib a
+                    letB,      // b = Fib 
                 }
             };
         #endregion
                 
-            var valid = prog.Validate(global);
+            var valid = prog.Validate(new Context());
             Assert.IsTrue(valid);
 
             var (success, result) = evalVisitor.Visit(prog);
@@ -389,120 +397,5 @@ namespace Tests {
             var dB = global.GetVar(letB.Identifier);
             Assert.AreEqual((double)13, dB);
         }
-
-        // Test for the RightArrow Operand
-        [TestMethod]
-        public void EvalRightArrow(){
-            #region Program
-            var letA = new LetVar(){ // let a = distw
-                Identifier = "a",
-                Expr = new DistW()
-            };
-            var letB = new LetVar(){ // let b = distw
-                Identifier = "b",
-                Expr = new DistW()
-            };
-            var letC = new LetVar(){ // let b = distw
-                Identifier = "c",
-                Expr = new DistW()
-            };
-            var rightA = new RightConn(){ // a -> b, c
-                LeftAgent = "a",
-                Agents = new List<string>(){ "b", "c" }
-            };
-            var prog = new ProgramNode(){
-                Statements = new List<IStatement>(){
-                    letA,
-                    letB,
-                    letC,
-                    rightA
-                }
-            };
-            #endregion
-                    
-                var valid = prog.Validate(global);
-                Assert.IsTrue(valid);
-    
-                var (success, result) = evalVisitor.Visit(prog);
-                Assert.IsTrue(success);
-    
-                var dA = global.GetVar(letA.Identifier);
-                Assert.IsTrue(((DistributionServer)dA).workers.Contains("b"));
-                Assert.IsTrue(((DistributionServer)dA).workers.Contains("c"));
-        }
-    
-        // Test for the RightArrow Operand with errors
-        [TestMethod]
-        public void EvalRightArrowErros(){
-            #region Program
-            var letA = new LetVar(){ // let a = distw
-                Identifier = "a",
-                Expr = new DistW()
-            };
-            var letB = new LetVar(){ // let b = distw
-                Identifier = "b",
-                Expr = new DistW()
-            };
-            var letC = new LetVar(){ // let b = distw
-                Identifier = "c",
-                Expr = new DistW()
-            };
-            var rightA = new RightConn(_logRArrow){ // a -> b, c
-                LeftAgent = "a",
-                Agents = new List<string>(){ "b", "c", "d" },
-                Token = new Token(Token.TypeEnum.Id, 1, 1, "a")
-            };
-            var prog = new ProgramNode(){
-                Statements = new List<IStatement>(){
-                    letA,
-                    letB,
-                    letC,
-                    rightA
-                }
-            };
-            #endregion
-                    
-            var valid = prog.Validate(global);
-            Assert.IsFalse(valid);
-        }
-    
-        // Test for the RightArrow Operand with errors
-        [TestMethod]
-        public void EvalRightArrowError2(){
-            #region Program
-            var letA = new LetVar(){ // let a = distw
-                Identifier = "a",
-                Expr = new DistW()
-            };
-            var letB = new LetVar(){ // let b = 1
-                Identifier = "b",
-                Expr = new Number() {Value = "1"}
-            };
-            var letC = new LetVar(){ // let c = distw
-                Identifier = "c",
-                Expr = new DistW()
-            };
-            var rightA = new RightConn(_logRArrow){ // a -> b, c
-                LeftAgent = "a",
-                Agents = new List<string>(){ "b", "c" },
-                Token = new Token(Token.TypeEnum.Id, 1, 1, "a")
-            };
-            var prog = new ProgramNode(){
-                Statements = new List<IStatement>(){
-                    letA,
-                    letB,
-                    letC,
-                    rightA
-                }
-            };
-            #endregion
-                    
-            var valid = prog.Validate(global);
-            Assert.IsTrue(valid);
-
-            var (success, result) = evalVisitor.Visit(prog);
-            Assert.IsFalse(success);
-        }
-    
     }
 }

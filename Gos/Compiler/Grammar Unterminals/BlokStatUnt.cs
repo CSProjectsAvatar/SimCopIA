@@ -1,18 +1,26 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Compiler.Grammar_Unterminals;
 using DataClassHierarchy;
 
 namespace Compiler {
-    internal class BlockStUnt : Unterminal
-    {
+    internal class BlockStUnt : Unterminal {
         public IEnumerable<string> Args { get; set; }
 
-        //<block-stat> := <if> | <def-func>
-        protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation)
-        {
+        protected override AstNode SetAst(IReadOnlyList<GramSymbol> derivation) {
+            // <block-stat> := <if> 
+            //               | <def-func>
+            //               | <inf-loop>
+            //               | <foreach>
+            //               | <behav>
+            //               | <init>
             return derivation[0] switch{
                 IfUnt ifUnt => ifUnt.Ast,
                 DefFunUnt defFuncUnt => defFuncUnt.Ast,
+                InfLoopUnt u => u.Ast,
+                ForEachUnt u => u.Ast,
+                BehavUnt u => u.Ast,
+                InitUnt u => u.Ast,
                 _ => throw new System.Exception("BlockStUnt.SetAst: grammar symbol no esperado")
             };
         

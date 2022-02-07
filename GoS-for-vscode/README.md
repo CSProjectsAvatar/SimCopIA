@@ -15,7 +15,7 @@ En este lenguaje se puede declarar funciones:
 
 ![multiline](imgs/multiline.gif)
 
-Crear servidores de tipo *worker* simple y distribuidores de carga:
+Crear servidores de tipo *worker* simple y distribuidores de carga: <!--@audit ahora es new simplew, y los colores cambiaron-->
 
 ![simple/distw](imgs/simplew-distw.gif)
 

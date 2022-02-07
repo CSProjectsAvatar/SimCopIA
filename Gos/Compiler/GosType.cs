@@ -5,6 +5,22 @@
     internal enum GosType {
         Number,
         Bool,
-        Server
+        Server,
+        List,
+        Null,
+        ServerStatus,
+        Response,
+
+        /// <summary>
+        /// Para el tipo de percepcio'n <see cref="ServersWithLayers.Observer"/>
+        /// </summary>
+        Alarm,
+        Request,
+        Environment,
+        String,
+        Resource,
+        Layer,
+        Behavior,
+        Function
     }
 }

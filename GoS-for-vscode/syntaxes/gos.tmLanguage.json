@@ -18,14 +18,20 @@
 		},
 		"keywords": {
 			"patterns": [{
+					"name": "keyword.other.gos",
+					"match": "\\b((?<=\\b(ask|order)\\b.+)for)\\b"
+				},{
 					"name": "keyword.control.gos",
-					"match": "\\b(if|return)\\b"
+					"match": "\\b(if|else_if|else|return|forever|break|for|(?<=\\bfor\\b.+)in)\\b"
 				}, {
 					"name": "keyword.other.gos",
-					"match": "\\b(fun|let|print|simplew|distw)\\b"
+					"match": "\\b(fun|let|print|new|and|or|true|false|behav|init|is|not|respond|respond_or_save|process|accept|ping|in|alarm_me|ask|order|for)\\b"
 				}, {
 					"name": "keyword.operator.gos",
-					"match": ">|<|\\=|==|\\+|\\->|\\-|\\*|\\/"
+					"match": ">|<|\\=|==|\\+|\\->|\\-|\\*|\\/|%"
+				}, {
+					"name": "support.class.gos",
+					"match": "\\b(server|request|response|alarm|resource|layer)\\b"
 				}]
 		},
 		"strings": {
@@ -49,11 +55,27 @@
 			"patterns": [{
 					"comment": "Llamado a función.",
 					"name": "support.function.gos",
-					"match": "\\b_?[a-zA-Z][_a-zA-Z0-9]*\\b(?=\\s*\\()"
+					"match": "\\b_*[a-zA-Z][_a-zA-Z0-9]*\\b(?=\\s*\\()"
+				},{
+					"comment": "Nombre de comportamiento.",
+					"name": "support.function.gos",
+					"match": "(?<=\\bbehav\\b\\s+)\\b_*[a-zA-Z][_a-zA-Z0-9]*\\b"
+				},{
+					"comment": "Propiedad.",
+					"name": "entity.attribute-name.gos",
+					"match": "(?<=\\.)\\b_*[a-zA-Z][_a-zA-Z0-9]*\\b"
+				},{
+					"comment": "Variables reservadas de comportamientos.",
+					"name": "markup.bold.gos",
+					"match": "(?<!\\.)\\b(status|percep|done_reqs|env)\\b"
+				},{
+					"comment": "Constante.",
+					"name": "support.constant.gos",
+					"match": "\\b_*[A-Z][_A-Z0-9]*\\b"
 				}, {
 					"comment": "Variable",
 					"name": "variable.other.gos",
-					"match": "\\b_?[a-zA-Z][_a-zA-Z0-9]*\\b"
+					"match": "\\b_*[a-zA-Z][_a-zA-Z0-9]*\\b"
 				}]
 		}
 	},

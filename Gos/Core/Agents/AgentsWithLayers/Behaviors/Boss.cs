@@ -144,14 +144,14 @@ namespace ServersWithLayers.Behaviors
         }
         
 
-        internal static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
+        public static List<Resource> FilterNotAvailableRscs(Status status,List<Resource> resources){
             var availList = status.AvailableResources;
             var res = resources.Where(x => !availList.Contains(x)).ToList();
 
             return res;
         }
 
-        private static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
+        public static List<Request> ResponseSelectionFunction(Status status,IEnumerable<Response> responses){
             List<Request> solution = new();
 
             // resource is Ready 
@@ -380,6 +380,18 @@ namespace ServersWithLayers.Behaviors
                 //    System.Console.WriteLine();
                 //}
                 
+            }
+            [TestMethod]
+            public void testingggg(){
+                Env.RunDefaultCurrentEnv() ;
+                var output=Env.CurrentEnv.Output;
+
+                System.Console.WriteLine(output.Average);
+                System.Console.WriteLine(output.ResponsePercent);
+                System.Console.WriteLine(output.NotResponsePercent);
+                System.Console.WriteLine(output.SlowestResponse);
+                System.Console.WriteLine(output.FastestResponse);
+                System.Console.WriteLine(output.TotalMonthlyCost);
             }
         }
     }    

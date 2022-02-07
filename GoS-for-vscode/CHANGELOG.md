@@ -3,6 +3,31 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato se basa en [*Keep a Changelog*](https://keepachangelog.com/en/1.0.0/), y este proyecto se adhiere a [*Semantic Versioning*](https://semver.org/spec/v2.0.0.html).
 <!-- Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file. -->
 
+## 0.3.0
+### Added
+- Palabras claves `else_if` y `else`.
+- Palabra clave `new`.
+- Operador resto `%`.
+- Palabras claves `forever`, `break`, `for` e `in`.
+- Palabras claves `and` y `or`.
+- Palabras claves `true` y `false`.
+- Posibles valores para el token CLASS: `server`, `request`, `response`, `alarm`, `resource` y `layer`.
+- Palabras claves `behav` e `init`.
+- *Highlight* para el nombre de los comportamientos.
+- Palabras claves `is` y `not`.
+- Palabras claves `respond`, `respond_or_save`, `accept` y `process`.
+- Variables m&aacute;gicas `status`, `percep`, `done_reqs` y `env` en negrita.
+- Tratamiento diferenciado a VARIABLES_QUE_ESTEN_ASI_EN_MAYUSCULAS.
+- Palabras claves `ping`, `alarm_me`, `ask` y `order`.
+- Tratamiento diferenciado a `for` e `in` cuando se encuentran despu&eacute;s de `ask`, `order` o `in`.
+
+### Removed
+- Palabras claves `distw` y `simplew`.
+
+### Fixed
+- Expresi&oacute;n regular para los identificadores.
+- No resaltar a los identificadores de variables m&aacute;gicas cuando se utilizan como propiedad.
+
 ## 0.2.0
 ### Added
 - Palabras claves `simplew` y `distw`.

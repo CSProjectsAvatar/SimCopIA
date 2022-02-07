@@ -9,7 +9,7 @@ namespace ServersWithLayers{
         {
             return $"{Name} - {Type} - {Count}";
         }
-        internal static Dictionary<string, MicroService> Services = new();
+        public static Dictionary<string, MicroService> Services = new();
         private ILogger<MicroService> _logger;
 
         private string _name;

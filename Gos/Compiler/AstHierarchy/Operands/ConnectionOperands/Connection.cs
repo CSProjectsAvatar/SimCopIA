@@ -1,6 +1,6 @@
-using Agents;
 using Compiler;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 namespace DataClassHierarchy
 {
@@ -13,7 +13,6 @@ namespace DataClassHierarchy
         public Connection(ILogger<Connection> logger = null) {
             _log = logger;
         }
-        public abstract (bool, object) TryCompute(Agent left, List<Agent> agents);
 
         public override bool Validate(Context context)
         {

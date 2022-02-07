@@ -2,14 +2,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace Compiler {
     public class Lr1Dfa {
-        internal Dictionary<(uint, Token.TypeEnum), (ActionEnum, uint)> action;  // (estado, token) -> (accio'n, data)
-        internal Dictionary<(uint, string), uint> @goto;  // (estado, no-terminal) -> nuevo estado
+        internal Dictionary<(uint, Token.TypeEnum), (ActionEnum, uint)> _action;  // (estado, token) -> (accio'n, data)
+        internal Dictionary<(uint, string), uint> _goto;  // (estado, no-terminal) -> nuevo estado
         internal Grammar grammar;
-        private readonly ILogger<Lr1Dfa> log;
+        private readonly ILogger<Lr1Dfa> _log;
         private Dictionary<string, ICollection<Token.TypeEnum>> first;
         private Dictionary<string, bool> derivesEps;
 
@@ -23,21 +25,21 @@ namespace Compiler {
             this.grammar.AddFakeProduction(initItem.Production);  // anyadiendo produccio'n falsa S' -> E
             this.grammar.Initial = initItem.Production.Unterminal;  // ahora el inicial es S'
 
-            this.log = logger;
+            this._log = logger;
             CalcEpsilonDerivations();
             CalcFirsts();
-            this.action = new();
-            this.@goto = new();
+            this._action = new();
+            this._goto = new();
             var toProcess = new Queue<Lr1State>();
             var states = new HashSet<Lr1State>();  // para no analizar 2 veces el mismo estado
 
             // considerando estado inicial
             Lr1State initState = Closure(initItem);
-            this.log?.LogDebug("Initial State:" + Environment.NewLine + "{init}", initState.ToString());
+            this._log?.LogDebug("Initial State:" + Environment.NewLine + "{init}", initState.ToString());
             toProcess.Enqueue(initState);  // encolando estado inicial para procesarlo
             states.Add(initState);  // anyadie'ndolo al conjunto de estados
-            this.action[(initState.Id, Token.TypeEnum.Eof)] = (ActionEnum.Ok, default);  // ACTION[I0, $] = 'OK'
-            this.@goto[(initState.Id, this.grammar.Initial.ToString())] = initState.Id;  // pa q cuan2 reduzk S -> E caiga en el estado inicial
+            this._action[(initState.Id, Token.TypeEnum.Eof)] = (ActionEnum.Ok, default);  // ACTION[I0, $] = 'OK'
+            this._goto[(initState.Id, this.grammar.Initial.ToString())] = initState.Id;  // pa q cuan2 reduzk S -> E caiga en el estado inicial
 
             var count = 1u;  // contador de estados
 
@@ -54,6 +56,23 @@ namespace Compiler {
                     ProcessClosure(toProcess, states, ref count, curState, group.Key, @goto);
                 }
             }
+        }
+
+        public Lr1Dfa(Grammar grammar, string dfaFile, ILogger<Lr1Dfa> logLr1Dfa) {
+            _log = logLr1Dfa;
+
+            var data = JsonSerializer.Deserialize<Lr1DfaData>(File.ReadAllText(dfaFile));
+            (_action, _goto) = data.GetData();
+
+            var initItem = Lr1Item.Initial(grammar.Initial);
+            grammar.AddFakeProduction(initItem.Production);  // anyadiendo produccio'n falsa S' -> E
+            grammar.Initial = initItem.Production.Unterminal;  // ahora el inicial es S'
+        }
+
+        internal void SaveToFile(string file) {
+            File.WriteAllText(
+                file,
+                JsonSerializer.Serialize(new Lr1DfaData(_action, _goto)));
         }
 
         internal ICollection<Token.TypeEnum> First(UntType e) {
@@ -92,7 +111,7 @@ namespace Compiler {
                     }
                 }
             } while (change);
-            this.log?.LogDebug(this.derivesEps.Aggregate(
+            this._log?.LogDebug(this.derivesEps.Aggregate(
                 "", 
                 (accum, kv) => $"{accum}{kv.Key} -{(kv.Value ? '-' : '/')}-> eps{Environment.NewLine}"));
         }
@@ -130,7 +149,7 @@ namespace Compiler {
             } while (change);
 
             this.first = firsts.ToDictionary(kv => kv.Key, kv => kv.Value as ICollection<Token.TypeEnum>);
-            this.log?.LogDebug(this.first.Aggregate(
+            this._log?.LogDebug(this.first.Aggregate(
                 "",
                 (accum, kv) => accum + $"First({kv.Key}) = " + string.Join(", ", kv.Value) + Environment.NewLine));
         }
@@ -261,18 +280,18 @@ namespace Compiler {
                 closure = match;  // pa q newState tenga el ID bien puesto
             } else {  // es un nuevo estado
                 closure.Id = count++;
-                this.log?.LogDebug("New state found:" + Environment.NewLine + "{closure}", closure.ToString());
+                this._log?.LogDebug("New state found:" + Environment.NewLine + "{closure}", closure.ToString());
                 states.Add(closure);
                 toProcess.Enqueue(closure);  // procesar luego el estado nuevo
             }
-            this.log?.LogDebug("Transition s{id1} --{symbol}--> s{id2}",
+            this._log?.LogDebug("Transition s{id1} --{symbol}--> s{id2}",
                 curState.Id,
                 transitionSymbol,
                 closure.Id);
             if (IsToken(transitionSymbol, out var token)) {  // X -> α.cω, s y Goto(curState, c) = @goto.Id
                 SetAction(curState.Id, token, ActionEnum.Shift, closure.Id);  // ACTION[curState, c] = shift pa @goto.Id
             } else {  // X → α.Yω, s y Goto(curState, Y) = @goto.Id
-                this.@goto[(curState.Id, transitionSymbol)] = closure.Id;
+                this._goto[(curState.Id, transitionSymbol)] = closure.Id;
             }
         }
 
@@ -284,29 +303,29 @@ namespace Compiler {
         /// <param name="action"></param>
         /// <param name="data"></param>
         private void SetAction(uint state, Token.TypeEnum token, ActionEnum action, uint data) {
-            if (!this.action.TryGetValue((state, token), out var old)) {
-                this.action[(state, token)] = (action, data);
+            if (!this._action.TryGetValue((state, token), out var old)) {
+                this._action[(state, token)] = (action, data);
             } else if (old.Item1!=ActionEnum.ShiftReduce && old.Item1!=ActionEnum.ReduceReduce) {
                 switch (action) {
                     case ActionEnum.Shift when old.Item1 == ActionEnum.Reduce:  // conflicto shift-reduce
-                        this.action[(state, token)] = (ActionEnum.ShiftReduce, default);
-                        this.log.LogError(
+                        this._action[(state, token)] = (ActionEnum.ShiftReduce, default);
+                        this._log.LogError(
                             "{conflict} conflict found in state {state} at token {token}.",
                             ActionEnum.ShiftReduce,
                             state,
                             token);
                         break;
                     case ActionEnum.Reduce when old.Item1 == ActionEnum.Shift:  // conflicto shift-reduce
-                        this.action[(state, token)] = (ActionEnum.ShiftReduce, default);
-                        this.log.LogError(
+                        this._action[(state, token)] = (ActionEnum.ShiftReduce, default);
+                        this._log.LogError(
                             "{conflict} conflict found in state {state} at token {token}.",
                             ActionEnum.ShiftReduce,
                             state,
                             token);
                         break;
                     case ActionEnum.Reduce when old.Item1 == ActionEnum.Reduce:  // conflicto reduce-reduce
-                        this.action[(state, token)] = (ActionEnum.ReduceReduce, default);
-                        this.log.LogError(
+                        this._action[(state, token)] = (ActionEnum.ReduceReduce, default);
+                        this._log.LogError(
                             "{conflict} conflict found in state {state} at token {token}.",
                             ActionEnum.ReduceReduce,
                             state,
@@ -329,7 +348,7 @@ namespace Compiler {
         /// <param name="curState"></param>
         private void SetReduceActions(uint stateId, IEnumerable<Lr1Item> items) {
             foreach (var (lookAh, prodId) in items.Select(i => (i.Lookahead, i.Production.Id))) {
-                this.log?.LogDebug("ACTION[{curStateId}, {lookAh}] = R{k}",
+                this._log?.LogDebug("ACTION[{curStateId}, {lookAh}] = R{k}",
                     stateId,
                     lookAh,
                     prodId);
@@ -337,7 +356,7 @@ namespace Compiler {
             }
         }
 
-        internal enum ActionEnum {
+        public enum ActionEnum {
             Ok,
             Shift,
             Reduce,
@@ -348,11 +367,51 @@ namespace Compiler {
         }
 
         internal (ActionEnum Action, uint Data) Action(uint state, Token.TypeEnum token) {
-            return this.action[(state, token)];
+            return this._action[(state, token)];
         }
 
         internal uint Goto(uint state, Type unterminal) {
-            return this.@goto[(state, unterminal.Name)];
+            return this._goto[(state, unterminal.Name)];
+        }
+
+        public class Lr1DfaData {
+            public Lr1DfaData() {
+
+            }
+
+            public Lr1DfaData(Dictionary<(uint, Token.TypeEnum), (ActionEnum, uint)> action, Dictionary<(uint, string), uint> @goto) {
+                Action = action
+                    .ToDictionary(
+                        kv => $"{kv.Key.Item1},{kv.Key.Item2}",
+                        kv => new Tuple<ActionEnum, uint>(kv.Value.Item1, kv.Value.Item2));
+                Goto = @goto
+                    .ToDictionary(
+                        kv => $"{kv.Key.Item1},{kv.Key.Item2}",
+                        kv => kv.Value);
+            }
+
+            public Dictionary<string, uint> Goto { get; set; }
+            public Dictionary<string, Tuple<ActionEnum, uint>> Action { get; set; }
+
+            public (Dictionary<(uint, Token.TypeEnum), (ActionEnum, uint)> Action, Dictionary<(uint, string), uint> Goto) GetData() {
+                return (
+                    Action.ToDictionary(
+                        kv => {
+                            var split = kv.Key.Split(',');
+                            return (
+                                uint.Parse(split[0]),
+                                Enum.Parse<Token.TypeEnum>(split[1]));
+                        },
+                        kv => (kv.Value.Item1, kv.Value.Item2)),
+                    Goto.ToDictionary(
+                        kv => {
+                            var split = kv.Key.Split(',');
+                            return (
+                                uint.Parse(split[0]),
+                                split[1]);
+                        },
+                        kv => kv.Value));
+            }
         }
     }
 }

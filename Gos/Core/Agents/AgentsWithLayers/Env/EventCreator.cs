@@ -5,13 +5,14 @@ using Core;
 using Utils;
 namespace ServersWithLayers{
     public class EventCreator{
-
+        private double lambda;
         List<Type> _eventTypes;
         private List<double> _accProbabilities;
 
-        public EventCreator(List<Type> eventTypes, List<double> probabilities){
+        public EventCreator(List<Type> eventTypes, List<double> probabilities, double lambda = 0.12){
             SetTypes(eventTypes);
             SetProbabilities(probabilities);
+            this.lambda = lambda;
         }
         public EventCreator(List<Type> eventTypes) : this(eventTypes,
             // set 1/eventTypes.count in each element of the prob list
@@ -47,7 +48,7 @@ namespace ServersWithLayers{
         public IEnumerable<(Event, int)> EventItertor()
         {
             while(true){
-                var time = (int)UtilsT.GenTimeOffset(lambda: 0.12);
+                var time = (int)UtilsT.GenTimeOffset(lambda: lambda);
                 var type = GetType(UtilsT.Rand.NextDouble());
 
                 yield return (BuildEvent(type), time);

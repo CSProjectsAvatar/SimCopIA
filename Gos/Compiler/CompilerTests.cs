@@ -1,5 +1,6 @@
 ﻿using Compiler;
 using Compiler.Grammar_Unterminals;
+using Compiler.Tests;
 using Core;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Compiler {
-    public class CompilerTests : BaseTest {
+    public class CompilerTests : LangTest {
         protected static readonly UntType S = UntType.S;
         protected static readonly UntType E = UntType.E;
         protected static readonly UntType T = UntType.T;

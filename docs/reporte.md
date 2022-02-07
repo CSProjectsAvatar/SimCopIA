@@ -235,30 +235,76 @@ graph LR
              
 <block-stat> := <if>
               | <def-func>
+              | <inf-loop>
+              | <foreach>
+              | <behav>
+              | <init>
+
+<behav> := "behav" ID "{" <stat-list> "}"
+
+<init> := "init" "{" <stat-list> "}"
+
+<foreach> := "for" <id-list> "in" <expr> "{" <stat-list> "}"
+
+<inf-loop> := "forever" "{" <stat-list> "}"
 
 <stat> := <let-var>
         | <print-stat>
         | <return>
         | <func-call>
         | ID <right-conn>
+        | <atom> "=" <expr>
+        | "break"
+        | <method-call>
+        | "respond_or_save" <expr>
+        | "process" <expr>
+        | "respond" <expr>
+        | "accept" <expr>
+        | <ping>
+        | "alarm_me" "in" <expr>
+        | <ask>
+        | <order>
+
+<ask> := "ask" <atom> <after-rsrc-req>
+
+<order> := "order" <atom> <after-rsrc-req>
+
+<after-rsrc-req> := "in" <math> "for" <atom>
+                  | "for" <atom>
+
+<ping> := "ping" <atom> "in" <math>
+        | "ping" <atom>
 
 <let-var> := "let" ID "=" <expr>
 
 <def-func> := "fun" ID "(" <id-list> ")" "{" <stat-list> "}"
+            | "fun" ID "(" ")" "{" <stat-list> "}"
 
 <print-stat> := "print" <expr>
 
 <id-list> := ID
            | ID "," <id-list>
 
+<disj> := <disj> "or" <conjtion>
+        | <conjtion>
+
+<conjtion> := <conjtion> "and" <cond>
+            | <cond>
+
 <cond> := <math> "<" <math>
         | <math> ">" <math>
         | <math> "==" <math>
-
-<expr> := <cond>
         | <math>
-        | "simplew"
-        | "distw"
+
+<expr> := <disj>
+        | <ping>
+        | <ask>
+        | <order>
+
+<list-idx> := <factor> "[" <math> "]"
+
+<gos-list> := "[" <expr-list> "]"
+            | "[" "]"
 
 <right-conn> := "->" <id-list>
 
@@ -268,46 +314,95 @@ graph LR
 
 <term> := <term> "*" <factor>
         | <term> "/" <factor>
+        | <term> "%" <factor>
         | <factor>
 
 <factor> := <atom>
-          | "(" <math> ")"
+          | "(" <expr> ")"
 
 <atom> := NUMBER
+        | BOOL
         | ID
         | <func-call>
+        | <list-idx>
+        | "new" CLASS
+        | <gos-list>
+        | <method-call>
+        | <prop-get>
+        | <is-type>
+
+<is-type> := <atom> "is" <after-is>
+
+<after-is> := <is-type-end>
+            | "not" <is-type-end>
+
+<is-type-end> := CLASS
+               | CLASS ID
+
+<prop-get> := <factor> "." ID
+
+<method-call> := <factor> "." <func-call>
 
 <func-call> := ID "(" <expr-list> ")"
+             | ID "(" ")"
 
 <expr-list> := <expr>
              | <expr> "," <expr-list>
+
+<if-atom> := "if" <expr> "{" <stat-list> "}"
+
+<else> := "else" "{" <stat-list> "}"
              
-<if> := "if" <cond> "{" <stat-list> "}"
+<if> := <if-atom>
+      | <if-atom> <after-if>
+
+<after-if> := <else-if>
+            | <else>
+            | <else-if> <else>
+
+<else-if> := <else-if-atom>
+           | <else-if-atom> <else-if>
+
+<else-if-atom> := "else_if" <expr> "{" <stat-list> "}"
 
 <return> := "return" <expr>
+          | "return"
 ```
 **El `;` lo pone el *lexer***, no es necesario que el usuario lo haga. Este puede emplear `\` para definir *statements* de m&aacute;s de una l&iacute;nea.
 
-N&oacute;tese que bajo esta gram&aacute;tica no se soporta el llamado a funciones en la condici&oacute;n del `if`:
 
-![if func](if-with-func.jpg)
-
-Esto el equipo lo tiene en cuenta y ser&aacute; rectificado en entregas posteriores.
 
 #### Tipos
-El lenguaje tiene 3 tipos:
+El lenguaje tiene 4 tipos:
 - `Number`: para todo tipo de n&uacute;meros
 - `Bool`: para valores de verdad (*true* o *false*)
+- `String`: para las cadenas de caracteres.
 - `Server`: para los servidores
+- `List`: para las listas.
+- `Null`: para la no existencia de algo, por ejemplo, el tipo de retorno de las funciones que no devuelven nada.
+- `ServerStatus`: para el estado de un servidor.
+- Para la percepción que tiene el servidor sobre el ambiente, hay 3 tipos:
+    - `Request`: pedido.
+    - `Response`: respuesta.
+    - `Alarm`: notificaci&oacute;n
+- `Environment`: para el ambiente de la simulaci&oacute;n.
+- `Resource`: para los recursos.
+- `Layer`: para las capas de comportamientos de cada servidor.
+- `Behavior`: para los comportamientos.
 
-Los operadores `+`, `-`, `*`, `/` solo est&aacute;n permitidos para el tipo `Number`. 
+Los operadores `+`, `-`, `*`, `/`, `%` solo est&aacute;n permitidos para el tipo `Number`. 
 
 En el caso del operador de conexi&oacute;n de servidores (`->`), solo est&aacute; permitido para el tipo `Server`, y el operando de la izquierda debe ser un distribuidor de carga (lo que se espera es que pueda ser de cualquier tipo de servidor; ser&aacute; rectificado en una entrega posterior).
-#### Reglas Sem&aacute;nticas
-- Una variable solo puede ser definida una vez en todo el
-programa.
-- Los nombres de variables y funciones no comparten el mismo
-ámbito (pueden existir una variable y una función llamadas
+
+Una variable no puede cambiar su tipo: una vez se ha inicializado mediante `let`, los pr&oacute;ximos valores a asignar deben
+ser del mismo tipo que el valor inicial. <!--@todo poner co'digo d ejemplo-->
+
+El indexado sobre las listas es en base 1.
+
+#### Otras Reglas Sem&aacute;nticas
+- Una variable solo puede ser definida una vez en un mismo ámbito.
+- Los nombres de variables y funciones s&iacute; comparten el mismo
+ámbito (no pueden existir una variable y una función llamadas
 igual).
 - No se pueden redefinir las funciones predefinidas.
 - Una función puede tener distintas definiciones siempre que
@@ -320,7 +415,13 @@ variables definidas globalmente o a argumentos definidos en
 otras funciones.
 - En el cuerpo de una función, los nombres de los argumentos
 ocultan los nombres de variables iguales.
-- En el cuerpo de un *statement* de bloque o una función, los nombres de las variables ocultan los nombres de variables en &aacute;mbitos superiores.
+- En el cuerpo de un *statement* de bloque o una función, los nombres de las variables definidas ocultan los 
+nombres de variables en &aacute;mbitos superiores.
+- El bloque `init`, de existir, debe ser el primer *statement* de un bloque `behav`.
+- Todos los *statements* de un bloque `init` son de la forma `ID "=" <expr>`.
+- El *statement* `return` no puede tener expresi&oacute;n asociada cuando se encuentra dentro
+de un bloque de comportamiento.
+
 
 #### Gram&aacute;tica de REGEX 
 El lenguaje de REGEX utilizado es el definido en la correspondiente conferencia de la asignatura.
@@ -462,3 +563,17 @@ $ gos Sources/distrb.gos
     
     <!-- @todo  -->
 
+### Flujo de un Pedido
+```mermaid
+graph TD
+    A[Pedido] --> C{Es ra'pido?}
+    C -->|Si'| D(respond)
+    C -->|No| E{Lo acepto?}
+    E -->|Si'| F(accept)
+    E -->|Si'| K
+    E -->|No| H(No hago na)
+    F --> I[Aceptado]
+    I -->|Cuando quiera| K(process)
+    K -->|Después de un tiempo en el heap...| L[procesa2]
+    L --> J(respond_or_save)
+```
