@@ -13,7 +13,7 @@ namespace Core
         List<Resource> _resources;
         List<Type> _events;
         private List<double> _probs;
-        public static int MaxBehavior ;
+        public static int MaxBehavior;
         public static int MaxResorce;
         public static int MaxServers;
 
