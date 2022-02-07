@@ -14,11 +14,16 @@ namespace ServersWithLayers
         Dictionary<string,Server> servers; //todos los servidores registrados en este enviroment.
         public List<Response> solutionResponses 
         => (from tR in GetClientResponses() select tR.Item2).ToList();
+
+        private List<(int,Request)> clientRequests;
         public int currentTime {get; private set;} // El tiempo actual en la simulacion
         private Utils.Heap<Event> turn; // Cola de prioridad, con los eventos ordenados por tiempo.
         private ILogger<Env> _loggerEnv;
 
+        
+
         private Server _clientServer;
+        public Output Output {get;}
 
         private static string main = "Main";
         public Env(ILogger<Env> loggerEnv = null, ILogger<MicroService> loggerMS = null)
@@ -31,6 +36,10 @@ namespace ServersWithLayers
             _loggerEnv = loggerEnv;
             new MicroService(main,loggerMS).SetAsEntryPoint(); // crea el microservicio principal
             InitializeClientServer();
+            
+            this.clientRequests = new();
+            this.Output = new Output(this);
+
         }
 
         /// <summary>
@@ -83,14 +92,24 @@ namespace ServersWithLayers
             return turn.First.Item2;
         }
         //Ejecuta la simulacion.
-        public void Run(){
-            foreach (var item in this.EnumerateActions())
+        public void Run(int maxSimulationTime=10000){
+            foreach (var item in this.EnumerateActions()){
+                if(this.currentTime > maxSimulationTime)
+                    break;
                 item();
+            }
+            Output.ProcessData();
         }
 
         //Suscribe un evento en el environment.
         public void SubsribeEvent(int time, Event e){
             turn.Add(time + e.MatureTime, e);
+
+            Request r0 = e as Request;
+            if( r0 != null && r0.Sender == "0" ){
+                clientRequests.Add((time,r0));
+            }
+
         }
         //Retorna un servidor con el identificador 'ID' si esta en el environment.
         public Server GetServerByID(string ID){
@@ -115,6 +134,9 @@ namespace ServersWithLayers
                 return new List<(int,Response)>();
             return l;
         }
+        public IEnumerable<(int,Request)> GetClientRequests(){
+            return clientRequests as IEnumerable<(int,Request)>;
+        }
         // el string log del cliente
         public IEnumerable<(int,string)> GetClientReciveLog() {
             var l = LoggerBehav.GetLogList(this._clientServer,0);
@@ -128,6 +150,8 @@ namespace ServersWithLayers
             logList.AddRange(GetClientReciveLog());
             foreach (var item in servers)
                 logList.AddRange(LoggerBehav.GetLogList(item.Value,0));
+
+            logList.Sort();
             return logList;
         }
 
@@ -136,7 +160,56 @@ namespace ServersWithLayers
             foreach (var server in Env.CurrentEnv.servers.Values)
                 server.ClearLayers();
         }
-      
+
+        public void GenerateEventsInTimeRange(List<Type> eventTypes, List<double> probabilities,int totalTime,int initialTime=0){
+            var eventCreator = new EventCreator(eventTypes,probabilities);
+
+            int lastEventTime = initialTime; 
+            foreach(var e in eventCreator.EventItertor())
+            {
+                lastEventTime += e.Item2;
+                if(lastEventTime > initialTime + totalTime)
+                    break;
+                this.SubsribeEvent(lastEventTime, e.Item1);
+            }
+        }
+        //tiene algun error
+        public void GenerateNEvents(List<Type> eventTypes, List<double> probabilities,int N,int initialTime=0){
+            var eventCreator = new EventCreator(eventTypes,probabilities);
+
+            int lastEvent = initialTime;
+            foreach(var e in eventCreator.GetEvents(N)){
+                lastEvent +=  e.Item2;
+                this.SubsribeEvent(lastEvent, e.Item1);
+            }
+        }
+        // Le agrega eventos a ejecutrase al environmen actual y ejecuta la simulacion,
+        // de no existir crea uno nuevo.
+        public static void RunDefaultCurrentEnv(){
+            if(Env.CurrentEnv == null)
+                new Env();
+            Env.CurrentEnv.RunDefault();
+        }
+        public void RunDefault(){
+            
+            List<Type> eventsTypes = new(){
+                typeof(Request),
+                typeof(CritFailure)
+            };
+            List<double> probabilities = new(){
+                0.98,
+                0.02
+            };
+
+            this.GenerateEventsInTimeRange(eventsTypes,probabilities,10000);
+
+            this.Run();
+        }
+        public void Dispose(){
+            MicroService.Services.Clear();
+            Resource.Resources.Clear();
+            Env.ClearServersLayers();
+        }
     }
 }
 /*
