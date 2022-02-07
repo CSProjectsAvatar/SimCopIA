@@ -37,12 +37,12 @@ namespace ServersWithLayers{
 
         #endregion
    
-        public Status(string iD, ILogger<Status> logger = null)
+        public Status(string iD, int parallels, ILogger<Status> logger = null)
         {
             _sendToEnv = new();
             _variables = new();
 
-            MaxCapacity = 5;
+            MaxCapacity = parallels;
             AvailableResources = new();
             aceptedRequests = new();
             serverID = iD;

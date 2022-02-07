@@ -382,6 +382,18 @@ namespace ServersWithLayers.Behaviors
                 //}
                 
             }
+            [TestMethod]
+            public void testingggg(){
+                Env.RunDefaultCurrentEnv() ;
+                var output=Env.CurrentEnv.Output;
+
+                System.Console.WriteLine(output.Average);
+                System.Console.WriteLine(output.ResponsePercent);
+                System.Console.WriteLine(output.NotResponsePercent);
+                System.Console.WriteLine(output.SlowestResponse);
+                System.Console.WriteLine(output.FastestResponse);
+                System.Console.WriteLine(output.TotalMonthlyCost);
+            }
         }
     }    
 
