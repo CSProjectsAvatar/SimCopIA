@@ -41,7 +41,26 @@ namespace Core
 
         internal static LayerSim RndLayer()
         {
-            throw new NotImplementedException();
+            LayerSim l = new LayerSim();
+            List<int> bevavior = Rellenar(5);// count de omarB
+            var countBehavior = _random.Next(1,3/*lo de omar countB*/);
+            for (int i = 0; i < countBehavior; i++)
+            {
+                var va = _random.Next(bevavior.Count-1);// lo de omar countB
+                l.behavior.Add(bevavior[va]);
+                bevavior.RemoveAt(va);
+            }
+            return l;
+        }
+
+        internal static List<int> Rellenar(int count)
+        {
+            List<int> b = new List<int> { };
+            for (int i = 0; i < count-1; i++)
+            {
+                b.Add(i);
+            }
+            return b;
         }
     }
 

@@ -62,8 +62,27 @@ namespace Core
 
         internal static ServerSim RndServer()
         {
-            throw new NotImplementedException();
+            ServerSim s = new ServerSim();
+
+            var countLayer = _random.Next(1, 3/*lo de omar countB*/);
+            for (int i = 0; i < countLayer; i++)
+            {
+                s.layers.Add(LayerSim.RndLayer());
+            }
+
+            var countResource = _random.Next(1, 3/*lo de omar countR*/);
+            List<int> resor = LayerSim.Rellenar(5);// count de omarB
+            for (int i = 0; i < countResource; i++)
+            {
+                var va = _random.Next(resor.Count - 1);// lo de omar countB
+                s.resources.Add(resor[va]);
+                resor.RemoveAt(va);
+
+            }
+
+            return s;
         }
+
     }
 
 }

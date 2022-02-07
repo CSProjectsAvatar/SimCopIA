@@ -19,7 +19,15 @@ namespace Core
 
         internal static MicroServiceSim RndMicro()
         {
-            throw new NotImplementedException();
+            MicroServiceSim m = new MicroServiceSim();
+
+            var countServer = _random.Next(1);
+            for (int i = 0; i < countServer; i++)
+            {
+                m.Servers.Add(ServerSim.RndServer());
+            }
+
+            return m;
         }
 
         public MicroServiceSim Clone()
