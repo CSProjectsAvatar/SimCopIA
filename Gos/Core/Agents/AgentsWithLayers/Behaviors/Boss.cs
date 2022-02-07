@@ -14,6 +14,7 @@ namespace ServersWithLayers.Behaviors
         private static string askResponsesB = "askResponses";
         private static string solutionResponseAsocietedRequestB = "solutionResponseAsocietedRequest";
         private static string askResponsesAsocietedIDB = "askResponsesAsocietedID";
+        private static string decrementRewardsTimeB = "decrementRewardsTime";
 
         private static void BossAnnounceInit(Status status,Dictionary<string, object> vars){
             vars[reviewTimeB] = 5; //cambiar cualquier cosa 
@@ -21,6 +22,7 @@ namespace ServersWithLayers.Behaviors
             vars[askResponsesB] = new Dictionary<int, List<Response>>();
             vars[askResponsesAsocietedIDB] = new Dictionary<int, int>();
             vars[solutionResponseAsocietedRequestB] = new Dictionary<int, (Request, int)>(); //de reqID --> Original Request
+            vars[decrementRewardsTimeB] = (500, false); //   (dalay de reduccion, ya esta inicializado)
         } 
         private static void BossAnnounce(Status status, Perception p, Dictionary<string,object> variables)
         {
@@ -29,7 +31,7 @@ namespace ServersWithLayers.Behaviors
             var solutionResponseAsocietedRequest  = variables[solutionResponseAsocietedRequestB] as Dictionary<int, (Request,int)>; // reqID -> (OriginalRequest, tiempoDeSalida)
             var askResponsesAsocietedID  = variables[askResponsesAsocietedIDB] as Dictionary<int, int>;
             int reviewTime = (int)variables[reviewTimeB];
-
+            (int,bool) decrementRewardsTime = ((int,bool))variables[decrementRewardsTimeB];
 
             switch (p) {
                 case Request req when req.Type is ReqType.Asking 
@@ -60,21 +62,31 @@ namespace ServersWithLayers.Behaviors
 
                 case Observer observer:
 
-                    // (tiempo actual  != timepo de recogida de responses) <=> (observer no asociado a esta capa)
-                    if( Env.Time != nextReview.First.Item1)
-                        return;
-                    
-                    (int requestExitTime,Request currentOriginalRequest) = nextReview.RemoveMin();
+                    // (tiempo actual  == timepo de recogida de responses) <=> (observer asociado a esta capa)
+                    if( Env.Time == nextReview.First.Item1){
+                        (int requestExitTime,Request currentOriginalRequest) = nextReview.RemoveMin();
 
-                    var responses =  askResponses[currentOriginalRequest.ID];
-                    //status.MicroService.SetReward(responses);
-                    var requestsToDo = ResponseSelectionFunction(status,responses);
+                        var responses =  askResponses[currentOriginalRequest.ID];
+                        //status.MicroService.SetReward(responses);
+                        var requestsToDo = ResponseSelectionFunction(status,responses);
 
-                    foreach(Request r in requestsToDo){
-                        status.Subscribe(r);
-                        solutionResponseAsocietedRequest.Add(r.ID, (currentOriginalRequest,requestExitTime));
+                        foreach(Request r in requestsToDo){
+                            status.Subscribe(r);
+                            solutionResponseAsocietedRequest.Add(r.ID, (currentOriginalRequest,requestExitTime));
+                        }
+                        askResponses.Remove(currentOriginalRequest.ID);
                     }
-                    askResponses.Remove(currentOriginalRequest.ID);
+
+                    if( status.MicroService.LeaderId == status.serverID && Env.Time % decrementRewardsTime.Item1 == 0 ){
+                        status.MicroService.LostRepInMicroS();
+                        status.SubscribeAt(Env.Time + decrementRewardsTime.Item1,new Observer(status.serverID));
+                    }
+
+                    if (status.MicroService.LeaderId == status.serverID && !decrementRewardsTime.Item2 ){
+                        int n = (int)(Env.Time/decrementRewardsTime.Item1);
+                        status.SubscribeAt((n+1)*decrementRewardsTime.Item1,new Observer(status.serverID));
+                        variables[decrementRewardsTimeB] = (decrementRewardsTime.Item1, true);
+                    }
 
                     break;
             }
