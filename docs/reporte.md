@@ -34,7 +34,7 @@
     - [**Modelado de Servidores**](#modelado-de-servidores)
     - [**Capas de Comportamiento**](#capas-de-comportamiento)
     - [**Comportamiento**](#comportamiento)
-    - [**Comportamientos BuildIn**](#comportamientos-buildin)
+    - [**Comportamientos Built-In**](#comportamientos-built-in)
     - [**Directorios**](#directorios)
   - [Flujo de un Pedido](#flujo-de-un-pedido)
 - [IA](#ia)
@@ -234,6 +234,8 @@ graph LR
     d2 --> w4[w4]
 ```
 #### Gram&aacute;tica de GoS
+Esta es la gram&aacute;tica del lenguaje (se ir&aacute; actualizando en este mismo lugar).
+
 ```
 <program> := <stat-list>
 
@@ -382,7 +384,7 @@ graph LR
 
 
 #### Tipos
-El lenguaje tiene 4 tipos:
+El lenguaje tiene 15 tipos:
 - `Number`: para todo tipo de n&uacute;meros
 - `Bool`: para valores de verdad (*true* o *false*)
 - `String`: para las cadenas de caracteres.
@@ -398,6 +400,7 @@ El lenguaje tiene 4 tipos:
 - `Resource`: para los recursos.
 - `Layer`: para las capas de comportamientos de cada servidor.
 - `Behavior`: para los comportamientos.
+- `Function`: para las funciones.
 
 Los operadores `+`, `-`, `*`, `/`, `%` solo est&aacute;n permitidos para el tipo `Number`. 
 
@@ -588,7 +591,7 @@ Este modelo da la posibilidad de crear capas personalizadas por el usuario a tra
 A pesar de esta posibilidad brindamos implementaciones de comportamientos de servidores que creemos fundamentales en nuestra simulación. Especialmente porque nos dimos la tarea de implementar una comunicación entre servidores *buildin*, y a la vez, darle al DSL la suficiente fuerza como para poder construir los mismos comportamientos, desde 0, con mucha menos dificultad de la requerida en C# por supuesto.
 
 Los comportamientos siguientes atienden principalmente a una planificación entre los servidores de tipo *Red de Contrato*:
-#### **Comportamientos BuildIn**
+#### **Comportamientos Built-In**
   - *Jefe* : 
 
     Es el comportamiento que se le da al servidor encargado de pedir recursos dentro de un microservicio. Cada vez que llega a él un *Request* pide los recursos solicitados por este a los integrantes de su microservicio a través de la interacción *Request-Response*, una vez satisfechos los recursos solicitados retorna un *Response* al servidor solicitante.
