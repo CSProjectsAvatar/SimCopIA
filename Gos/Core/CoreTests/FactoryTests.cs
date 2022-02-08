@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using ServersWithLayers;
 using System.Linq;
 using Utils;
+using System.IO;
+using System.Text;
 using ServersWithLayers;
 
 namespace Core {
@@ -245,11 +247,17 @@ namespace Core {
             List<Behavior> behaviors = new List<Behavior> { workerB, falenLeader, contractor };
             List<Resource> resources = new List<Resource> { r1, r2, r3, r4, r5, r6, r7, r8 };
             FactorySim factory = new FactorySim(behaviors, resources);
-            //factory.RunSimulation(individual);
 
+            var s = factory.ToStringIndividual(individual);
+            //Open the File
+            StreamWriter sw = new StreamWriter("//Users//claudia//Documents//Test1.txt", true, Encoding.ASCII);
 
-            individual.Mutate();
+ 
+            sw.Write(s);
+            
 
+            //close the file
+            sw.Close();
             //poner el assert
         }
 

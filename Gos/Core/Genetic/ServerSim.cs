@@ -92,17 +92,20 @@ namespace Core
 
         public override string ToString()
         {
-            string toString = "Layers" + "\n";
+
+            string toString = "Parallels Procesors :" + ParallelsProcesors+"\n";
             foreach (var item in layers)
             {
-                toString += item.ToString() + "\n";
+                toString += "Layer { "+item.ToString() +" }"+ "\n";
             }
-            toString += "Resources" + "\n";
+            toString += "Resources" + "{ ";
 
             foreach (var item in resources)
             {
-                toString += FactorySim._resources[item].Name + "\n";
+                toString += FactorySim._resources[item].Name + " ";
             }
+            toString += " }" + "\n";
+
             return toString;
         }
     }

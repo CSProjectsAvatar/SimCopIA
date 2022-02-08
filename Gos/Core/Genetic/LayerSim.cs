@@ -54,11 +54,14 @@ namespace Core
 
         public override string ToString()
         {
-            string toString = "Behaviour" + "\n";
+            string toString = "";
 
             foreach (var item in behavior)
             {
-                toString += item+ "\n";
+                if(FactorySim._behaviors[item].Name == null)
+                    toString += "None" + " ";
+                else
+                    toString += FactorySim._behaviors[item].Name + " ";
             }
             return toString;
         }

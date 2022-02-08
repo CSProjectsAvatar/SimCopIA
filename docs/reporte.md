@@ -18,17 +18,26 @@
     - [Caracter&iacute;sticas](#características)
     - [Gram&aacute;tica de GoS](#gramática-de-gos)
     - [Tipos](#tipos)
-    - [Reglas Sem&aacute;nticas](#reglas-semánticas)
+    - [Otras Reglas Sem&aacute;nticas](#otras-reglas-semánticas)
     - [Gram&aacute;tica de REGEX](#gramática-de-regex)
     - [DSL para las Gram&aacute;ticas](#dsl-para-las-gramáticas)
     - [*Syntax Highlight* en el Code](#syntax-highlight-en-el-code)
   - [Ejecutando `gos`](#ejecutando-gos-1)
-- [3ra Entrega](#3ra-entrega)
-  - [Simulacion](#simulacion)
-  - [Ambiente](#ambiente)
-  - [Servidores](#servidires)
-  - [Microservicios](#microservicios)
-  - [Eventos](#eventos)
+- [3da Entrega](#3da-entrega)
+  - [Simulación](#simulación)
+    - [**Eventos**](#eventos-1)
+    - [**Percepciones**](#percepciones)
+    - [**Eventos Adicionales**](#eventos-adicionales)
+    - [**Creador de Eventos**](#creador-de-eventos)
+    - [**Ambiente**](#ambiente-1)
+    - [**Microservicios**](#microservicios)
+    - [**Modelado de Servidores**](#modelado-de-servidores)
+    - [**Capas de Comportamiento**](#capas-de-comportamiento)
+    - [**Comportamiento**](#comportamiento)
+    - [**Comportamientos Built-In**](#comportamientos-built-in)
+    - [**Directorios**](#directorios)
+  - [Flujo de un Pedido](#flujo-de-un-pedido)
+- [IA](#ia)
 
 ## Propuesta
 
@@ -225,6 +234,8 @@ graph LR
     d2 --> w4[w4]
 ```
 #### Gram&aacute;tica de GoS
+Esta es la gram&aacute;tica del lenguaje (se ir&aacute; actualizando en este mismo lugar).
+
 ```
 <program> := <stat-list>
 
@@ -373,7 +384,7 @@ graph LR
 
 
 #### Tipos
-El lenguaje tiene 4 tipos:
+El lenguaje tiene 15 tipos:
 - `Number`: para todo tipo de n&uacute;meros
 - `Bool`: para valores de verdad (*true* o *false*)
 - `String`: para las cadenas de caracteres.
@@ -389,6 +400,7 @@ El lenguaje tiene 4 tipos:
 - `Resource`: para los recursos.
 - `Layer`: para las capas de comportamientos de cada servidor.
 - `Behavior`: para los comportamientos.
+- `Function`: para las funciones.
 
 Los operadores `+`, `-`, `*`, `/`, `%` solo est&aacute;n permitidos para el tipo `Number`. 
 
@@ -517,50 +529,92 @@ $ gos Sources/distrb.gos
 
 ### Simulación
   
-  La simulación que tenemos en uso actualmente es la misma idea que la 2da entrega, solo que esta vez aumentamos sus posibilidades de uso, permitiendo simular aspectos mas complejos de una manera más fácil.
-  
-#### **Ambiente**
-  El ambiente (Environment) es el encargado de avisarle a los servidores cuando un evento relacionado con estos está a punto de ocurrir. Posee caracteristicas generales de la simulación y da acceso a algunas estadisticas finales como la cantidad de respuestas dadas al cliente (el servidor que hace los request iniciales a nuestro conjunto de servidores).
-#### **Comportamientos de Servidores**
-  Ahora los Agentes (Servidores) tienen un conjunto de capas internas, cada una con una lista de comportamientos asociados. Cada una de estas capas se ejecutan cada vez que el servidor recibe información del ambiente (cada vez que llega un estímulo que este servidor pueda detectar) y cada una ejecuta uno de sus comportamientos, esta elección de comportamiento de cada capa está basada en el estado interno del servidor y la persepción entrante.  
-  
-  Este modelo da la posibilidad de crear capas personalizadas por el usuario a través del DSL permitiendo lograr comportamientos no previamente definidos. Estos comportamientos tienen memoria interna donde el usuario puede guardar datos para lograr funcionamientos mas complejos. A pesar de esta posibilidad brindamos implementaciones de comportamientos de servidores que creemos fundamentales en nuestra simulación.
-  - ##### **BuildIn Behaviors**
-    - *Jefe* : 
+La simulación presentada sigue el curso de la de la 2da entrega, mucho más extendida. En la actual versión se amplían mucho los escenarios que se pueden reproducir, así como las facilidades del lenguaje, Gos, lo que nos permite simular aspectos más complejos de una manera más fácil; sin más, pasaremos a presentarlas:
 
-      Es el comportamiento que se le da al servidor  encargado de pedir recursos dentro de un microservicio. Cada vez que llega a el un Request pide los recursos solicitados por este a los integrantes de su microservicio a través de la interacción Request-Response, una vez satisfechos los recursos solicitados retorna un Response al servidor solicitante.
+Como decimos en anteriores entregas, lo que se simula es un ambiente de servidores distribuidos, donde el evento principal del medio son los pedidos de recursos de los clientes, y la tarea de los servidores es proveerselos. 
 
-      Este comportamiento a la hora de solicitar un recurso a los integrantes de su microservicio (pedidos por otro servidor), lo pide basado en una función de credibilidad modificable, el servidor que más rápido responda a sus pedidos, lo puntua con credibilidad dentro del microservicio, priorizando que la proxima vez que se haga un pedido se tenga en cuenta quien se le debe de pedir recursos sobre los demás.
+En el modelo usado están embebidos el **modelo de eventos discretos** y el **modelo de agentes inteligentes**, por lo que lo catalogamos como **mixto**.
 
-    - *Empleado*:
-      
-      Para este comportamiento, dado un Request que le llega preguntando si puede resolver algo, esta comprueba si lo quiere o puede resolver (dado el resultado de una función de aceptación), en caso positivo responde afirmativamente para notificar al enviante de que va a aceptar lo preguntado por el Request, para que el enviante sepa que ya puede mandar un Request imperativo, diciendole a otros comportamientos que este servidor posea (como comportamiento de Trabajador) lo que tienen que hacer o procesar. Su uso va estrechamente relacionado con la existencia de algún servidor con comportamiento de Jefe, creando una red de contrato al interactuar entre ellos.
-
-    - *Trabajador*:
-
-      Es el comportamientos que se le da a los servidores destinados al procesamiento, este toma los pedidos ya aceptados previamente y los "procesa" para "obtener" los recursos asociados a estos. Después de el tiempo necesario de procesamiento, este construye una respuestas a los pedidos las retorna en forma de Response.
-
-    - *Fallen Leader*:
-
-      Este es un comportamiento de sustitución de lider, el cual consiste en estar comunicandose constantemente con el lider actual del microservicio. Si este en algún momento detecta que el lider actual no esta disponible, intenta conectarse varias veces más hasta llevar a cabo una acción. Cuando este ya verifica que efectivamente el lider actual está "caído", informa a todo el microservicio mandando un mensaje que este va a sustituir al lider actual. El servidor que posee este comportamiento suele tener el comportamiento de *Jefe* u otro que actue como tal para saber desempeñar la función de lider en caso de sustituya al lider del microservicio. 
-
-#### **Microservicios**
-  Cada servidor pertenece a un microservicio, el cual tiene como objetivo usualmente responder a Requests más complejos, usando los servidores pertenecientes a este los cuales se encargan de prestar sus Recursos basado en lo solicitado. Cada Microservicio tiene un lider que es el encargado de recibir Request externos al su microservicio, este suele tener comportamientos iguales o parecidos a los de un *Jefe*.
-  - ##### **Directorios**
-
-    Los directorios son diccionarios que contienen información importante sobre un microservicio, tal como los recursos que proveen cada servidor perteneciente a este, la cantidad capacidad de procesamiento en paralelo y la creedibilidad (o confiabilidad) asociada a un servidor.
-
+Esto se modeló tratando de darle una responsabilidad única a cada clase para respetar principalmente el *Single Responsability* de SOLID, de la siguiente forma :
 
 #### **Eventos**
-  Los eventos se ejecutan en algún momento en el tiempo, estos pueden tanto ser : llegadas de mensajes la ejecucion de un proceso interno de un servidor, como eventos meteorológicos que afecten la conectividad con algunos servidores o la interrumpa.  
-  - ##### **Percepciones**
-    Estas son las directamente relacionadas con lo que el servidor puede detectar como:
+Un evento `Event`, en el sistema presentado es un ente que representa un cambio en el Ambiente, puede ser desde un `Request` de un cliente a "www.cubadebate.cu"; hasta eventos meteorológicos que afecten la conectividad con algunos servidores o la interrumpa. Los eventos se ejecutan en algún momento en el tiempo.
 
-    - la llegada de un *Request* que es una solicitud de algún recurso o acción a algún servidor.
-    - la llegada de un *Response* que es una respuesta a un *Request*.
-    - la llegada de a lo que nosotros denominamos *Observer* que no es mas que la posibilidad que le dimos al sistema que (a nivel de implementación) le diga a un Servidor que debe cambiar su estado interno por alguna razón que el mismo servidor conoce. Esto es muy útil ya que nos permite no tener en cada instancia de tiempo que revisar si todos los servidores tienen algún cambio de estado interno.
-  - ##### **Eventos Adicionales**
-    Son eventos que no son generados por los servidores, suelen simular fallas en los sistemas o algo que los afecte directamente, imposibilitando su uso o modificando algún aspecto de su funcionamiento. 
+#### **Percepciones**
+Ahora bien, no todos los eventos le incumben directamente a un servidor, como un terremoto, o un evento de creacion de servidores. Los que sí lo hacen son los que llamamos percepciones del medio ambiente, **Perception**, y son principalmente los mensajes entre servidores(**Request**, y **Response**).
+
+- un *Request*, que es una solicitud de recursos o acción a algún servidor.
+- un *Response*, que es una respuesta a un *Request*.
+- *Alarm*, la llegada de lo que denominamos en el DSL como *Alarm* que no es mas que la posibilidad que le dimos al sistema que (a nivel de implementación) le diga a un Servidor que debe cambiar su estado interno por alguna razón que el mismo servidor conoce. Esto es muy útil ya que nos permite no tener en cada instancia de tiempo que revisar si todos los servidores tienen algún cambio de estado interno.
+
+#### **Eventos Adicionales**
+Son eventos que no son generados por los servidores, suelen simular fallas en los sistemas o algo que los afecte directamente, imposibilitando su uso o modificando algún aspecto de su funcionamiento. 
+
+#### **Creador de Eventos**
+El creador de eventos `EventCreator` es la clase encargada de proveer de eventos aleatorios a un Ambiente. Se instancia en una lista de eventos, y otra de probabilidades asociadas a estos, y, básicamente, devuelve un iterador infinito de eventos, donde la función de probabilidad distribuye en función de la 2da lista. Por ej, dado:
+```
+events = [Request, CriticalFailure]
+probs = [0.9, 0.1]
+eventCrtor ( events, probs )
+```
+Cada elemento que devuelva el iterador de `eventCrtor` sera un `Request`, o un `CriticalFailure` aleatorio, con una probabilidad de 0.9 y 0.1 respectivamente. El tiempo en que ocurre el evento se genera con una v.a. que distribuye Poisson.
+
+#### **Ambiente**
+El ambiente (`Env`) es el mundo donde corre la simulación, su responsabilidad principal es la de correr los eventos que fueron creados en esta instancia de `Env` en el orden en que ocurren. Posee caracteristicas generales de la simulación y da acceso a algunas estadisticas finales como la cantidad de respuestas satisfechas a pedidos de los clientes.
+  
+#### **Microservicios**
+Cada servidor pertenece a un microservicio, el cual tiene como objetivo usualmente responder a Requests asociados a un tipo de servicio. Cada Microservicio tiene un lider que es el encargado de recibir Request externos al microservicio, este suele tener comportamientos iguales o parecidos a los de un *Jefe*.
+
+#### **Modelado de Servidores**
+los Agentes (**Server**) se caracterizan principalmente por:
+
+- Capacidad de Procesamiento
+- Capas de Comportamiento Personalizadas
+
+La capacidad de procesamiento se mide en *Micros*, y determina la cantidad de pedidos que un server puede atender a la vez.
+Las capas atienden al modelo de capas verticales:
+
+![V-Layers](VLayers.jpg)
+
+De esta forma, cuando llega una percepción del medio, se pasa por todas las capas, en orden, y la salida de una pasa a la siguiente, ya que tienen control sobre el estado interno del agente. Al finalizar, se obtiene un nuevo estado interno del agente, y un conjunto de acciones que decidieron hacer las capas en su conjunto, que se subscriben al **Env** como mensajes.
+
+#### **Capas de Comportamiento**
+Una capa de comportamiento, **Layer**, es una clase que engloba comportamientos. Está definida por una lista de **Behaviors**, y una *función de selección* que es la encargada de decidir que comportamiento aplicar en cada ocasion.
+Una aplicación de los *layers* puede ser para englobar comportamientos incoherentes entre si, entre los que se quiera decidir el mejor a aplicar en cada momento, pero nunca varios a la vez. Por defecto *build-in* una función selectora, de la que hablaremos en la parte de IA más adelante.
+  
+#### **Comportamiento**
+Un comportamiento, **Behavior**, es una secuencia de acciones a seguir, dado un estado interno del servidor **State**, y un estímulo del medio ambiente dado **Perception**.
+Los comportamientos además de recibir estos parámetros, tienen variables persistentes entre un llamado y otro, lo que permite que puedan tener memoria, y se ejecuten comportamientos más complejos.
+
+Este modelo da la posibilidad de crear capas personalizadas por el usuario a través del DSL permitiendo lograr comportamientos no previamente definidos.
+
+A pesar de esta posibilidad brindamos implementaciones de comportamientos de servidores que creemos fundamentales en nuestra simulación. Especialmente porque nos dimos la tarea de implementar una comunicación entre servidores *buildin*, y a la vez, darle al DSL la suficiente fuerza como para poder construir los mismos comportamientos, desde 0, con mucha menos dificultad de la requerida en C# por supuesto.
+
+Los comportamientos siguientes atienden principalmente a una planificación entre los servidores de tipo *Red de Contrato*:
+#### **Comportamientos Built-In**
+  - *Jefe* : 
+
+    Es el comportamiento que se le da al servidor encargado de pedir recursos dentro de un microservicio. Cada vez que llega a él un *Request* pide los recursos solicitados por este a los integrantes de su microservicio a través de la interacción *Request-Response*, una vez satisfechos los recursos solicitados retorna un *Response* al servidor solicitante.
+
+    Este comportamiento a la hora de solicitar un recurso a los integrantes de su microservicio (pedidos por otro servidor), lo pide basado en una función de credibilidad modificable, el servidor que más rápido responda a sus pedidos, lo puntua con credibilidad dentro del microservicio, priorizando que la proxima vez que se haga un pedido se tenga en cuenta quien se le debe de pedir recursos sobre los demás.
+
+  - *Empleado*:
+    
+    Para este comportamiento, dado un *Request* que le llega preguntando si puede resolver algo, esta comprueba si lo quiere o puede resolver (dado el resultado de una función de aceptación), en caso positivo responde afirmativamente para notificar al enviante de que va a aceptar lo preguntado por el *Request*, para que el enviante sepa que ya puede mandar un *Request* imperativo, diciendole a otros comportamientos que este servidor posea (como comportamiento de Trabajador) lo que tienen que hacer o procesar. Su uso va estrechamente relacionado con la existencia de algún servidor con comportamiento de Jefe, creando una *red de contrato* al interactuar entre ellos.
+
+  - *Trabajador*:
+
+    Es el comportamientos que se le da a los servidores destinados al procesamiento, este toma los pedidos ya aceptados previamente y los "procesa" para "obtener" los recursos asociados a estos. Después de el tiempo necesario de procesamiento, este construye una respuestas a los pedidos las retorna en forma de Response.
+
+  - *Lider Caído*:
+
+    Este es un comportamiento de sustitución de lider, el cual consiste en estar comunicandose cada determinados intervalos de tiempo con el lider actual del microservicio. Si este en algún momento detecta que el lider actual no esta disponible, intenta conectarse varias veces más. Cuando este ya verifica que efectivamente el lider actual está "caído", informa a todo el microservicio mandando un mensaje que este va a sustituir al lider actual. El servidor que posee este comportamiento suele tener el comportamiento de *Jefe* u otro que actue como tal para saber desempeñar la función de lider en caso de sustituya al lider del microservicio.
+
+
+#### **Directorios**
+
+Los directorios son la manera en que se organiza la planificacion en la red de un microservicio. Contiene **Paginas Amarillas** con información sobre que servers pueden proveer un recurso y **Paginas Blancas** que ofrecen información de conocimiento común sobre un server tal como su capacidad de procesamiento en paralelo y su la creedibilidad (o confiabilidad) de acuerdo a su historia de *Requests* respondidas.
+
 
 ### Flujo de un Pedido
 ```mermaid
@@ -576,3 +630,21 @@ graph TD
     K -->|Después de un tiempo en el heap...| L[procesa2]
     L --> J(respond_or_save)
 ```
+
+## IA
+
+De IA usamos principalmente Metaheuristicas con algunas modificaciones. 
+
+La planificacion como *Red de Contrato* se ayuda de una Metaheurística para decidir a que servers mandarles los pedidos. Más especificamente, es una adaptación de Colonias de Hormigas en un sistema distribuido, ya que más que simular el algoritmo, el conjunto de servidores **hace** el colonia de hormigas. Cuando un servidor realiza una tarea correctamente, se le aumenta su reputación, por el servidor que le pidio hacer la tarea, en función del tiempo en que la logró hacer. Y para decidir entre varios servidores, elige con mayor probabilidad a los servidores con mayor reputación. Además cada cierto tiempo se reduce la reputación a todos los servers de un microservicio. Observemos que, esto es precisamente Colonia de Hormigas, donde el alimento son los servidores de calidad, y las feromonas son la reputación.
+
+Por otro lado, recordemos que los servers se componen de Layers, y estos pueden tener varios comportamientos, pero ... cual usar en cada momento? A esto también se le responde con una metaheurística. La función de selección usada hace una busqueda de a pasos por el mejor comportamiento. Primero, a modod de explotación usa los comportamientos de forma aleatoria, y cada un ciclo de tiempo, cambia de comportamiento, guardando la cantidad de reputacion que ganó usandolo. Luego de terminar de explorar, adopta un enfoque de explotación, donde elije el comportamiento con probabilidad, basandose en cuanta reputación le ha hecho ganar cada comportamiento en función del total de reputación que ha ganado. De cierta forma, si lo primero eran las hormigas optimizando la ruta hacia el alimento, estos son los alimentos buscando la manera de ser mas apetitosos.
+
+Como forma de integrar la IA también se usó la propia simulación. El objetivo era, dado presupuesto, un conjunto de comportamientos, y uno de recursos que quiero proveer, cual es la mejor distribución de servidores con recursos, capas y comportamientos definidos de manera que entre en el presupuesto, y minimice el tiempo de respuesta por pedido, maximice el porciento de respuesta general, etc. Para esto se quiso usar un algorimo génetico que usara "Individuos", donde un *Individuo* es una instancia de la simulación entera, una configuración inicial.
+
+Un individuo representa un proceso de simulación, con sus microservicios, los servidores de cada microservicio sus capas y comportamientos que se encuentran en cada una.  
+Para simbolizar el "individuo" se creó una clase *IndividualSim* la cual posee una lista de *MicroServerSim*, esta lista representa de una manera más sencilla la cantidad de microservicios que van a estar en la simulación y asi en cada uno de elementos de esta lista hay otra de *ServerSim* que contiene todos los servidores que perteneceran al microservicio. En un *ServerSim* se encuentra una lista de *resources* y una lista de *Layers* donde en cada posición estan los *behavior* que posee ese *layer*. Todas estas representaciones son con enteros (int) para que el proceso de mezcla sea mas fácil.
+
+Para poder lograr una biyección entre un individuo y una instancia de una simulación, se usan los enteros que representan los *behavior* y *resources*, se tiene una clase llamada *FactorySim* que contiene las listas de todos los *Bahaviors* y *Resources* que existen. Esta clase también posee un método *RunSimulation* que dado un individuo crea un ambiente y devulve la salida de la simulación, por donde se pasa luego una función a minimizar.
+
+Hicimos la clase Genetic que es donde realizamos el proceso de selección de los individuos más prometedores. A partir de una población de individuos generados de manera aleatoria se seleccionan los mejores padres pasando cada uno por una función de validación. Luego de obtener los padres potenciales se comienza a crear nuevos individuos (hijos) mediante entrecruzamiento con sus dos padres. En el entrecruzamiento se toman tanto las características de un padre como del otro, teniendo en cuenta criterios de probabilidad, además pueden surgir mutaciones en el nuevo individuo dependiendo si la variable aleatoria generada es menor que la probabilidad de mutación.
+
