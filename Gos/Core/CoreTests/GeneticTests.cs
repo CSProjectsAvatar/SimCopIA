@@ -210,7 +210,7 @@ namespace Core {
 
     public class GeneticMeta{
 
-        public static List<IndividualSim> GeneticAlgo(List<Behavior> behaviors, List<Resource> resources, out List<(double, double)> results, int budget = 50, int timeToWaitMs = 20000, int initialSamplerSize = 200)
+        public static List<IndividualSim> GeneticAlgo(List<Behavior> behaviors, List<Resource> resources, out List<(double, double)> results, int budget = 50, int timeToWaitMs = 10000, int initialSamplerSize = 50)
         {
             FactorySim factory = new FactorySim(behaviors, resources, budget);
             var meta = new Genetic();
