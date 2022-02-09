@@ -527,6 +527,8 @@ $ gos Sources/distrb.gos
 
 ## 3da Entrega
 
+Contamos con un [manual de usuario](https://github.com/CSProjectsAvatar/SimCopIA/blob/dev/manual.pdf).
+
 ### Simulación
   
 La simulación presentada sigue el curso de la de la 2da entrega, mucho más extendida. En la actual versión se amplían mucho los escenarios que se pueden reproducir, así como las facilidades del lenguaje, Gos, lo que nos permite simular aspectos más complejos de una manera más fácil; sin más, pasaremos a presentarlas:
@@ -619,15 +621,15 @@ Los directorios son la manera en que se organiza la planificacion en la red de u
 ### Flujo de un Pedido
 ```mermaid
 graph TD
-    A[Pedido] --> C{Es ra'pido?}
-    C -->|Si'| D(respond)
+    A[Pedido] --> C{Es rápido?}
+    C -->|Sí| D(respond)
     C -->|No| E{Lo acepto?}
-    E -->|Si'| F(accept)
-    E -->|Si'| K
-    E -->|No| H(No hago na)
+    E -->|Sí| F(accept)
+    E -->|Sí| K
+    E -->|No| H(No hago nada)
     F --> I[Aceptado]
     I -->|Cuando quiera| K(process)
-    K -->|Después de un tiempo en el heap...| L[procesa2]
+    K -->|Después de un tiempo en el heap...| L[procesado]
     L --> J(respond_or_save)
 ```
 
