@@ -64,7 +64,8 @@ y ejecutarlo mediante
 $ gos run Sources/fact.gos
 120
 warn: DataClassHierarchy.EvalVisitor[0]
-      No servers are accessible from the global context. Simulation won't run.
+      No servers are accessible from the global context. 
+      Simulation won't run.
 ```
 
 ## Funcionalidades y Caracter&iacute;sticas del Lenguaje
@@ -578,7 +579,15 @@ En la secci&oacute;n [Ciclos](#ciclos) llamamos a la funci&oacute;n `range()`, a
 
 `range()` devuelve una lista con los n&uacute;meros enteros mayores o iguales que 0 y menores que `upper`.
 
-Las otras dos funciones predefinidas del lenguaje son `pow()` y `one_always()`. La primera recibe dos argumentos `x` y `n` y devuelve $x^n$. La segunda recibe un argumento y devuelve 1 siempre. `one_always()` se puede emplear como selector de comportamientos de una capa si se quiere seleccionar siempre el primer comportamiento.
+Las otras funciones predefinidas del lenguaje son
+
+| Identificador | Cantidad de Argumentos | Tipo de los Argumentos | Descripci&oacute;n |
+|-----|-----|-----|-----|
+| `pow` | 2 | `Number` y `Number` | Recibe dos argumentos `x` y `n` y devuelve $x^n$. |
+| `one_always` | 1 | `List` | Recibe un argumento y devuelve 1 siempre. Se puede emplear como selector de comportamientos de una capa si se quiere seleccionar siempre el primer comportamiento. |
+| `rand` | 1 | `Number` | Devuelve un n&uacute;mero aleatorio mayor o igual que 0 y menor que el argumento. |
+| `rand_int` | 1 | `Number` | Devuelve un n&uacute;mero aleatorio entero mayor o igual que 0 y menor que el argumento. |
+| `genetic` | 0 | | Recopila todos los comportamientos y recursos accesibles desde el contexto global y ejecuta un algoritmo gen&eacute;tico. Devuelve una lista de listas de 2 elementos: promedio de retardo de los pedidos satisfechos y el porciento de pedidos satisfechos. Esta lista contiene los mejores resultados que obtuvo el algoritmo al ejecutar la simulaci&oacute;n un gran n&uacute;mero veces, variando los comportamientos y recursos asociados a los servidores. El int&eacute;rprete notifica las configuraciones que obtienen esos resultados.
 
 ### Comportamientos
 Un comportamiento es como una función con argumentos fijos y con estado. Para declarar un comportamiento se emplea la palabra clave `behav`.
