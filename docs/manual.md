@@ -374,6 +374,8 @@ Para asociar comportamientos a una capa, se asigna una lista a la propiedad `beh
     l.behaviors = [p, q]
     l.selector = sel
 
+Se puede seleccionar el comportamiento a ejecutar mediante IA si utilizamos el selector `ai_selector`.
+
 #### Servidores
 A un servidor tambi&eacute;n el int&eacute;rprete le asocia un identificador un&iacute;voco en tiempo de ejecuci&oacute;n. A este se puede acceder mediante la propiedad `id`.
 
