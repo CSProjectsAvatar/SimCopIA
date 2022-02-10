@@ -1169,6 +1169,65 @@ behav p {
                 @out.ToString());
         }
 
+        [TestMethod]
+        public void SaveCorrectness() {
+            var tokens = _lex.Tokenize(
+                @"
+behav p {
+    init {
+        l = []
+    }
+    if percep is response resp {
+        l.add(resp)
+    } else_if percep is request req {
+        save l[1] for req
+    }
+}
+let r1 = new resource
+let r2 = new resource
+
+let l = new layer
+l.behaviors = [p]
+l.selector = one_always
+" + _dslSuf, _builtinCode);
+
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsTrue(ast.Validate(Context.Global()));
+
+            var @out = new StringWriter();
+            var ctx = Context.Global();
+            var vis = new EvalVisitor(ctx, LoggerFact.CreateLogger<EvalVisitor>(), @out);
+            var (success, _) = vis.Visit(ast);
+
+            Assert.IsTrue(success);
+
+            Behavior behavP = ctx.GetBehav("p");
+
+            var lay = ctx.GetVar("l") as Layer;
+            var r1 = ctx.GetVar("r1") as Resource;
+            var r2 = ctx.GetVar("r2") as Resource;
+            var serv = new Server("s1", _logServ, _logStat, 5);
+
+            serv.AddLayer(lay);
+            serv.SetResources(new[] { r1, r2 });
+
+            var env = new Env(_logEnv, _logMicroS);
+            env.AddServerList(new List<Server> { serv });
+            
+            var req = new Request("mengano", serv.ID, ReqType.DoIt);
+            req.AskingRscs.AddRange(new[] { r1, r2 });
+
+            var resp = new Response(
+                req.ID,
+                "worker_1",
+                serv.ID,
+                ReqType.DoIt,
+                new Dictionary<string, bool> { [r1.Name] = true });
+
+            serv.HandlePerception(resp);
+            serv.HandlePerception(req);
+        }
+
         [TestCleanup]
         public void Clean() {
             Dispose();

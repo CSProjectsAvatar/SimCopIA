@@ -31,6 +31,7 @@
     - [`accept`](#accept)
     - [`process`](#process)
     - [`respond_or_save`](#respond_or_save)
+    - [`save`](#save)
     - [Contratado](#contratado)
 
 ## Descarga de la Aplicaci&oacute;n
@@ -704,7 +705,13 @@ donde `pedido` es un `Request` en el estado *procesado*.
 
 Elabora una respuesta a `pedido` con los recursos que el servidor posee. Si alg&uacute;n recurso no puede ser satisfecho, entonces la respuesta se almacena en el estado del servidor. En caso contrario, se env&iacute;a al remitente del pedido.
 
-Las respuestas guardadas no son accesibles desde el DSL. Esta es una caracter&iacute;stica que debe ser implementada en posteriores versiones.
+#### `save`
+Sintaxis:
+> `save` respuesta `for` pedido
+
+donde `respuesta` es de tipo `Response` y `pedido` es de tipo `Request`.
+
+Guarda la respuesta como una parcial al pedido dado. En caso de que todos los recursos del pedido hayan sido satisfechos mediante respuestas parciales, entonces se env&iacute;a la respuesta conjunta al remitente del pedido.
 
 #### Contratado
 A modo de resumen, presentamos un comportamiento llamado `hired` (contratado).

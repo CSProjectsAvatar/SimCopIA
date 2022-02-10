@@ -95,6 +95,7 @@ namespace Compiler {
         private static readonly TokenType alarmMe = Token.TypeEnum.AlarmMe;
         private static readonly TokenType ask = Token.TypeEnum.Ask;
         private static readonly TokenType order = Token.TypeEnum.Order;
+        private static readonly TokenType save = Token.TypeEnum.Save;
 
         #endregion
         public GosGrammar() : base(
@@ -138,6 +139,7 @@ namespace Compiler {
             Stat > (alarmMe, @in, Expr),
             Stat > Ask,
             Stat > Order,
+            Stat > (save, Atom, @for, Atom),
 
             Ask > (ask, Atom, AfterRsrcReq),
             Order > (order, Atom, AfterRsrcReq),
