@@ -27,6 +27,7 @@ namespace Compiler.Grammar_Unterminals {
                      | "alarm_me" "in" <expr>
                      | <ask>
                      | <order>
+                     | "save" <atom> "for" <atom>
             */
             return derivation[0] switch {
                 Token { Type: Token.TypeEnum.Id } id when derivation[1] is RightConnUnt rc
@@ -77,6 +78,12 @@ namespace Compiler.Grammar_Unterminals {
                     },
                 AskUnt u => u.Ast,
                 OrderUnt u => u.Ast,
+                Token { Type: Token.TypeEnum.Save } t when derivation[1] is AtomUnt respAtom && derivation[^1] is AtomUnt reqAtom
+                    => new SaveAst(Helper.Logger<SaveAst>()) {
+                        Token = t,
+                        Response = respAtom.Ast as Expression,
+                        Request = reqAtom.Ast as Expression
+                    },
                 _ => throw new ArgumentException("Invalid symbol.", nameof(derivation))
             };
         }

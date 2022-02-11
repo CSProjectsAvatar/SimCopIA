@@ -714,7 +714,13 @@ namespace DataClassHierarchy
 
                     break;
                 case GosType.Layer when node.Property == "selector":
+                    var layer = tval as Layer;
+
                     if (!TryEval(node.NewVal, GosType.Function, out var selectorObj)) {
+                        if (node.NewVal is Variable v && v.Identifier == Helper.AiSelector) {
+                            layer.AssociateDecisor(new Decisor());
+                            break;
+                        }
                         return default;
                     }
                     var selector = selectorObj as DefFun;
@@ -726,7 +732,6 @@ namespace DataClassHierarchy
                             );
                         return default;
                     }
-                    var layer = tval as Layer;
                     layer.SetBehaviourSelector(bs => {
                         var (succ, res) = Visiting(new FunCall {
                             Token = node.NewVal.Token,
@@ -1062,6 +1067,31 @@ namespace DataClassHierarchy
             return (true, null);
         }
 
+        public (bool, object) Visiting(SaveAst node) {
+            if (!TryEval(node.Response, GosType.Response, out var respObj)
+                || !TryEval(node.Request, GosType.Request, out var reqObj)) {
+
+                return default;
+            }
+            var req = reqObj as Request;
+
+            if (req.Type != ReqType.DoIt) {
+                _log.LogError(
+                    Helper.LogPref + "expected request type: DO; actual request type: {type}.",
+                    node.Request.Token.Line,
+                    node.Request.Token.Column,
+                    req.Type);
+                return default;
+            }
+            var status = Context.GetVar(Helper.StatusVar) as Status;
+            var resp = respObj as Response;
+
+            Response solutionResponse = new Response(req.ID, status.serverID, req.Sender, ReqType.DoIt, resp.AnswerRscs);
+            status.AddPartialRpnse(solutionResponse);
+
+            return (true, null);
+        }
+
         /// <summary>
         /// Retorna si lo pudo eliminar del heap de pedi2 en procesamiento.
         /// </summary>
@@ -1330,11 +1360,7 @@ namespace DataClassHierarchy
         }
 
         public (bool, object) Visiting(Variable node){
-            var result = Context.GetVar(node.Identifier);
-            if(result is null){
-                throw new Exception("Una variable ya definida dio null, y no permitimos null");
-            }
-            return (true, result);
+            return (true, Context.GetVar(node.Identifier));
         }
     
         public (bool, object) Visiting(Number node){

@@ -106,6 +106,29 @@ print genetic()
             Assert.IsTrue(success);
         }
 
+        [TestMethod]
+        public void AiSelectorCantBeCalled() {
+            var tokens = _lex.Tokenize(
+                @"
+let l = [1, 2, 3]
+ai_selector(l)
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsFalse(ast.Validate(Context.Global()));
+        }
+
+        [TestMethod]
+        public void AiSelectorCantBeDefined() {
+            var tokens = _lex.Tokenize(
+                @"
+fun ai_selector(l) {
+    return 1
+}
+" + _dslSuf, _builtinCode);
+            Assert.IsTrue(_parser.TryParse(tokens, out var ast));
+            Assert.IsFalse(ast.Validate(Context.Global()));
+        }
+
         [TestCleanup]
         public void Clean() {
             Dispose();

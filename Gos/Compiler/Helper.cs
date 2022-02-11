@@ -38,6 +38,7 @@ namespace Compiler {
             ("alarm_me", Token.TypeEnum.AlarmMe),
             ("ask", Token.TypeEnum.Ask),
             ("order", Token.TypeEnum.Order),
+            ("save", Token.TypeEnum.Save),
 
             ("[0-9]+(.[0-9]+)?", Token.TypeEnum.Number),
             ("_*[a-zA-Z][_a-zA-Z0-9]*", Token.TypeEnum.Id),
@@ -70,6 +71,7 @@ namespace Compiler {
         internal const string DoneReqsVar = "done_reqs";
         internal static readonly string HiddenDoneReqsHeapVar = "__done_reqs_heap";
         internal static readonly Random Random = new Random(Environment.TickCount);
+        internal const string AiSelector = "ai_selector";
         internal const string RandFun = "rand";
         internal const string RandIntFun = "rand_int";
         internal const string GeneticFun = "genetic";

@@ -275,6 +275,7 @@ Esta es la gram&aacute;tica del lenguaje (se ir&aacute; actualizando en este mis
         | "alarm_me" "in" <expr>
         | <ask>
         | <order>
+        | "save" <atom> "for" <atom>
 
 <ask> := "ask" <atom> <after-rsrc-req>
 

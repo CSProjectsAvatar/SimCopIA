@@ -108,7 +108,7 @@ namespace DataClassHierarchy
             if(parent != null){
                 return parent.GetVar(varName);
             }
-            return null;
+            throw new ArgumentException("Variable not found.", nameof(varName));
         }
         public DefFun GetFunc(string funcName, int arity){
             if(_functions.ContainsKey((funcName, arity))){
@@ -142,6 +142,7 @@ namespace DataClassHierarchy
             ctx.DefFunc(Helper.RandFun, 1);
             ctx.DefFunc(Helper.RandIntFun, 1);
             ctx.DefFunc(Helper.GeneticFun, 0);
+            ctx.DefVariable(Helper.AiSelector);
 
             return ctx;
         }
